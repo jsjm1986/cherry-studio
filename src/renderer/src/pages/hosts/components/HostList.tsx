@@ -158,7 +158,7 @@ const List = styled.div`
   flex-direction: column;
   padding: 0 12px 12px;
   gap: 4px;
-  max-height: 240px;
+  max-height: 340px;
   overflow-y: auto;
 
   &::-webkit-scrollbar {

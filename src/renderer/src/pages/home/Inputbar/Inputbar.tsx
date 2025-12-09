@@ -68,8 +68,8 @@ interface Props {
   topic: Topic
   /** 发送前的消息转换回调，可用于附加额外信息（如专家信息） */
   onBeforeSend?: (message: Message, blocks: MessageBlock[]) => { message: Message; blocks: MessageBlock[] }
-  /** 额外的顶部内容，显示在输入框内部顶部（如专家选择器） */
-  extraTopContent?: React.ReactNode
+  /** 额外的顶部内容，显示在输入框内部顶部（如专家选择器）。可以是 ReactNode 或 render prop */
+  extraTopContent?: React.ReactNode | ((onTextChange: (text: string) => void) => React.ReactNode)
   /** 获取实际用于发送消息的 assistant（用于主机模式下使用专家设置） */
   getEffectiveAssistant?: () => Assistant | null
 }
@@ -488,9 +488,11 @@ const InputbarInner: FC<InputbarInnerProps> = ({
   }
 
   // topContent: 所有顶部预览内容
+  const renderedExtraTopContent =
+    typeof extraTopContent === 'function' ? extraTopContent(setText) : extraTopContent
   const topContent = (
     <>
-      {extraTopContent}
+      {renderedExtraTopContent}
 
       {selectedKnowledgeBases.length > 0 && (
         <KnowledgeBaseInput

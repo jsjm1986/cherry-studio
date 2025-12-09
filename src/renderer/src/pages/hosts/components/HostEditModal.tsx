@@ -9,7 +9,7 @@ import styled from 'styled-components'
 interface Props {
   open: boolean
   host?: Host | null
-  onOk: (data: { name: string; emoji: string; description: string }) => void
+  onOk: (data: { name: string; emoji: string; description: string; welcomeMessage: string }) => void
   onCancel: () => void
 }
 
@@ -18,6 +18,7 @@ const HostEditModal: FC<Props> = ({ open, host, onOk, onCancel }) => {
   const [name, setName] = useState('')
   const [emoji, setEmoji] = useState('🏠')
   const [description, setDescription] = useState('')
+  const [welcomeMessage, setWelcomeMessage] = useState('')
 
   useEffect(() => {
     if (open) {
@@ -25,17 +26,19 @@ const HostEditModal: FC<Props> = ({ open, host, onOk, onCancel }) => {
         setName(host.name)
         setEmoji(host.emoji || '🏠')
         setDescription(host.description || host.prompt || '')
+        setWelcomeMessage(host.welcomeMessage || '')
       } else {
         setName('')
         setEmoji('🏠')
         setDescription('')
+        setWelcomeMessage('')
       }
     }
   }, [open, host])
 
   const handleOk = () => {
     if (!name.trim()) return
-    onOk({ name: name.trim(), emoji, description: description.trim() })
+    onOk({ name: name.trim(), emoji, description: description.trim(), welcomeMessage: welcomeMessage.trim() })
   }
 
   return (
@@ -63,7 +66,16 @@ const HostEditModal: FC<Props> = ({ open, host, onOk, onCancel }) => {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder={t('hosts.description')}
-            rows={4}
+            rows={3}
+          />
+        </FormItem>
+        <FormItem>
+          <Label>{t('hosts.welcome_message')}</Label>
+          <Input.TextArea
+            value={welcomeMessage}
+            onChange={(e) => setWelcomeMessage(e.target.value)}
+            placeholder={t('hosts.welcome_message_placeholder')}
+            rows={3}
           />
         </FormItem>
       </FormContainer>

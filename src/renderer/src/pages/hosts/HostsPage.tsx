@@ -4,7 +4,13 @@ import { useAssistant } from '@renderer/hooks/useAssistant'
 import { useNavbarPosition } from '@renderer/hooks/useSettings'
 import { db } from '@renderer/databases'
 import { getDefaultTopic } from '@renderer/services/AssistantService'
+import { useAppDispatch } from '@renderer/store'
+import { upsertManyBlocks } from '@renderer/store/messageBlock'
+import { newMessagesActions } from '@renderer/store/newMessage'
+import { saveMessageAndBlocksToDB } from '@renderer/store/thunk/messageThunk'
 import type { Assistant, Expert, Host, Topic } from '@renderer/types'
+import { AssistantMessageStatus, MessageBlockStatus } from '@renderer/types/newMessage'
+import { createAssistantMessage, createMainTextBlock } from '@renderer/utils/messageUtils/create'
 import { Modal } from 'antd'
 import type { FC } from 'react'
 import { useCallback, useEffect, useState } from 'react'
@@ -28,6 +34,7 @@ const HostsPageContent: FC = () => {
   const { t } = useTranslation()
   const { navbarPosition } = useNavbarPosition()
   const { setMentionedExpert } = useExpertContext()
+  const dispatch = useAppDispatch()
 
   // 主机状态
   const { hosts, createHost, updateHost, deleteHost } = useHosts()
@@ -51,6 +58,33 @@ const HostsPageContent: FC = () => {
   const [settingsExpert, setSettingsExpert] = useState<Expert | null>(null)
   const [importModalOpen, setImportModalOpen] = useState(false)
 
+  // 添加欢迎消息到话题
+  const addWelcomeMessage = useCallback(
+    async (topicId: string, hostId: string, welcomeMessage: string) => {
+      // 创建助手消息
+      const message = createAssistantMessage(hostId, topicId)
+      message.status = AssistantMessageStatus.SUCCESS
+
+      // 创建文本块
+      const textBlock = createMainTextBlock(message.id, welcomeMessage, {
+        status: MessageBlockStatus.SUCCESS
+      })
+
+      // 更新消息的 blocks 引用
+      message.blocks = [textBlock.id]
+
+      // 添加文本块到 Redux store
+      dispatch(upsertManyBlocks([textBlock]))
+
+      // 添加消息到 Redux store
+      dispatch(newMessagesActions.addMessage({ topicId, message }))
+
+      // 保存到数据库
+      await saveMessageAndBlocksToDB(message, [textBlock])
+    },
+    [dispatch]
+  )
+
   // 当选择主机时，自动加载或创建 Topic
   useEffect(() => {
     const initTopic = async () => {
@@ -68,6 +102,11 @@ const HostsPageContent: FC = () => {
         await db.topics.add({ id: newTopic.id, messages: [] })
         addTopic(newTopic)
         setActiveTopic(newTopic)
+
+        // 如果主机有欢迎消息，添加到新话题
+        if (activeHost.welcomeMessage) {
+          await addWelcomeMessage(newTopic.id, activeHost.id, activeHost.welcomeMessage)
+        }
       }
     }
 
@@ -103,21 +142,27 @@ const HostsPageContent: FC = () => {
   )
 
   const handleHostModalOk = useCallback(
-    (data: { name: string; emoji: string; description: string }) => {
+    (data: { name: string; emoji: string; description: string; welcomeMessage: string }) => {
       if (editingHost) {
-        updateHost(editingHost.id, {
+        const updatedData = {
           name: data.name,
           emoji: data.emoji,
           description: data.description,
-          prompt: data.description
-        })
+          prompt: data.description,
+          welcomeMessage: data.welcomeMessage
+        }
+        updateHost(editingHost.id, updatedData)
+        // 同步更新本地 activeHost 状态
+        if (activeHost?.id === editingHost.id) {
+          setActiveHost({ ...activeHost, ...updatedData } as Host)
+        }
       } else {
-        const newHost = createHost(data)
+        const newHost = createHost({ ...data, welcomeMessage: data.welcomeMessage })
         setActiveHost(newHost)
       }
       setHostModalOpen(false)
     },
-    [editingHost, createHost, updateHost]
+    [editingHost, createHost, updateHost, activeHost]
   )
 
   // 专家操作
@@ -197,7 +242,12 @@ const HostsPageContent: FC = () => {
     await db.topics.add({ id: newTopic.id, messages: [] })
     addTopic(newTopic)
     setActiveTopic(newTopic)
-  }, [activeHost, currentAssistant, addTopic])
+
+    // 如果主机有欢迎消息，添加到新话题
+    if (activeHost.welcomeMessage) {
+      await addWelcomeMessage(newTopic.id, activeHost.id, activeHost.welcomeMessage)
+    }
+  }, [activeHost, currentAssistant, addTopic, addWelcomeMessage])
 
   // 删除话题
   const handleDeleteTopic = useCallback(
@@ -272,17 +322,6 @@ const HostsPageContent: FC = () => {
             onMention={handleMentionExpert}
             disabled={!activeHost}
           />
-
-          {/* 对话记录列表 */}
-          <TopicList
-            topics={currentAssistant?.topics || []}
-            activeTopicId={activeTopic?.id}
-            onSelect={setActiveTopic}
-            onAdd={handleAddTopic}
-            onDelete={handleDeleteTopic}
-            onRename={handleRenameTopic}
-            disabled={!activeHost}
-          />
         </Sidebar>
 
         <ChatArea>
@@ -313,6 +352,21 @@ const HostsPageContent: FC = () => {
             </EmptyStateCenter>
           )}
         </ChatArea>
+
+        {/* 右侧栏：对话记录 */}
+        {activeHost && (
+          <RightSidebar>
+            <TopicList
+              topics={currentAssistant?.topics || []}
+              activeTopicId={activeTopic?.id}
+              onSelect={setActiveTopic}
+              onAdd={handleAddTopic}
+              onDelete={handleDeleteTopic}
+              onRename={handleRenameTopic}
+              disabled={!activeHost}
+            />
+          </RightSidebar>
+        )}
       </MainContent>
 
       <HostEditModal
@@ -386,6 +440,25 @@ const ChatArea = styled.div`
   background-color: var(--color-background);
   overflow: hidden;
   position: relative;
+`
+
+const RightSidebar = styled.div`
+  width: 240px;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--color-border);
+  background: linear-gradient(180deg, var(--color-background-soft) 0%, var(--color-background) 100%);
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 2px;
+  }
 `
 
 const ChatPlaceholder = styled.div`

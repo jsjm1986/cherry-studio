@@ -5,7 +5,7 @@ import type { Assistant, Expert, Topic } from '@renderer/types'
 import type { Message, MessageBlock } from '@renderer/types/newMessage'
 import { AtSign, ChevronDown } from 'lucide-react'
 import type { FC } from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
@@ -63,14 +63,26 @@ const HostsInputbar: FC<Props> = ({ assistant: initialAssistant, topic, setActiv
   const [selectedExpert, setSelectedExpert] = useState<Expert | null>(null)
   // 是否显示专家选择下拉
   const [showDropdown, setShowDropdown] = useState(false)
+  // 键盘高亮的索引
+  const [highlightedIndex, setHighlightedIndex] = useState(-1)
+  // 下拉列表项的 refs
+  const dropdownItemRefs = useRef<(HTMLDivElement | null)[]>([])
 
   // 使用 ExpertContext 来接收从侧边栏点击的专家
   const { mentionedExpert, setMentionedExpert } = useExpertContext()
 
-  // 当从侧边栏点击专家时，自动选中
+  // 保存 onTextChange 回调的引用
+  const onTextChangeRef = useRef<((text: string) => void) | null>(null)
+
+  // 当从侧边栏点击专家时，自动选中并插入 @名称
   useEffect(() => {
     if (mentionedExpert) {
       setSelectedExpert(mentionedExpert)
+      // 插入 @名称 到输入框
+      const handle = mentionedExpert.handle?.replace('@', '') || mentionedExpert.name
+      if (onTextChangeRef.current) {
+        onTextChangeRef.current(`@${handle} `)
+      }
       setMentionedExpert(null) // 清除 context 中的值
     }
   }, [mentionedExpert, setMentionedExpert])
@@ -79,6 +91,11 @@ const HostsInputbar: FC<Props> = ({ assistant: initialAssistant, topic, setActiv
   const handleSelectExpert = useCallback((expert: Expert) => {
     setSelectedExpert(expert)
     setShowDropdown(false)
+    // 插入 @名称 到输入框
+    const handle = expert.handle?.replace('@', '') || expert.name
+    if (onTextChangeRef.current) {
+      onTextChangeRef.current(`@${handle} `)
+    }
   }, [])
 
   // 清除选中的专家
@@ -109,6 +126,54 @@ const HostsInputbar: FC<Props> = ({ assistant: initialAssistant, topic, setActiv
     return () => document.removeEventListener('click', handleClickOutside)
   }, [showDropdown])
 
+  // 下拉打开时重置高亮索引
+  useEffect(() => {
+    if (showDropdown) {
+      setHighlightedIndex(-1)
+    }
+  }, [showDropdown])
+
+  // 键盘事件处理
+  useEffect(() => {
+    if (!showDropdown || experts.length === 0) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault()
+          setHighlightedIndex((prev) => {
+            const newIndex = prev < experts.length - 1 ? prev + 1 : 0
+            // 滚动到可见区域
+            dropdownItemRefs.current[newIndex]?.scrollIntoView({ block: 'nearest' })
+            return newIndex
+          })
+          break
+        case 'ArrowUp':
+          e.preventDefault()
+          setHighlightedIndex((prev) => {
+            const newIndex = prev > 0 ? prev - 1 : experts.length - 1
+            // 滚动到可见区域
+            dropdownItemRefs.current[newIndex]?.scrollIntoView({ block: 'nearest' })
+            return newIndex
+          })
+          break
+        case 'Enter':
+          e.preventDefault()
+          if (highlightedIndex >= 0 && highlightedIndex < experts.length) {
+            handleSelectExpert(experts[highlightedIndex])
+          }
+          break
+        case 'Escape':
+          e.preventDefault()
+          setShowDropdown(false)
+          break
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [showDropdown, experts, highlightedIndex, handleSelectExpert])
+
   // 发送前的消息转换回调，将专家信息附加到消息中
   const handleBeforeSend = useCallback(
     (message: Message, blocks: MessageBlock[]): { message: Message; blocks: MessageBlock[] } => {
@@ -128,55 +193,67 @@ const HostsInputbar: FC<Props> = ({ assistant: initialAssistant, topic, setActiv
     [selectedExpert]
   )
 
-  // 专家选择器内容 - 融合到输入框内部
-  const expertSelectorContent = (
-    <ExpertSelectorContainer className="expert-selector-container">
-      <HorizontalScrollContainer dependencies={[selectedExpert, experts]} expandable>
-        {selectedExpert ? (
-          <CustomTag
-            icon={<AtSign size={12} />}
-            color="var(--color-primary)"
-            closable
-            onClose={handleClearExpert}
-            onClick={toggleDropdown}
-            style={{ cursor: 'pointer' }}>
-            <TagContent>
-              <span>{selectedExpert.emoji || '👤'}</span>
-              <span>{selectedExpert.name}</span>
-              <ChevronDown size={10} style={{ marginLeft: 2, opacity: 0.7 }} />
-            </TagContent>
-          </CustomTag>
-        ) : (
-          <SelectExpertButton onClick={toggleDropdown} $hasExperts={experts.length > 0}>
-            <AtSign size={12} />
-            <span>{experts.length > 0 ? t('experts.select_expert') : t('experts.empty')}</span>
-            {experts.length > 0 && <ChevronDown size={10} />}
-          </SelectExpertButton>
-        )}
-      </HorizontalScrollContainer>
+  // 专家选择器内容 - 融合到输入框内部（render prop）
+  const renderExpertSelector = useCallback(
+    (onTextChange: (text: string) => void) => {
+      // 保存 onTextChange 引用，供 handleSelectExpert 和 useEffect 使用
+      onTextChangeRef.current = onTextChange
+      return (
+        <ExpertSelectorContainer className="expert-selector-container">
+          <HorizontalScrollContainer dependencies={[selectedExpert, experts]} expandable>
+            {selectedExpert ? (
+              <CustomTag
+                icon={<AtSign size={12} />}
+                color="var(--color-primary)"
+                closable
+                onClose={handleClearExpert}
+                onClick={toggleDropdown}
+                style={{ cursor: 'pointer' }}>
+                <TagContent>
+                  <span>{selectedExpert.emoji || '👤'}</span>
+                  <span>{selectedExpert.name}</span>
+                  <ChevronDown size={10} style={{ marginLeft: 2, opacity: 0.7 }} />
+                </TagContent>
+              </CustomTag>
+            ) : (
+              <SelectExpertButton onClick={toggleDropdown} $hasExperts={experts.length > 0}>
+                <AtSign size={12} />
+                <span>{experts.length > 0 ? t('experts.select_expert') : t('experts.empty')}</span>
+                {experts.length > 0 && <ChevronDown size={10} />}
+              </SelectExpertButton>
+            )}
+          </HorizontalScrollContainer>
 
-      {/* 专家下拉列表 */}
-      {showDropdown && experts.length > 0 && (
-        <DropdownList>
-          {experts.map((expert) => (
-            <DropdownItem
-              key={expert.id}
-              onClick={() => handleSelectExpert(expert)}
-              $isSelected={selectedExpert?.id === expert.id}>
-              <ItemEmoji>{expert.emoji || '👤'}</ItemEmoji>
-              <ItemInfo>
-                <ItemName>
-                  <AtSymbol>@</AtSymbol>
-                  {expert.handle?.replace('@', '') || expert.name}
-                </ItemName>
-                {expert.description && <ItemDescription>{expert.description}</ItemDescription>}
-              </ItemInfo>
-              {selectedExpert?.id === expert.id && <SelectedMark>✓</SelectedMark>}
-            </DropdownItem>
-          ))}
-        </DropdownList>
-      )}
-    </ExpertSelectorContainer>
+          {/* 专家下拉列表 */}
+          {showDropdown && experts.length > 0 && (
+            <DropdownList>
+              {experts.map((expert, index) => (
+                <DropdownItem
+                  key={expert.id}
+                  ref={(el) => {
+                    dropdownItemRefs.current[index] = el
+                  }}
+                  onClick={() => handleSelectExpert(expert)}
+                  onMouseEnter={() => setHighlightedIndex(index)}
+                  $isSelected={selectedExpert?.id === expert.id}
+                  $isHighlighted={index === highlightedIndex}>
+                  <ItemEmoji>{expert.emoji || '👤'}</ItemEmoji>
+                  <ItemInfo>
+                    <ItemName>
+                      <AtSymbol>@</AtSymbol>
+                      {expert.handle?.replace('@', '') || expert.name}
+                    </ItemName>
+                    {expert.description && <ItemDescription>{expert.description}</ItemDescription>}
+                  </ItemInfo>
+                  {selectedExpert?.id === expert.id && <SelectedMark>✓</SelectedMark>}
+                </DropdownItem>
+              ))}
+            </DropdownList>
+          )}
+        </ExpertSelectorContainer>
+      )
+    },
+    [selectedExpert, experts, handleClearExpert, toggleDropdown, t, showDropdown, handleSelectExpert, highlightedIndex]
   )
 
   // 获取实际用于发送消息的 assistant（选中专家时合并专家和主机的设置）
@@ -230,7 +307,7 @@ const HostsInputbar: FC<Props> = ({ assistant: initialAssistant, topic, setActiv
       topic={topic}
       setActiveTopic={setActiveTopic}
       onBeforeSend={handleBeforeSend}
-      extraTopContent={expertSelectorContent}
+      extraTopContent={renderExpertSelector}
       getEffectiveAssistant={getEffectiveAssistant}
     />
   )
@@ -297,14 +374,15 @@ const DropdownList = styled.div`
   }
 `
 
-const DropdownItem = styled.div<{ $isSelected: boolean }>`
+const DropdownItem = styled.div<{ $isSelected: boolean; $isHighlighted: boolean }>`
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 8px 12px;
   cursor: pointer;
   transition: background 0.15s ease;
-  background: ${({ $isSelected }) => ($isSelected ? 'var(--color-background-soft)' : 'transparent')};
+  background: ${({ $isSelected, $isHighlighted }) =>
+    $isHighlighted ? 'var(--color-background-soft)' : $isSelected ? 'var(--color-background-soft)' : 'transparent'};
 
   &:hover {
     background: var(--color-background-soft);

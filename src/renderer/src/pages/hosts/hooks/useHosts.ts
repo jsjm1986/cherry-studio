@@ -22,7 +22,7 @@ export function useHosts() {
 
   /** 创建新主机 */
   const createHost = useCallback(
-    (data: { name: string; emoji?: string; description?: string }) => {
+    (data: { name: string; emoji?: string; description?: string; welcomeMessage?: string }) => {
       const hostId = uuid()
       const defaultTopic = getDefaultTopic(hostId)
 
@@ -32,6 +32,7 @@ export function useHosts() {
         emoji: data.emoji || '🏠',
         description: data.description || '',
         prompt: data.description || '',
+        welcomeMessage: data.welcomeMessage || '',
         type: 'host',
         topics: [defaultTopic],
         // 添加默认设置，确保主机可以使用工具（如 web search）

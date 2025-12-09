@@ -56,6 +56,8 @@ export type Assistant = {
   content?: string
   targetLanguage?: TranslateLanguage
   // === 主机与专家功能扩展字段 ===
+  /** 欢迎消息/引导对话 (仅 type='host' 时使用) */
+  welcomeMessage?: string
   /** 专家所属主机ID (仅 type='expert' 时使用) */
   hostId?: string
   /** @提及名称，如 "@汪曾祺" (仅 type='expert' 时使用) */

@@ -1442,11 +1442,15 @@
     "topics": {
       "add": "新建对话",
       "default_name": "新对话",
+      "delete": "删除对话",
+      "delete_confirm": "确定要删除这个对话吗？删除后无法恢复。",
       "empty": "暂无对话记录",
       "title": "对话记录"
     },
     "welcome": "欢迎使用主机与专家",
-    "welcome_desc": "创建主机并添加专家，开始多角色协作对话"
+    "welcome_desc": "创建主机并添加专家，开始多角色协作对话",
+    "welcome_message": "欢迎消息",
+    "welcome_message_placeholder": "进入房间时显示的引导消息，如：你好，欢迎来到XXX房间。本房间可以XXX，您可以@XXX专家"
   },
   "html_artifacts": {
     "capture": {

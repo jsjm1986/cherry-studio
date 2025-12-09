@@ -16,7 +16,7 @@ interface Props {
   topic: Topic
   setActiveTopic: (topic: Topic) => void
   experts: Expert[]
-  activeHost: { emoji?: string; name: string; description?: string } | null
+  activeHost: { emoji?: string; name: string; description?: string; welcomeMessage?: string } | null
   onHostClick?: () => void
 }
 
@@ -75,7 +75,12 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
         </ChatHeaderRight>
       </ChatHeader>
       <ChatContent ref={chatContentRef}>
-        <Messages assistant={assistant} topic={topic} setActiveTopic={setActiveTopic} onHostClick={onHostClick} />
+        <Messages
+          assistant={assistant}
+          topic={topic}
+          setActiveTopic={setActiveTopic}
+          onHostClick={onHostClick}
+        />
         {!isMultiSelectMode && (
           <HostsInputbar assistant={assistant} topic={topic} setActiveTopic={setActiveTopic} experts={experts} />
         )}
@@ -215,7 +220,7 @@ const ChatContent = styled.div`
   overflow: hidden;
 
   /* Messages 组件占据剩余空间 */
-  & > div:first-child {
+  & > .messages-container {
     flex: 1;
     overflow-y: auto;
     min-height: 0;
