@@ -125,23 +125,6 @@ const HostsPageContent: FC = () => {
     setHostModalOpen(true)
   }, [])
 
-  const handleDeleteHost = useCallback(
-    (host: Host) => {
-      Modal.confirm({
-        title: t('hosts.delete'),
-        content: t('assistants.delete.content'),
-        okButtonProps: { danger: true },
-        onOk: () => {
-          deleteHost(host.id)
-          if (activeHost?.id === host.id) {
-            setActiveHost(null)
-          }
-        }
-      })
-    },
-    [deleteHost, activeHost, t]
-  )
-
   const handleHostModalOk = useCallback(
     (data: { name: string; emoji: string; description: string; welcomeMessage: string }) => {
       if (editingHost) {

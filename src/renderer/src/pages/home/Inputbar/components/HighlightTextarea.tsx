@@ -149,6 +149,7 @@ export const HighlightTextarea: FC<HighlightTextareaProps> = ({
       textarea.addEventListener('scroll', syncScroll)
       return () => textarea.removeEventListener('scroll', syncScroll)
     }
+    return undefined
   }, [textareaRef, syncScroll])
 
   // 检查是否需要高亮（性能优化：如果没有 @ 符号就不渲染高亮层）

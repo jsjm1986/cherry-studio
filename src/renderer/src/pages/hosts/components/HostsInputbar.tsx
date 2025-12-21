@@ -88,7 +88,6 @@ interface ExpertMentionHandlerProps {
   experts: Expert[]
   selectedExpert: Expert | null
   setSelectedExpert: (expert: Expert | null) => void
-  onTextChangeRef: React.MutableRefObject<((text: string) => void) | null>
   /** 当前输入框文本，用于检测 @ 是否被删除 */
   currentText: string
 }
@@ -97,7 +96,6 @@ const ExpertMentionHandler: FC<ExpertMentionHandlerProps> = ({
   experts,
   selectedExpert,
   setSelectedExpert,
-  onTextChangeRef,
   currentText
 }) => {
   const { recentExpertIds, recordExpertUsage } = useExpertContext()
@@ -135,7 +133,9 @@ const ExpertMentionHandler: FC<ExpertMentionHandlerProps> = ({
   // 创建稳定的 quickPanel 对象
   const quickPanelApi = useMemo(
     () => ({
-      registerTrigger: registerTriggerWrapper
+      registerTrigger: registerTriggerWrapper,
+      // registerRootMenu is not used by useMentionExpertsPanel but required by type
+      registerRootMenu: () => () => {}
     }),
     [registerTriggerWrapper]
   )
@@ -219,7 +219,6 @@ const HostsInputbar: FC<Props> = ({
   onMentionedModelsChange,
   userInfo
 }) => {
-  const { t } = useTranslation()
   // 从 store 获取最新的 assistant 状态（包含工具栏设置如 webSearchProviderId）
   const { assistant } = useAssistant(initialAssistant?.id ?? '')
 
@@ -274,7 +273,6 @@ const HostsInputbar: FC<Props> = ({
             experts={experts}
             selectedExpert={selectedExpert}
             setSelectedExpert={setSelectedExpert}
-            onTextChangeRef={onTextChangeRef}
             currentText={text}
           />
 

@@ -57,8 +57,6 @@ interface Props {
   selectedInfoFolderId?: string
   // 用户信息
   onUpdateUserInfo?: (hostId: string, userInfo: RoomUserInfo) => void
-  // 设置
-  onOpenSettings?: () => void
 }
 
 const HostsLeftSidebar: FC<Props> = ({
@@ -86,8 +84,7 @@ const HostsLeftSidebar: FC<Props> = ({
   onSelectInfoFolder,
   onDeleteInfoFolder,
   selectedInfoFolderId,
-  onUpdateUserInfo,
-  onOpenSettings
+  onUpdateUserInfo
 }) => {
   const [showRoomDropdown, setShowRoomDropdown] = useState(false)
   const [projectCollapsed, setProjectCollapsed] = useState(false)
