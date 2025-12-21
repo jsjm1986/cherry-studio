@@ -38,3 +38,4 @@ jobs:
         with:
           name: mac-build
           path: dist/**
+          retention-days: 1
