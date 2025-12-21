@@ -1,6 +1,3 @@
-import { useCallback, useMemo } from 'react'
-import { v4 as uuid } from 'uuid'
-
 import { useAppDispatch, useAppSelector } from '@renderer/store'
 import {
   addInfoFolder,
@@ -12,6 +9,8 @@ import {
   updateInfoItem
 } from '@renderer/store/assistants'
 import type { InfoFolder, InfoItem } from '@renderer/types'
+import { useCallback, useMemo } from 'react'
+import { v4 as uuid } from 'uuid'
 
 /**
  * 资料库 Hook - 管理主机的资料文件夹和内容

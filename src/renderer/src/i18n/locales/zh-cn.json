@@ -1425,53 +1425,6 @@
     "title": "话题搜索"
   },
   "hosts": {
-    "add": "添加主机",
-    "chat_hint": "已添加 {{count}} 位专家，使用 @ 提及专家开始对话",
-    "create_first": "创建房间",
-    "current": "当前主机",
-    "delete": "删除主机",
-    "description": "主机描述",
-    "edit": "编辑主机",
-    "emoji": "表情符号",
-    "empty": "暂无主机，点击上方按钮创建",
-    "list": "主机列表",
-    "name": "主机名称",
-    "select_hint": "请先选择一个房间",
-    "settings": "房间设置",
-    "title": "主机",
-    "world": {
-      "all": "所有世界",
-      "create": "创建世界",
-      "delete": "删除世界",
-      "edit": "编辑世界",
-      "select": "选择世界",
-      "title": "世界",
-      "ungrouped": "未分组"
-    },
-    "room": {
-      "create": "创建房间",
-      "empty": "暂无房间",
-      "select": "选择房间",
-      "title": "房间"
-    },
-    "member": {
-      "add": "添加成员",
-      "empty": "暂无成员",
-      "title": "成员"
-    },
-    "project": {
-      "title": "项目"
-    },
-    "information": {
-      "configured": "已配置模型",
-      "description": "房间描述",
-      "member_list": "成员列表",
-      "members": "成员统计",
-      "more_members": "还有 {{count}} 位成员...",
-      "no_description": "暂无描述",
-      "title": "信息",
-      "total_members": "总成员"
-    },
     "about": {
       "introduction": "自我介绍",
       "introduction_placeholder": "简单介绍一下自己，让成员们更了解您",
@@ -1486,15 +1439,53 @@
       "title": "关于",
       "user_info_hint": "填写您的信息，帮助房间内的成员更好地了解您并进行协作"
     },
-    "tabs": {
-      "chat": "聊天",
-      "configuration": "配置"
-    },
+    "add": "添加主机",
+    "chat_hint": "已添加 {{count}} 位专家，使用 @ 提及专家开始对话",
     "configuration": {
       "hint": "点击下方按钮编辑房间配置",
       "select_room": "请先选择房间",
       "select_room_hint": "选择一个房间后可查看和编辑配置"
     },
+    "create_first": "创建房间",
+    "current": "当前主机",
+    "delete": "删除主机",
+    "description": "主机描述",
+    "edit": "编辑主机",
+    "emoji": "表情符号",
+    "empty": "暂无主机，点击上方按钮创建",
+    "information": {
+      "configured": "已配置模型",
+      "description": "房间描述",
+      "member_list": "成员列表",
+      "members": "成员统计",
+      "more_members": "还有 {{count}} 位成员...",
+      "no_description": "暂无描述",
+      "title": "信息",
+      "total_members": "总成员"
+    },
+    "list": "主机列表",
+    "member": {
+      "add": "添加成员",
+      "empty": "暂无成员",
+      "title": "成员"
+    },
+    "name": "主机名称",
+    "project": {
+      "title": "项目"
+    },
+    "room": {
+      "create": "创建房间",
+      "empty": "暂无房间",
+      "select": "选择房间",
+      "title": "房间"
+    },
+    "select_hint": "请先选择一个房间",
+    "settings": "房间设置",
+    "tabs": {
+      "chat": "聊天",
+      "configuration": "配置"
+    },
+    "title": "主机",
     "topics": {
       "add": "新建对话",
       "default_name": "新对话",
@@ -1506,7 +1497,16 @@
     "welcome": "欢迎使用主机与专家",
     "welcome_desc": "创建主机并添加专家，开始多角色协作对话",
     "welcome_message": "欢迎消息",
-    "welcome_message_placeholder": "进入房间时显示的引导消息，如：你好，欢迎来到XXX房间。本房间可以XXX，您可以@XXX专家"
+    "welcome_message_placeholder": "进入房间时显示的引导消息，如：你好，欢迎来到XXX房间。本房间可以XXX，您可以@XXX专家",
+    "world": {
+      "all": "所有世界",
+      "create": "创建世界",
+      "delete": "删除世界",
+      "edit": "编辑世界",
+      "select": "选择世界",
+      "title": "世界",
+      "ungrouped": "未分组"
+    }
   },
   "html_artifacts": {
     "capture": {

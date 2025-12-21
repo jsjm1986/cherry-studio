@@ -1,81 +1,81 @@
 {
   "segments": [
     {
+      "channelTemplates": {
+        "beta": {
+          "feedTemplates": {
+            "gitcode": "https://github.com/CherryHQ/cherry-studio/releases/download/{{tag}}",
+            "github": "https://github.com/CherryHQ/cherry-studio/releases/download/{{tag}}"
+          }
+        },
+        "latest": {
+          "feedTemplates": {
+            "gitcode": "https://releases.cherry-ai.com",
+            "github": "https://github.com/CherryHQ/cherry-studio/releases/download/{{tag}}"
+          }
+        },
+        "rc": {
+          "feedTemplates": {
+            "gitcode": "https://github.com/CherryHQ/cherry-studio/releases/download/{{tag}}",
+            "github": "https://github.com/CherryHQ/cherry-studio/releases/download/{{tag}}"
+          }
+        }
+      },
+      "description": "Last stable v1.7.x release - required intermediate version for users below v1.7",
       "id": "legacy-v1",
-      "type": "legacy",
       "match": {
         "range": ">=1.0.0 <2.0.0"
       },
       "minCompatibleVersion": "1.0.0",
-      "description": "Last stable v1.7.x release - required intermediate version for users below v1.7",
+      "type": "legacy"
+    },
+    {
       "channelTemplates": {
         "latest": {
           "feedTemplates": {
-            "github": "https://github.com/CherryHQ/cherry-studio/releases/download/{{tag}}",
-            "gitcode": "https://releases.cherry-ai.com"
-          }
-        },
-        "rc": {
-          "feedTemplates": {
-            "github": "https://github.com/CherryHQ/cherry-studio/releases/download/{{tag}}",
-            "gitcode": "https://github.com/CherryHQ/cherry-studio/releases/download/{{tag}}"
-          }
-        },
-        "beta": {
-          "feedTemplates": {
-            "github": "https://github.com/CherryHQ/cherry-studio/releases/download/{{tag}}",
-            "gitcode": "https://github.com/CherryHQ/cherry-studio/releases/download/{{tag}}"
+            "gitcode": "https://gitcode.com/CherryHQ/cherry-studio/releases/download/{{tag}}",
+            "github": "https://github.com/CherryHQ/cherry-studio/releases/download/{{tag}}"
           }
         }
-      }
-    },
-    {
+      },
+      "description": "Major release v2.0 - required intermediate version for v2.x upgrades",
       "id": "gateway-v2",
-      "type": "breaking",
+      "lockedVersion": "2.0.0",
       "match": {
         "exact": ["2.0.0"]
       },
-      "lockedVersion": "2.0.0",
       "minCompatibleVersion": "1.7.0",
-      "description": "Major release v2.0 - required intermediate version for v2.x upgrades",
-      "channelTemplates": {
-        "latest": {
-          "feedTemplates": {
-            "github": "https://github.com/CherryHQ/cherry-studio/releases/download/{{tag}}",
-            "gitcode": "https://gitcode.com/CherryHQ/cherry-studio/releases/download/{{tag}}"
-          }
-        }
-      }
+      "type": "breaking"
     },
     {
-      "id": "current-v2",
-      "type": "latest",
-      "match": {
-        "range": ">=2.0.0 <3.0.0",
-        "excludeExact": ["2.0.0"]
-      },
-      "minCompatibleVersion": "2.0.0",
-      "description": "Current latest v2.x release",
       "channelTemplates": {
+        "beta": {
+          "feedTemplates": {
+            "gitcode": "https://gitcode.com/CherryHQ/cherry-studio/releases/download/{{tag}}",
+            "github": "https://github.com/CherryHQ/cherry-studio/releases/download/{{tag}}"
+          }
+        },
         "latest": {
           "feedTemplates": {
-            "github": "https://github.com/CherryHQ/cherry-studio/releases/download/{{tag}}",
-            "gitcode": "https://gitcode.com/CherryHQ/cherry-studio/releases/download/{{tag}}"
+            "gitcode": "https://gitcode.com/CherryHQ/cherry-studio/releases/download/{{tag}}",
+            "github": "https://github.com/CherryHQ/cherry-studio/releases/download/{{tag}}"
           }
         },
         "rc": {
           "feedTemplates": {
-            "github": "https://github.com/CherryHQ/cherry-studio/releases/download/{{tag}}",
-            "gitcode": "https://gitcode.com/CherryHQ/cherry-studio/releases/download/{{tag}}"
-          }
-        },
-        "beta": {
-          "feedTemplates": {
-            "github": "https://github.com/CherryHQ/cherry-studio/releases/download/{{tag}}",
-            "gitcode": "https://gitcode.com/CherryHQ/cherry-studio/releases/download/{{tag}}"
+            "gitcode": "https://gitcode.com/CherryHQ/cherry-studio/releases/download/{{tag}}",
+            "github": "https://github.com/CherryHQ/cherry-studio/releases/download/{{tag}}"
           }
         }
-      }
+      },
+      "description": "Current latest v2.x release",
+      "id": "current-v2",
+      "match": {
+        "excludeExact": ["2.0.0"],
+        "range": ">=2.0.0 <3.0.0"
+      },
+      "minCompatibleVersion": "2.0.0",
+      "type": "latest"
     }
   ]
 }

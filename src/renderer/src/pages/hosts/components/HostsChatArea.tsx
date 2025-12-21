@@ -91,11 +91,7 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
         {(selectedExpert || mentionedModels.length > 0) && (
           <ChatHeaderTags>
             {selectedExpert && (
-              <CustomTag
-                icon={<AtSign size={12} />}
-                color="var(--color-primary)"
-                closable
-                onClose={handleClearExpert}>
+              <CustomTag icon={<AtSign size={12} />} color="var(--color-primary)" closable onClose={handleClearExpert}>
                 <TagContent>
                   <span>{selectedExpert.emoji || '👤'}</span>
                   <span>{selectedExpert.name}</span>

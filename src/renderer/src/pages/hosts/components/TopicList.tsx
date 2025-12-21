@@ -1,14 +1,14 @@
+import 'dayjs/locale/zh-cn'
+
+import type { Topic } from '@renderer/types'
 import { Dropdown } from 'antd'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import 'dayjs/locale/zh-cn'
 import { ChevronDown, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
 import type { FC } from 'react'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
-
-import type { Topic } from '@renderer/types'
 
 dayjs.extend(relativeTime)
 

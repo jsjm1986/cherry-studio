@@ -9,9 +9,9 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
+import Inputbar from '../../home/Inputbar/Inputbar'
 import { useExpertContext } from '../context/ExpertContext'
 import { MENTION_EXPERTS_SYMBOL, useMentionExpertsPanel } from '../hooks/useMentionExpertsPanel'
-import Inputbar from '../../home/Inputbar/Inputbar'
 
 /**
  * 构建增强的专家提示词

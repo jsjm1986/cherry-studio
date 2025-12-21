@@ -1,3 +1,4 @@
+import { DEFAULT_ASSISTANT_SETTINGS, getDefaultTopic } from '@renderer/services/AssistantService'
 import { useAppDispatch, useAppSelector } from '@renderer/store'
 import {
   addAssistant,
@@ -9,7 +10,6 @@ import {
   updateAssistant
 } from '@renderer/store/assistants'
 import type { Assistant, Expert, Host } from '@renderer/types'
-import { DEFAULT_ASSISTANT_SETTINGS, getDefaultTopic } from '@renderer/services/AssistantService'
 import { useCallback, useMemo } from 'react'
 import { v4 as uuid } from 'uuid'
 
