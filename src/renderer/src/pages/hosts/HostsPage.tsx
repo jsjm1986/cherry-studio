@@ -36,7 +36,7 @@ const HostsPageContent: FC = () => {
   const dispatch = useAppDispatch()
 
   // 主机状态
-  const { hosts, createHost, updateHost, deleteHost } = useHosts()
+  const { hosts, createHost, updateHost } = useHosts()
   const [activeHost, setActiveHost] = useState<Host | null>(null)
   const [hostModalOpen, setHostModalOpen] = useState(false)
   const [editingHost, setEditingHost] = useState<Host | null>(null)
