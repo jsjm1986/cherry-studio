@@ -4,7 +4,17 @@ import { createSelector, createSlice } from '@reduxjs/toolkit'
 import { DEFAULT_CONTEXTCOUNT, DEFAULT_TEMPERATURE } from '@renderer/config/constant'
 import { TopicManager } from '@renderer/hooks/useTopic'
 import { DEFAULT_ASSISTANT_SETTINGS, getDefaultAssistant, getDefaultTopic } from '@renderer/services/AssistantService'
-import type { Assistant, AssistantPreset, AssistantSettings, Expert, Host, Model, Topic } from '@renderer/types'
+import type {
+  Assistant,
+  AssistantPreset,
+  AssistantSettings,
+  Expert,
+  Host,
+  InfoFolder,
+  InfoItem,
+  Model,
+  Topic
+} from '@renderer/types'
 import { isEmpty, uniqBy } from 'lodash'
 
 import type { RootState } from '.'
@@ -243,6 +253,68 @@ const assistantsSlice = createSlice({
     /** 删除专家 */
     removeExpert: (state, action: PayloadAction<{ id: string }>) => {
       state.assistants = state.assistants.filter((a) => a.id !== action.payload.id)
+    },
+    // === 资料库功能 ===
+    /** 添加资料文件夹 */
+    addInfoFolder: (state, action: PayloadAction<{ hostId: string; folder: InfoFolder }>) => {
+      const host = state.assistants.find((a) => a.id === action.payload.hostId && a.type === 'host') as Host | undefined
+      if (host) {
+        if (!host.infoFolders) host.infoFolders = []
+        host.infoFolders.push(action.payload.folder)
+      }
+    },
+    /** 删除资料文件夹 */
+    removeInfoFolder: (state, action: PayloadAction<{ hostId: string; folderId: string }>) => {
+      const host = state.assistants.find((a) => a.id === action.payload.hostId && a.type === 'host') as Host | undefined
+      if (host && host.infoFolders) {
+        host.infoFolders = host.infoFolders.filter((f) => f.id !== action.payload.folderId)
+      }
+    },
+    /** 更新资料文件夹 */
+    updateInfoFolder: (state, action: PayloadAction<{ hostId: string; folder: InfoFolder }>) => {
+      const host = state.assistants.find((a) => a.id === action.payload.hostId && a.type === 'host') as Host | undefined
+      if (host && host.infoFolders) {
+        const index = host.infoFolders.findIndex((f) => f.id === action.payload.folder.id)
+        if (index !== -1) {
+          host.infoFolders[index] = action.payload.folder
+        }
+      }
+    },
+    /** 添加资料项到文件夹 */
+    addInfoItem: (state, action: PayloadAction<{ hostId: string; folderId: string; item: InfoItem }>) => {
+      const host = state.assistants.find((a) => a.id === action.payload.hostId && a.type === 'host') as Host | undefined
+      if (host && host.infoFolders) {
+        const folder = host.infoFolders.find((f) => f.id === action.payload.folderId)
+        if (folder) {
+          folder.items.push(action.payload.item)
+          folder.updatedAt = Date.now()
+        }
+      }
+    },
+    /** 删除资料项 */
+    removeInfoItem: (state, action: PayloadAction<{ hostId: string; folderId: string; itemId: string }>) => {
+      const host = state.assistants.find((a) => a.id === action.payload.hostId && a.type === 'host') as Host | undefined
+      if (host && host.infoFolders) {
+        const folder = host.infoFolders.find((f) => f.id === action.payload.folderId)
+        if (folder) {
+          folder.items = folder.items.filter((i) => i.id !== action.payload.itemId)
+          folder.updatedAt = Date.now()
+        }
+      }
+    },
+    /** 更新资料项 */
+    updateInfoItem: (state, action: PayloadAction<{ hostId: string; folderId: string; item: InfoItem }>) => {
+      const host = state.assistants.find((a) => a.id === action.payload.hostId && a.type === 'host') as Host | undefined
+      if (host && host.infoFolders) {
+        const folder = host.infoFolders.find((f) => f.id === action.payload.folderId)
+        if (folder) {
+          const index = folder.items.findIndex((i) => i.id === action.payload.item.id)
+          if (index !== -1) {
+            folder.items[index] = action.payload.item
+            folder.updatedAt = Date.now()
+          }
+        }
+      }
     }
   }
 })
@@ -274,7 +346,14 @@ export const {
   addHost,
   removeHost,
   addExpert,
-  removeExpert
+  removeExpert,
+  // 资料库功能
+  addInfoFolder,
+  removeInfoFolder,
+  updateInfoFolder,
+  addInfoItem,
+  removeInfoItem,
+  updateInfoItem
 } = assistantsSlice.actions
 
 export const selectAllTopics = createSelector([(state: RootState) => state.assistants.assistants], (assistants) =>
@@ -324,5 +403,14 @@ export const selectRegularAssistants = createSelector(
   [(state: RootState) => state.assistants.assistants],
   (assistants): Assistant[] => assistants.filter((a) => a.type !== 'host' && a.type !== 'expert')
 )
+
+// === 资料库选择器 ===
+
+/** 选择指定主机的资料文件夹 */
+export const selectInfoFoldersByHostId = (hostId: string) =>
+  createSelector([(state: RootState) => state.assistants.assistants], (assistants): InfoFolder[] => {
+    const host = assistants.find((a): a is Host => a.type === 'host' && a.id === hostId)
+    return host?.infoFolders || []
+  })
 
 export default assistantsSlice.reducer

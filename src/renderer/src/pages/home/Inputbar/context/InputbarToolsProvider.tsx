@@ -158,12 +158,35 @@ interface InputbarToolsProviderProps {
     onTextChange: (updater: string | ((prev: string) => string)) => void
     toggleExpanded: (nextState?: boolean) => void
   }
+  /** 外部 mentionedModels 状态（可选，用于状态提升场景） */
+  externalMentionedModels?: Model[]
+  /** mentionedModels 变化时的回调（与 externalMentionedModels 配合使用） */
+  onMentionedModelsChange?: (models: Model[]) => void
 }
 
-export const InputbarToolsProvider: React.FC<InputbarToolsProviderProps> = ({ children, initialState, actions }) => {
+export const InputbarToolsProvider: React.FC<InputbarToolsProviderProps> = ({
+  children,
+  initialState,
+  actions,
+  externalMentionedModels,
+  onMentionedModelsChange
+}) => {
   // Core state
   const [files, setFiles] = useState<FileType[]>(initialState?.files || [])
-  const [mentionedModels, setMentionedModels] = useState<Model[]>(initialState?.mentionedModels || [])
+  const [internalMentionedModels, setInternalMentionedModels] = useState<Model[]>(initialState?.mentionedModels || [])
+
+  // Use external state if provided, otherwise use internal state
+  const mentionedModels = externalMentionedModels ?? internalMentionedModels
+
+  // Wrapped setter that syncs to both internal state and external callback
+  const setMentionedModels = useCallback<React.Dispatch<React.SetStateAction<Model[]>>>(
+    (updater) => {
+      const newModels = typeof updater === 'function' ? updater(mentionedModels) : updater
+      setInternalMentionedModels(newModels)
+      onMentionedModelsChange?.(newModels)
+    },
+    [mentionedModels, onMentionedModelsChange]
+  )
   const [selectedKnowledgeBases, setSelectedKnowledgeBases] = useState<KnowledgeBase[]>(
     initialState?.selectedKnowledgeBases || []
   )

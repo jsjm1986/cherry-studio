@@ -16,10 +16,12 @@ import type { KnowledgeBase, KnowledgeReference } from './knowledge'
 import type { MCPConfigSample, MCPServerInstallSource, McpServerType } from './mcp'
 import type { Message } from './newMessage'
 import type { BaseTool, MCPTool } from './tool'
+import type { InfoFolder } from './infoLibrary'
 
 export * from './agent'
 export * from './apiModels'
 export * from './apiServer'
+export * from './infoLibrary'
 export * from './knowledge'
 export * from './mcp'
 export * from './notification'
@@ -87,10 +89,28 @@ export const isTranslateAssistant = (assistant: Assistant): assistant is Transla
 }
 
 // === 主机与专家类型别名 ===
-/** 主机类型 - 智能体群容器 */
-export type Host = Assistant & { type: 'host' }
+/** 用户在房间中的个人信息 */
+export type RoomUserInfo = {
+  /** 用户自我介绍 */
+  introduction?: string
+  /** 用户角色/身份 */
+  role?: string
+  /** 其他备注信息 */
+  notes?: string
+}
 
-/** 专家类型 - 主机内的单个智能体 */
+/** 主机类型 - 智能体群容器 (UI中显示为"房间") */
+export type Host = Assistant & {
+  type: 'host'
+  /** 世界分组名称 (用于UI分组显示) */
+  worldName?: string
+  /** 用户在此房间的个人信息 */
+  userInfo?: RoomUserInfo
+  /** 资料文件夹列表 */
+  infoFolders?: InfoFolder[]
+}
+
+/** 专家类型 - 主机内的单个智能体 (UI中显示为"成员") */
 export type Expert = Assistant & { type: 'expert'; hostId: string }
 
 /** 判断是否为主机 */

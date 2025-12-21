@@ -222,6 +222,7 @@ export type Message = {
   expertId?: string // 专家ID
   expertName?: string // 专家名称
   expertEmoji?: string // 专家头像emoji
+  mentionedExpertIds?: string[] // 所有被提及的专家ID（用于多专家顺序回复）
 
   // raw data
   // TODO: add this providerMetadata to MessageBlock to save raw provider data for each block

@@ -37,9 +37,7 @@ const CurrentHostInfo: FC<Props> = ({ host, onAdd }) => {
         <HostAvatar>{host.emoji || '🏠'}</HostAvatar>
         <HostMeta>
           <HostName>{host.name}</HostName>
-          {(host.description || host.prompt) && (
-            <HostDescription>{host.description || host.prompt}</HostDescription>
-          )}
+          {(host.description || host.prompt) && <HostDescription>{host.description || host.prompt}</HostDescription>}
         </HostMeta>
       </HostCard>
     </Container>

@@ -1,22 +1,23 @@
-import HorizontalScrollContainer from '@renderer/components/HorizontalScrollContainer'
-import CustomTag from '@renderer/components/Tags/CustomTag'
+import { useQuickPanel } from '@renderer/components/QuickPanel'
 import { useAssistant } from '@renderer/hooks/useAssistant'
-import type { Assistant, Expert, Topic } from '@renderer/types'
+import { useInputbarToolsDispatch } from '@renderer/pages/home/Inputbar/context/InputbarToolsProvider'
+import type { Assistant, Expert, Model, RoomUserInfo, Topic } from '@renderer/types'
 import type { Message, MessageBlock } from '@renderer/types/newMessage'
 import { AtSign, ChevronDown } from 'lucide-react'
 import type { FC } from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
 import { useExpertContext } from '../context/ExpertContext'
+import { MENTION_EXPERTS_SYMBOL, useMentionExpertsPanel } from '../hooks/useMentionExpertsPanel'
 import Inputbar from '../../home/Inputbar/Inputbar'
 
 /**
  * 构建增强的专家提示词
  * 根据专家的 promptSettings 配置，生成最终的提示词
  */
-function buildExpertPrompt(expert: Expert, hostPrompt?: string): string {
+function buildExpertPrompt(expert: Expert, hostPrompt?: string, userInfo?: RoomUserInfo): string {
   const promptSettings = expert.promptSettings
   const enableEnhancedMode = promptSettings?.enableEnhancedMode ?? true
   const hostPromptMode = promptSettings?.hostPromptMode ?? 'append'
@@ -42,7 +43,20 @@ ${expert.prompt || ''}
 
   // 处理主机提示词
   if (hostPromptMode === 'append' && hostPrompt) {
-    finalPrompt += `\n\n[背景信息]\n${hostPrompt}`
+    finalPrompt = finalPrompt ? `${finalPrompt}\n\n[背景信息]\n${hostPrompt}` : `[背景信息]\n${hostPrompt}`
+  }
+
+  // 添加用户个人信息
+  if (userInfo && (userInfo.role || userInfo.introduction)) {
+    let userInfoSection = '[对话用户信息]'
+    if (userInfo.role) {
+      userInfoSection += `\n用户身份/角色: ${userInfo.role}`
+    }
+    if (userInfo.introduction) {
+      userInfoSection += `\n用户自我介绍: ${userInfo.introduction}`
+    }
+    userInfoSection += '\n请根据用户身份信息调整你的回复方式，更好地为用户服务。'
+    finalPrompt = finalPrompt ? `${finalPrompt}\n\n${userInfoSection}` : userInfoSection
   }
 
   return finalPrompt
@@ -53,23 +67,164 @@ interface Props {
   topic: Topic
   setActiveTopic: (topic: Topic) => void
   experts: Expert[]
+  /** 外部管理的选中专家状态 */
+  selectedExpert: Expert | null
+  /** 设置选中专家的回调 */
+  setSelectedExpert: (expert: Expert | null) => void
+  /** 外部管理的 mentionedModels 状态 */
+  mentionedModels: Model[]
+  /** mentionedModels 变化时的回调 */
+  onMentionedModelsChange: (models: Model[]) => void
+  /** 用户在房间中的个人信息 */
+  userInfo?: RoomUserInfo
 }
 
-const HostsInputbar: FC<Props> = ({ assistant: initialAssistant, topic, setActiveTopic, experts }) => {
+/**
+ * 专家提及处理器组件
+ * 负责注册 QuickPanel 触发器和处理专家选择
+ * 必须在 InputbarToolsProvider 内渲染
+ */
+interface ExpertMentionHandlerProps {
+  experts: Expert[]
+  selectedExpert: Expert | null
+  setSelectedExpert: (expert: Expert | null) => void
+  onTextChangeRef: React.MutableRefObject<((text: string) => void) | null>
+  /** 当前输入框文本，用于检测 @ 是否被删除 */
+  currentText: string
+}
+
+const ExpertMentionHandler: FC<ExpertMentionHandlerProps> = ({
+  experts,
+  selectedExpert,
+  setSelectedExpert,
+  onTextChangeRef,
+  currentText
+}) => {
+  const { recentExpertIds, recordExpertUsage } = useExpertContext()
+  const { toolsRegistry, onTextChange } = useInputbarToolsDispatch()
+  const quickPanelController = useQuickPanel()
+
+  // 创建 setText 的包装函数 - 使用 onTextChange 支持函数形式
+  const setTextWrapper = useCallback<React.Dispatch<React.SetStateAction<string>>>(
+    (action) => {
+      // 使用 InputbarToolsDispatch 的 onTextChange，它支持函数形式
+      onTextChange(action)
+    },
+    [onTextChange]
+  )
+
+  // 包装 setSelectedExpert 以同时记录使用
+  const handleSelectExpert = useCallback(
+    (expert: Expert | null) => {
+      setSelectedExpert(expert)
+      if (expert) {
+        recordExpertUsage(expert.id)
+      }
+    },
+    [setSelectedExpert, recordExpertUsage]
+  )
+
+  // 稳定化 registerTrigger 包装函数，避免每次渲染创建新引用
+  const registerTriggerWrapper = useCallback(
+    (symbol: any, handler: (payload?: unknown) => void) => {
+      return toolsRegistry.registerTrigger('mention-experts', symbol, handler)
+    },
+    [toolsRegistry]
+  )
+
+  // 创建稳定的 quickPanel 对象
+  const quickPanelApi = useMemo(
+    () => ({
+      registerTrigger: registerTriggerWrapper
+    }),
+    [registerTriggerWrapper]
+  )
+
+  // 使用专家提及面板 hook
+  useMentionExpertsPanel(
+    {
+      quickPanel: quickPanelApi,
+      quickPanelController,
+      experts,
+      recentExpertIds,
+      selectedExpert,
+      setSelectedExpert: handleSelectExpert,
+      setText: setTextWrapper
+    },
+    'manager'
+  )
+
+  // 监听文本变化，当 @handle 被删除时自动清除选中的专家
+  useEffect(() => {
+    if (!selectedExpert) return
+
+    // 获取专家的 handle（用于匹配输入框中的 @xxx）
+    const handle = selectedExpert.handle?.replace('@', '') || selectedExpert.name
+
+    // 检查文本中是否还包含 @handle
+    // 使用正则匹配，确保 @ 后面紧跟 handle（避免误匹配）
+    const pattern = new RegExp(`@${handle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:\\s|$)`, 'i')
+
+    if (!pattern.test(currentText)) {
+      // @ handle 已被删除，清除选中的专家
+      setSelectedExpert(null)
+    }
+  }, [currentText, selectedExpert, setSelectedExpert])
+
+  // 这个组件只是为了注册副作用，不渲染任何内容
+  return null
+}
+
+/**
+ * 专家选择按钮组件
+ * 必须在 InputbarToolsProvider 内渲染，以便访问 triggers
+ */
+interface ExpertSelectorButtonInnerProps {
+  experts: Expert[]
+  onTextChange: (text: string) => void
+}
+
+const ExpertSelectorButtonInner: FC<ExpertSelectorButtonInnerProps> = ({ experts, onTextChange }) => {
+  const { t } = useTranslation()
+  const { triggers } = useInputbarToolsDispatch()
+
+  const handleOpenExpertPanel = useCallback(() => {
+    if (experts.length === 0) {
+      window.toast?.info?.(t('experts.empty'))
+      return
+    }
+    // 先设置 @ 文本
+    onTextChange('@')
+    // 然后触发专家面板打开
+    triggers.emit(MENTION_EXPERTS_SYMBOL as any, { type: 'button', position: 0, originalText: '@' })
+  }, [experts.length, t, onTextChange, triggers])
+
+  return (
+    <SelectExpertButton onClick={handleOpenExpertPanel} $hasExperts={experts.length > 0}>
+      <AtSign size={12} />
+      <span>{experts.length > 0 ? t('experts.select_expert') : t('experts.empty')}</span>
+      {experts.length > 0 && <ChevronDown size={10} />}
+    </SelectExpertButton>
+  )
+}
+
+const HostsInputbar: FC<Props> = ({
+  assistant: initialAssistant,
+  topic,
+  setActiveTopic,
+  experts,
+  selectedExpert,
+  setSelectedExpert,
+  mentionedModels,
+  onMentionedModelsChange,
+  userInfo
+}) => {
   const { t } = useTranslation()
   // 从 store 获取最新的 assistant 状态（包含工具栏设置如 webSearchProviderId）
   const { assistant } = useAssistant(initialAssistant?.id ?? '')
-  // 当前选中的专家（单选）
-  const [selectedExpert, setSelectedExpert] = useState<Expert | null>(null)
-  // 是否显示专家选择下拉
-  const [showDropdown, setShowDropdown] = useState(false)
-  // 键盘高亮的索引
-  const [highlightedIndex, setHighlightedIndex] = useState(-1)
-  // 下拉列表项的 refs
-  const dropdownItemRefs = useRef<(HTMLDivElement | null)[]>([])
 
   // 使用 ExpertContext 来接收从侧边栏点击的专家
-  const { mentionedExpert, setMentionedExpert } = useExpertContext()
+  const { mentionedExpert, setMentionedExpert, recordExpertUsage } = useExpertContext()
 
   // 保存 onTextChange 回调的引用
   const onTextChangeRef = useRef<((text: string) => void) | null>(null)
@@ -78,6 +233,7 @@ const HostsInputbar: FC<Props> = ({ assistant: initialAssistant, topic, setActiv
   useEffect(() => {
     if (mentionedExpert) {
       setSelectedExpert(mentionedExpert)
+      recordExpertUsage(mentionedExpert.id)
       // 插入 @名称 到输入框
       const handle = mentionedExpert.handle?.replace('@', '') || mentionedExpert.name
       if (onTextChangeRef.current) {
@@ -85,94 +241,7 @@ const HostsInputbar: FC<Props> = ({ assistant: initialAssistant, topic, setActiv
       }
       setMentionedExpert(null) // 清除 context 中的值
     }
-  }, [mentionedExpert, setMentionedExpert])
-
-  // 选择专家（单选）
-  const handleSelectExpert = useCallback((expert: Expert) => {
-    setSelectedExpert(expert)
-    setShowDropdown(false)
-    // 插入 @名称 到输入框
-    const handle = expert.handle?.replace('@', '') || expert.name
-    if (onTextChangeRef.current) {
-      onTextChangeRef.current(`@${handle} `)
-    }
-  }, [])
-
-  // 清除选中的专家
-  const handleClearExpert = useCallback(() => {
-    setSelectedExpert(null)
-  }, [])
-
-  // 切换下拉显示
-  const toggleDropdown = useCallback(() => {
-    if (experts.length === 0) {
-      window.toast?.info?.(t('experts.empty'))
-      return
-    }
-    setShowDropdown((prev) => !prev)
-  }, [experts.length, t])
-
-  // 点击外部关闭下拉
-  useEffect(() => {
-    if (!showDropdown) return
-
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (!target.closest('.expert-selector-container')) {
-        setShowDropdown(false)
-      }
-    }
-    document.addEventListener('click', handleClickOutside)
-    return () => document.removeEventListener('click', handleClickOutside)
-  }, [showDropdown])
-
-  // 下拉打开时重置高亮索引
-  useEffect(() => {
-    if (showDropdown) {
-      setHighlightedIndex(-1)
-    }
-  }, [showDropdown])
-
-  // 键盘事件处理
-  useEffect(() => {
-    if (!showDropdown || experts.length === 0) return
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case 'ArrowDown':
-          e.preventDefault()
-          setHighlightedIndex((prev) => {
-            const newIndex = prev < experts.length - 1 ? prev + 1 : 0
-            // 滚动到可见区域
-            dropdownItemRefs.current[newIndex]?.scrollIntoView({ block: 'nearest' })
-            return newIndex
-          })
-          break
-        case 'ArrowUp':
-          e.preventDefault()
-          setHighlightedIndex((prev) => {
-            const newIndex = prev > 0 ? prev - 1 : experts.length - 1
-            // 滚动到可见区域
-            dropdownItemRefs.current[newIndex]?.scrollIntoView({ block: 'nearest' })
-            return newIndex
-          })
-          break
-        case 'Enter':
-          e.preventDefault()
-          if (highlightedIndex >= 0 && highlightedIndex < experts.length) {
-            handleSelectExpert(experts[highlightedIndex])
-          }
-          break
-        case 'Escape':
-          e.preventDefault()
-          setShowDropdown(false)
-          break
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [showDropdown, experts, highlightedIndex, handleSelectExpert])
+  }, [mentionedExpert, setMentionedExpert, recordExpertUsage, setSelectedExpert])
 
   // 发送前的消息转换回调，将专家信息附加到消息中
   const handleBeforeSend = useCallback(
@@ -193,67 +262,28 @@ const HostsInputbar: FC<Props> = ({ assistant: initialAssistant, topic, setActiv
     [selectedExpert]
   )
 
-  // 专家选择器内容 - 融合到输入框内部（render prop）
+  // 专家选择器内容 - 只显示选择按钮（标签已移到页面顶部）
   const renderExpertSelector = useCallback(
-    (onTextChange: (text: string) => void) => {
-      // 保存 onTextChange 引用，供 handleSelectExpert 和 useEffect 使用
+    ({ text, onTextChange }: { text: string; onTextChange: (text: string) => void }) => {
+      // 保存 onTextChange 引用，供其他地方使用
       onTextChangeRef.current = onTextChange
       return (
         <ExpertSelectorContainer className="expert-selector-container">
-          <HorizontalScrollContainer dependencies={[selectedExpert, experts]} expandable>
-            {selectedExpert ? (
-              <CustomTag
-                icon={<AtSign size={12} />}
-                color="var(--color-primary)"
-                closable
-                onClose={handleClearExpert}
-                onClick={toggleDropdown}
-                style={{ cursor: 'pointer' }}>
-                <TagContent>
-                  <span>{selectedExpert.emoji || '👤'}</span>
-                  <span>{selectedExpert.name}</span>
-                  <ChevronDown size={10} style={{ marginLeft: 2, opacity: 0.7 }} />
-                </TagContent>
-              </CustomTag>
-            ) : (
-              <SelectExpertButton onClick={toggleDropdown} $hasExperts={experts.length > 0}>
-                <AtSign size={12} />
-                <span>{experts.length > 0 ? t('experts.select_expert') : t('experts.empty')}</span>
-                {experts.length > 0 && <ChevronDown size={10} />}
-              </SelectExpertButton>
-            )}
-          </HorizontalScrollContainer>
+          {/* 专家提及处理器 - 注册 QuickPanel 触发器 */}
+          <ExpertMentionHandler
+            experts={experts}
+            selectedExpert={selectedExpert}
+            setSelectedExpert={setSelectedExpert}
+            onTextChangeRef={onTextChangeRef}
+            currentText={text}
+          />
 
-          {/* 专家下拉列表 */}
-          {showDropdown && experts.length > 0 && (
-            <DropdownList>
-              {experts.map((expert, index) => (
-                <DropdownItem
-                  key={expert.id}
-                  ref={(el) => {
-                    dropdownItemRefs.current[index] = el
-                  }}
-                  onClick={() => handleSelectExpert(expert)}
-                  onMouseEnter={() => setHighlightedIndex(index)}
-                  $isSelected={selectedExpert?.id === expert.id}
-                  $isHighlighted={index === highlightedIndex}>
-                  <ItemEmoji>{expert.emoji || '👤'}</ItemEmoji>
-                  <ItemInfo>
-                    <ItemName>
-                      <AtSymbol>@</AtSymbol>
-                      {expert.handle?.replace('@', '') || expert.name}
-                    </ItemName>
-                    {expert.description && <ItemDescription>{expert.description}</ItemDescription>}
-                  </ItemInfo>
-                  {selectedExpert?.id === expert.id && <SelectedMark>✓</SelectedMark>}
-                </DropdownItem>
-              ))}
-            </DropdownList>
-          )}
+          {/* 只显示选择按钮，标签显示在页面顶部 */}
+          {!selectedExpert && <ExpertSelectorButtonInner experts={experts} onTextChange={onTextChange} />}
         </ExpertSelectorContainer>
       )
     },
-    [selectedExpert, experts, handleClearExpert, toggleDropdown, t, showDropdown, handleSelectExpert, highlightedIndex]
+    [selectedExpert, experts, setSelectedExpert]
   )
 
   // 获取实际用于发送消息的 assistant（选中专家时合并专家和主机的设置）
@@ -262,8 +292,8 @@ const HostsInputbar: FC<Props> = ({ assistant: initialAssistant, topic, setActiv
       // 从最新的 experts 列表中获取专家数据，确保使用最新状态
       const latestExpert = experts.find((e) => e.id === selectedExpert.id) || selectedExpert
 
-      // 构建增强的专家提示词
-      const enhancedPrompt = buildExpertPrompt(latestExpert, assistant.prompt)
+      // 构建增强的专家提示词（包含用户个人信息）
+      const enhancedPrompt = buildExpertPrompt(latestExpert, assistant.prompt, userInfo)
 
       // 合并主机和专家的设置
       // 优先使用专家的设置，但如果专家没有设置某项，则使用主机的设置
@@ -298,8 +328,28 @@ const HostsInputbar: FC<Props> = ({ assistant: initialAssistant, topic, setActiv
         }
       }
     }
+
+    // 没有选中专家时，也将用户信息添加到主机的提示词中
+    if (userInfo && (userInfo.role || userInfo.introduction)) {
+      const basePrompt = assistant.prompt || ''
+      let userInfoSection = '[对话用户信息]'
+      if (userInfo.role) {
+        userInfoSection += `\n用户身份/角色: ${userInfo.role}`
+      }
+      if (userInfo.introduction) {
+        userInfoSection += `\n用户自我介绍: ${userInfo.introduction}`
+      }
+      userInfoSection += '\n请根据用户身份信息调整你的回复方式，更好地为用户服务。'
+
+      const hostPromptWithUserInfo = basePrompt ? `${basePrompt}\n\n${userInfoSection}` : userInfoSection
+      return {
+        ...assistant,
+        prompt: hostPromptWithUserInfo
+      }
+    }
+
     return assistant
-  }, [selectedExpert, assistant, experts])
+  }, [selectedExpert, assistant, experts, userInfo])
 
   return (
     <Inputbar
@@ -309,6 +359,11 @@ const HostsInputbar: FC<Props> = ({ assistant: initialAssistant, topic, setActiv
       onBeforeSend={handleBeforeSend}
       extraTopContent={renderExpertSelector}
       getEffectiveAssistant={getEffectiveAssistant}
+      mentionMode="experts"
+      forceEnableQuickPanelTriggers
+      externalMentionedModels={mentionedModels}
+      onMentionedModelsChange={onMentionedModelsChange}
+      showMentionedModelsInInputbar={false}
     />
   )
 }
@@ -317,12 +372,6 @@ const ExpertSelectorContainer = styled.div`
   width: 100%;
   padding: 5px 15px 5px 15px;
   position: relative;
-`
-
-const TagContent = styled.span`
-  display: flex;
-  align-items: center;
-  gap: 4px;
 `
 
 const SelectExpertButton = styled.button<{ $hasExperts: boolean }>`
@@ -348,107 +397,6 @@ const SelectExpertButton = styled.button<{ $hasExperts: boolean }>`
       border-style: solid;
     `}
   }
-`
-
-const DropdownList = styled.div`
-  position: absolute;
-  bottom: 100%;
-  left: 15px;
-  width: 280px;
-  max-height: 280px;
-  overflow-y: auto;
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 100;
-  margin-bottom: 6px;
-
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--color-border);
-    border-radius: 2px;
-  }
-`
-
-const DropdownItem = styled.div<{ $isSelected: boolean; $isHighlighted: boolean }>`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-  background: ${({ $isSelected, $isHighlighted }) =>
-    $isHighlighted ? 'var(--color-background-soft)' : $isSelected ? 'var(--color-background-soft)' : 'transparent'};
-
-  &:hover {
-    background: var(--color-background-soft);
-  }
-
-  &:first-child {
-    border-radius: 10px 10px 0 0;
-  }
-
-  &:last-child {
-    border-radius: 0 0 10px 10px;
-  }
-
-  &:only-child {
-    border-radius: 10px;
-  }
-`
-
-const ItemEmoji = styled.div`
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: var(--color-background-mute);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  flex-shrink: 0;
-`
-
-const ItemInfo = styled.div`
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-`
-
-const ItemName = styled.div`
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text);
-  display: flex;
-  align-items: center;
-`
-
-const AtSymbol = styled.span`
-  color: var(--color-primary);
-  font-weight: 600;
-  margin-right: 1px;
-`
-
-const ItemDescription = styled.div`
-  font-size: 11px;
-  color: var(--color-text-secondary);
-  line-height: 1.3;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`
-
-const SelectedMark = styled.span`
-  color: var(--color-primary);
-  font-size: 12px;
-  flex-shrink: 0;
-  align-self: center;
 `
 
 export default HostsInputbar

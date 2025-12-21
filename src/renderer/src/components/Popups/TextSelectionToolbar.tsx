@@ -1,5 +1,5 @@
 import { useTheme } from '@renderer/context/ThemeProvider'
-import { Copy } from 'lucide-react'
+import { Copy, FolderPlus } from 'lucide-react'
 import type { FC } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -11,6 +11,8 @@ interface Props {
   onAskHer?: (selectedText: string) => void
   onFormat?: (selectedText: string) => void
   onHighlight?: (selectedText: string) => void
+  onSaveToLibrary?: (selectedText: string) => void
+  showSaveToLibrary?: boolean
 }
 
 interface ToolbarPosition {
@@ -19,7 +21,15 @@ interface ToolbarPosition {
   visible: boolean
 }
 
-const TextSelectionToolbar: FC<Props> = ({ containerRef, onCopy, onAskHer, onFormat, onHighlight }) => {
+const TextSelectionToolbar: FC<Props> = ({
+  containerRef,
+  onCopy,
+  onAskHer,
+  onFormat,
+  onHighlight,
+  onSaveToLibrary,
+  showSaveToLibrary = false
+}) => {
   const { t } = useTranslation()
   const { theme } = useTheme()
   const toolbarRef = useRef<HTMLDivElement>(null)
@@ -32,48 +42,49 @@ const TextSelectionToolbar: FC<Props> = ({ containerRef, onCopy, onAskHer, onFor
     return {
       background: isDark ? '#3a3a3a' : '#ffffff',
       border: isDark ? 'rgba(255, 255, 255, 0.1)' : '#e5e5e5',
-      boxShadow: isDark
-        ? '0 2px 8px rgba(0, 0, 0, 0.3)'
-        : '0 2px 8px rgba(0, 0, 0, 0.12)',
+      boxShadow: isDark ? '0 2px 8px rgba(0, 0, 0, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.12)',
       text: isDark ? '#e0e0e0' : '#333333',
       textSecondary: isDark ? '#999999' : '#666666'
     }
   }, [theme])
 
   // 计算工具栏位置
-  const calculatePosition = useCallback((selection: Selection): ToolbarPosition | null => {
-    const range = selection.getRangeAt(0)
-    const rect = range.getBoundingClientRect()
+  const calculatePosition = useCallback(
+    (selection: Selection): ToolbarPosition | null => {
+      const range = selection.getRangeAt(0)
+      const rect = range.getBoundingClientRect()
 
-    if (rect.width === 0 || rect.height === 0) {
-      return null
-    }
+      if (rect.width === 0 || rect.height === 0) {
+        return null
+      }
 
-    // 工具栏宽度估算
-    const toolbarWidth = 180
-    const toolbarHeight = 32
+      // 工具栏宽度估算（包含保存按钮时更宽）
+      const toolbarWidth = showSaveToLibrary ? 220 : 180
+      const toolbarHeight = 32
 
-    // 计算位置：在选中文字上方居中
-    let left = rect.left + rect.width / 2 - toolbarWidth / 2
-    let top = rect.top - toolbarHeight - 8
+      // 计算位置：在选中文字上方居中
+      let left = rect.left + rect.width / 2 - toolbarWidth / 2
+      let top = rect.top - toolbarHeight - 8
 
-    // 确保不超出视口左边界
-    if (left < 10) {
-      left = 10
-    }
+      // 确保不超出视口左边界
+      if (left < 10) {
+        left = 10
+      }
 
-    // 确保不超出视口右边界
-    if (left + toolbarWidth > window.innerWidth - 10) {
-      left = window.innerWidth - toolbarWidth - 10
-    }
+      // 确保不超出视口右边界
+      if (left + toolbarWidth > window.innerWidth - 10) {
+        left = window.innerWidth - toolbarWidth - 10
+      }
 
-    // 如果上方空间不足，显示在下方
-    if (top < 10) {
-      top = rect.bottom + 8
-    }
+      // 如果上方空间不足，显示在下方
+      if (top < 10) {
+        top = rect.bottom + 8
+      }
 
-    return { top, left, visible: true }
-  }, [])
+      return { top, left, visible: true }
+    },
+    [showSaveToLibrary]
+  )
 
   // 检查选中是否在容器内
   const isSelectionInContainer = useCallback(
@@ -195,6 +206,17 @@ const TextSelectionToolbar: FC<Props> = ({ containerRef, onCopy, onAskHer, onFor
     [onAskHer, selectedText]
   )
 
+  const handleSaveToLibraryClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      onSaveToLibrary?.(selectedText)
+      // 点击后隐藏工具栏
+      setPosition((prev) => ({ ...prev, visible: false }))
+    },
+    [onSaveToLibrary, selectedText]
+  )
+
   if (!position.visible) {
     return null
   }
@@ -225,6 +247,18 @@ const TextSelectionToolbar: FC<Props> = ({ containerRef, onCopy, onAskHer, onFor
       <IconButton onClick={handleHighlightClick} title={t('selection.highlight', { defaultValue: '高亮' })}>
         <HighlightDot />
       </IconButton>
+
+      {/* 保存到资料库按钮 */}
+      {showSaveToLibrary && (
+        <>
+          <Divider />
+          <IconButton
+            onClick={handleSaveToLibraryClick}
+            title={t('selection.save_to_library', { defaultValue: '保存到资料库' })}>
+            <FolderPlus size={14} strokeWidth={1.5} />
+          </IconButton>
+        </>
+      )}
 
       <Divider />
 

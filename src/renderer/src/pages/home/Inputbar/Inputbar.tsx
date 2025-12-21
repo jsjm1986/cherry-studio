@@ -69,9 +69,21 @@ interface Props {
   /** 发送前的消息转换回调，可用于附加额外信息（如专家信息） */
   onBeforeSend?: (message: Message, blocks: MessageBlock[]) => { message: Message; blocks: MessageBlock[] }
   /** 额外的顶部内容，显示在输入框内部顶部（如专家选择器）。可以是 ReactNode 或 render prop */
-  extraTopContent?: React.ReactNode | ((onTextChange: (text: string) => void) => React.ReactNode)
+  extraTopContent?:
+    | React.ReactNode
+    | ((params: { text: string; onTextChange: (text: string) => void }) => React.ReactNode)
   /** 获取实际用于发送消息的 assistant（用于主机模式下使用专家设置） */
   getEffectiveAssistant?: () => Assistant | null
+  /** 控制 @ 符号的行为: 'models'(默认) 或 'experts' */
+  mentionMode?: 'models' | 'experts'
+  /** 强制启用 QuickPanel 触发器（覆盖用户设置） */
+  forceEnableQuickPanelTriggers?: boolean
+  /** 外部 mentionedModels 状态（可选，用于状态提升场景） */
+  externalMentionedModels?: Model[]
+  /** mentionedModels 变化时的回调（与 externalMentionedModels 配合使用） */
+  onMentionedModelsChange?: (models: Model[]) => void
+  /** 是否在输入框内显示模型标签（默认 true） */
+  showMentionedModelsInInputbar?: boolean
 }
 
 type ProviderActionHandlers = {
@@ -93,7 +105,12 @@ const Inputbar: FC<Props> = ({
   topic,
   onBeforeSend,
   extraTopContent,
-  getEffectiveAssistant
+  getEffectiveAssistant,
+  mentionMode,
+  forceEnableQuickPanelTriggers,
+  externalMentionedModels,
+  onMentionedModelsChange,
+  showMentionedModelsInInputbar = true
 }) => {
   const actionsRef = useRef<ProviderActionHandlers>({
     resizeTextArea: () => {},
@@ -128,7 +145,9 @@ const Inputbar: FC<Props> = ({
         onNewContext: () => actionsRef.current.onNewContext(),
         onTextChange: (updater) => actionsRef.current.onTextChange(updater),
         toggleExpanded: (next) => actionsRef.current.toggleExpanded(next)
-      }}>
+      }}
+      externalMentionedModels={externalMentionedModels}
+      onMentionedModelsChange={onMentionedModelsChange}>
       <InputbarInner
         assistant={initialAssistant}
         setActiveTopic={setActiveTopic}
@@ -137,6 +156,9 @@ const Inputbar: FC<Props> = ({
         onBeforeSend={onBeforeSend}
         extraTopContent={extraTopContent}
         getEffectiveAssistant={getEffectiveAssistant}
+        mentionMode={mentionMode}
+        forceEnableQuickPanelTriggers={forceEnableQuickPanelTriggers}
+        showMentionedModelsInInputbar={showMentionedModelsInInputbar}
       />
     </InputbarToolsProvider>
   )
@@ -149,7 +171,10 @@ const InputbarInner: FC<InputbarInnerProps> = ({
   actionsRef,
   onBeforeSend,
   extraTopContent,
-  getEffectiveAssistant
+  getEffectiveAssistant,
+  mentionMode,
+  forceEnableQuickPanelTriggers,
+  showMentionedModelsInInputbar = true
 }) => {
   const scope = topic.type ?? TopicType.Chat
   const config = getInputbarConfig(scope)
@@ -489,7 +514,7 @@ const InputbarInner: FC<InputbarInnerProps> = ({
 
   // topContent: 所有顶部预览内容
   const renderedExtraTopContent =
-    typeof extraTopContent === 'function' ? extraTopContent(setText) : extraTopContent
+    typeof extraTopContent === 'function' ? extraTopContent({ text, onTextChange: setText }) : extraTopContent
   const topContent = (
     <>
       {renderedExtraTopContent}
@@ -501,7 +526,7 @@ const InputbarInner: FC<InputbarInnerProps> = ({
         />
       )}
 
-      {mentionedModels.length > 0 && (
+      {showMentionedModelsInInputbar && mentionedModels.length > 0 && (
         <MentionModelsInput selectedModels={mentionedModels} onRemoveModel={handleRemoveModel} />
       )}
     </>
@@ -542,6 +567,8 @@ const InputbarInner: FC<InputbarInnerProps> = ({
       leftToolbar={leftToolbar}
       rightToolbar={rightToolbar}
       topContent={topContent}
+      mentionMode={mentionMode}
+      forceEnableQuickPanelTriggers={forceEnableQuickPanelTriggers}
     />
   )
 }

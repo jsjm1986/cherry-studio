@@ -8,6 +8,7 @@ import { useRuntime } from '@renderer/hooks/useRuntime'
 import { useSettings } from '@renderer/hooks/useSettings'
 import { useTimer } from '@renderer/hooks/useTimer'
 import useTranslate from '@renderer/hooks/useTranslate'
+import { MENTION_EXPERTS_SYMBOL } from '@renderer/pages/hosts/hooks/useMentionExpertsPanel'
 import PasteService from '@renderer/services/PasteService'
 import { translateText } from '@renderer/services/TranslateService'
 import { useAppDispatch } from '@renderer/store'
@@ -18,7 +19,6 @@ import { formatQuotedText } from '@renderer/utils/formats'
 import { isSendMessageKeyPressed } from '@renderer/utils/input'
 import { IpcChannel } from '@shared/IpcChannel'
 import { Tooltip } from 'antd'
-import TextArea from 'antd/es/input/TextArea'
 import { CirclePause, Languages } from 'lucide-react'
 import type { CSSProperties, FC } from 'react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -37,6 +37,7 @@ import { usePasteHandler } from '../hooks/usePasteHandler'
 import { getInputbarConfig } from '../registry'
 import SendMessageButton from '../SendMessageButton'
 import type { InputbarScope } from '../types'
+import { HighlightTextarea } from './HighlightTextarea'
 
 const logger = loggerService.withContext('InputbarCore')
 
@@ -68,6 +69,9 @@ export interface InputbarCoreProps {
 
   // Override the user preference for quick panel triggers
   forceEnableQuickPanelTriggers?: boolean
+
+  /** 控制 @ 符号的行为: 'models'(默认) 或 'experts' */
+  mentionMode?: 'models' | 'experts'
 }
 
 const TextareaStyle: CSSProperties = {
@@ -116,7 +120,8 @@ export const InputbarCore: FC<InputbarCoreProps> = ({
   leftToolbar,
   rightToolbar,
   topContent,
-  forceEnableQuickPanelTriggers
+  forceEnableQuickPanelTriggers,
+  mentionMode = 'models'
 }) => {
   const config = useMemo(() => getInputbarConfig(scope), [scope])
   const { files, isExpanded } = useInputbarToolsState()
@@ -392,7 +397,9 @@ export const InputbarCore: FC<InputbarCoreProps> = ({
       }
 
       const openMentionPanelAt = (position: number) => {
-        triggers.emit(QuickPanelReservedSymbol.MentionModels, {
+        // 根据 mentionMode 选择触发的符号
+        const targetSymbol = mentionMode === 'experts' ? MENTION_EXPERTS_SYMBOL : QuickPanelReservedSymbol.MentionModels
+        triggers.emit(targetSymbol as any, {
           type: 'input',
           position,
           originalText: newText
@@ -436,20 +443,25 @@ export const InputbarCore: FC<InputbarCoreProps> = ({
         }
 
         if (lastSymbol === QuickPanelReservedSymbol.MentionModels && hasValidTriggerBoundary) {
-          if (quickPanel.isVisible && quickPanel.symbol !== QuickPanelReservedSymbol.MentionModels) {
+          // 确定当前模式应该使用的符号
+          const expectedSymbol =
+            mentionMode === 'experts' ? MENTION_EXPERTS_SYMBOL : QuickPanelReservedSymbol.MentionModels
+          if (quickPanel.isVisible && quickPanel.symbol !== expectedSymbol) {
             quickPanel.close('switch-symbol')
           }
-          if (!quickPanel.isVisible || quickPanel.symbol !== QuickPanelReservedSymbol.MentionModels) {
+          if (!quickPanel.isVisible || quickPanel.symbol !== expectedSymbol) {
             openMentionPanelAt(cursorPosition - 1)
           }
         }
       }
 
       if (quickPanel.isVisible && quickPanel.triggerInfo?.type === 'input') {
-        const activeSymbol = quickPanel.symbol as QuickPanelReservedSymbol
+        const activeSymbol = quickPanel.symbol as string
         const triggerPosition = quickPanel.triggerInfo.position ?? -1
         const isTrackedSymbol =
-          activeSymbol === QuickPanelReservedSymbol.Root || activeSymbol === QuickPanelReservedSymbol.MentionModels
+          activeSymbol === QuickPanelReservedSymbol.Root ||
+          activeSymbol === QuickPanelReservedSymbol.MentionModels ||
+          activeSymbol === MENTION_EXPERTS_SYMBOL
 
         if (isTrackedSymbol && triggerPosition >= 0) {
           // Check if cursor is before the trigger position (user deleted the symbol)
@@ -458,14 +470,19 @@ export const InputbarCore: FC<InputbarCoreProps> = ({
           } else {
             // Check if the trigger symbol still exists at the expected position
             const triggerChar = newText[triggerPosition]
-            if (triggerChar !== activeSymbol) {
+            // For @ symbols (both models and experts), check for '@'
+            const expectedTriggerChar =
+              activeSymbol === QuickPanelReservedSymbol.MentionModels || activeSymbol === MENTION_EXPERTS_SYMBOL
+                ? '@'
+                : activeSymbol
+            if (triggerChar !== expectedTriggerChar) {
               quickPanel.close('delete-symbol')
             }
           }
         }
       }
     },
-    [setText, textareaRef, quickPanelTriggersEnabled, config.enableQuickPanel, quickPanel, triggers]
+    [setText, textareaRef, quickPanelTriggersEnabled, config.enableQuickPanel, quickPanel, triggers, mentionMode]
   )
 
   const onTranslated = useCallback(
@@ -659,8 +676,8 @@ export const InputbarCore: FC<InputbarCoreProps> = ({
           )}
           {topContent}
 
-          <Textarea
-            ref={textareaRef}
+          <HighlightTextarea
+            textareaRef={textareaRef}
             value={text}
             onChange={handleTextareaChange}
             onKeyDown={handleKeyDown}
@@ -669,16 +686,12 @@ export const InputbarCore: FC<InputbarCoreProps> = ({
             onBlur={() => setInputFocus(false)}
             placeholder={isTranslating ? t('chat.input.translating') : placeholder}
             autoFocus
-            variant="borderless"
             spellCheck={enableSpellCheck}
             rows={2}
             autoSize={height ? false : { minRows: 2, maxRows: 20 }}
             styles={{ textarea: TextareaStyle }}
-            style={{
-              fontSize,
-              height: height,
-              minHeight: '30px'
-            }}
+            fontSize={fontSize}
+            height={height}
             disabled={isTranslating || searching}
             onClick={() => {
               searching && dispatch(setSearching(false))
@@ -759,23 +772,6 @@ const InputBarContainer = styled.div`
       z-index: 5;
       pointer-events: none;
     }
-  }
-`
-
-const Textarea = styled(TextArea)`
-  padding: 0;
-  border-radius: 0;
-  display: flex;
-  resize: none !important;
-  overflow: auto;
-  width: 100%;
-  box-sizing: border-box;
-  transition: none !important;
-  &.ant-input {
-    line-height: 1.4;
-  }
-  &::-webkit-scrollbar {
-    width: 3px;
   }
 `
 

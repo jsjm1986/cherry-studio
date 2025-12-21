@@ -1,10 +1,12 @@
 import MultiSelectActionPopup from '@renderer/components/Popups/MultiSelectionPopup'
+import SaveToLibraryPopup from '@renderer/components/Popups/SaveToLibraryPopup'
 import TextSelectionToolbar from '@renderer/components/Popups/TextSelectionToolbar'
+import CustomTag from '@renderer/components/Tags/CustomTag'
 import { useChatContext } from '@renderer/hooks/useChatContext'
-import type { Assistant, Expert, Topic } from '@renderer/types'
-import { Settings2 } from 'lucide-react'
+import type { Assistant, Expert, Host, Model, Topic } from '@renderer/types'
+import { AtSign, Settings2 } from 'lucide-react'
 import type { FC } from 'react'
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
@@ -16,7 +18,7 @@ interface Props {
   topic: Topic
   setActiveTopic: (topic: Topic) => void
   experts: Expert[]
-  activeHost: { emoji?: string; name: string; description?: string; welcomeMessage?: string } | null
+  activeHost: Host | null
   onHostClick?: () => void
 }
 
@@ -24,6 +26,20 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
   const { t } = useTranslation()
   const { isMultiSelectMode } = useChatContext(topic)
   const chatContentRef = useRef<HTMLDivElement>(null)
+
+  // 提升的状态：选中的专家和模型
+  const [selectedExpert, setSelectedExpert] = useState<Expert | null>(null)
+  const [mentionedModels, setMentionedModels] = useState<Model[]>([])
+
+  // 清除选中的专家
+  const handleClearExpert = useCallback(() => {
+    setSelectedExpert(null)
+  }, [])
+
+  // 移除模型
+  const handleRemoveModel = useCallback((model: Model) => {
+    setMentionedModels((prev) => prev.filter((m) => m.id !== model.id))
+  }, [])
 
   // 处理选中文字后的操作（暂时只打印，后续实现功能）
   const handleCopy = useCallback((selectedText: string) => {
@@ -46,6 +62,18 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
     // TODO: 实现高亮功能
   }, [])
 
+  const handleSaveToLibrary = useCallback(
+    async (selectedText: string) => {
+      if (!activeHost) return
+      await SaveToLibraryPopup.show({
+        hostId: activeHost.id,
+        content: selectedText,
+        sourceTopicId: topic.id
+      })
+    },
+    [activeHost, topic.id]
+  )
+
   return (
     <>
       <ChatHeader>
@@ -58,6 +86,35 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
             </ChatHeaderSubtitle>
           </ChatHeaderInfo>
         </ChatHeaderLeft>
+
+        {/* 标签显示区域 */}
+        {(selectedExpert || mentionedModels.length > 0) && (
+          <ChatHeaderTags>
+            {selectedExpert && (
+              <CustomTag
+                icon={<AtSign size={12} />}
+                color="var(--color-primary)"
+                closable
+                onClose={handleClearExpert}>
+                <TagContent>
+                  <span>{selectedExpert.emoji || '👤'}</span>
+                  <span>{selectedExpert.name}</span>
+                </TagContent>
+              </CustomTag>
+            )}
+            {mentionedModels.map((model) => (
+              <CustomTag
+                key={model.id}
+                icon={<AtSign size={12} />}
+                color="#1677ff"
+                closable
+                onClose={() => handleRemoveModel(model)}>
+                {model.name}
+              </CustomTag>
+            ))}
+          </ChatHeaderTags>
+        )}
+
         <ChatHeaderRight>
           {experts.length > 0 && (
             <ExpertAvatars>
@@ -75,14 +132,19 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
         </ChatHeaderRight>
       </ChatHeader>
       <ChatContent ref={chatContentRef}>
-        <Messages
-          assistant={assistant}
-          topic={topic}
-          setActiveTopic={setActiveTopic}
-          onHostClick={onHostClick}
-        />
+        <Messages assistant={assistant} topic={topic} setActiveTopic={setActiveTopic} onHostClick={onHostClick} />
         {!isMultiSelectMode && (
-          <HostsInputbar assistant={assistant} topic={topic} setActiveTopic={setActiveTopic} experts={experts} />
+          <HostsInputbar
+            assistant={assistant}
+            topic={topic}
+            setActiveTopic={setActiveTopic}
+            experts={experts}
+            selectedExpert={selectedExpert}
+            setSelectedExpert={setSelectedExpert}
+            mentionedModels={mentionedModels}
+            onMentionedModelsChange={setMentionedModels}
+            userInfo={activeHost?.userInfo}
+          />
         )}
         {isMultiSelectMode && <MultiSelectActionPopup topic={topic} />}
       </ChatContent>
@@ -94,6 +156,8 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
         onAskHer={handleAskHer}
         onFormat={handleFormat}
         onHighlight={handleHighlight}
+        showSaveToLibrary={!!activeHost}
+        onSaveToLibrary={handleSaveToLibrary}
       />
     </>
   )
@@ -119,6 +183,26 @@ const ChatHeaderRight = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
+`
+
+const ChatHeaderTags = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
+  padding: 0 16px;
+  overflow-x: auto;
+
+  &::-webkit-scrollbar {
+    height: 0;
+  }
+`
+
+const TagContent = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 4px;
 `
 
 const ChatHeaderIcon = styled.div`

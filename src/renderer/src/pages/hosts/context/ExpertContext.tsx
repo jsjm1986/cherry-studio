@@ -2,6 +2,35 @@ import type { Expert } from '@renderer/types'
 import type { FC, ReactNode } from 'react'
 import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 
+/** localStorage key for recent experts */
+const RECENT_EXPERTS_KEY = 'cherry-studio:recent-mentioned-experts'
+const MAX_RECENT_EXPERTS = 10
+
+/** Load recent expert IDs from localStorage */
+const loadRecentExpertIds = (): string[] => {
+  try {
+    const stored = localStorage.getItem(RECENT_EXPERTS_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      if (Array.isArray(parsed)) {
+        return parsed.filter((id): id is string => typeof id === 'string')
+      }
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return []
+}
+
+/** Save recent expert IDs to localStorage */
+const saveRecentExpertIds = (ids: string[]): void => {
+  try {
+    localStorage.setItem(RECENT_EXPERTS_KEY, JSON.stringify(ids))
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 interface ExpertContextValue {
   /** 当前选中的专家列表 */
   mentionedExperts: Expert[]
@@ -21,6 +50,10 @@ interface ExpertContextValue {
   mentionedExpert: Expert | null
   /** 设置从侧边栏点击的专家 */
   setMentionedExpert: (expert: Expert | null) => void
+  /** 最近使用的专家ID列表（用于排序） */
+  recentExpertIds: string[]
+  /** 记录专家使用（更新最近使用列表） */
+  recordExpertUsage: (expertId: string) => void
 }
 
 const ExpertContext = createContext<ExpertContextValue | null>(null)
@@ -33,6 +66,19 @@ export const ExpertProvider: FC<ExpertProviderProps> = ({ children }) => {
   const [mentionedExperts, setMentionedExperts] = useState<Expert[]>([])
   // 从侧边栏点击的专家（用于快速@）
   const [mentionedExpert, setMentionedExpert] = useState<Expert | null>(null)
+  // 最近使用的专家ID列表
+  const [recentExpertIds, setRecentExpertIds] = useState<string[]>(() => loadRecentExpertIds())
+
+  // 记录专家使用
+  const recordExpertUsage = useCallback((expertId: string) => {
+    setRecentExpertIds((prev) => {
+      // 移除已存在的ID，将新ID放到最前面
+      const filtered = prev.filter((id) => id !== expertId)
+      const updated = [expertId, ...filtered].slice(0, MAX_RECENT_EXPERTS)
+      saveRecentExpertIds(updated)
+      return updated
+    })
+  }, [])
 
   const addMentionedExpert = useCallback((expert: Expert) => {
     setMentionedExperts((prev) => {
@@ -75,7 +121,9 @@ export const ExpertProvider: FC<ExpertProviderProps> = ({ children }) => {
       clearMentionedExperts,
       getActiveExpert,
       mentionedExpert,
-      setMentionedExpert
+      setMentionedExpert,
+      recentExpertIds,
+      recordExpertUsage
     }),
     [
       mentionedExperts,
@@ -84,7 +132,9 @@ export const ExpertProvider: FC<ExpertProviderProps> = ({ children }) => {
       toggleMentionedExpert,
       clearMentionedExperts,
       getActiveExpert,
-      mentionedExpert
+      mentionedExpert,
+      recentExpertIds,
+      recordExpertUsage
     ]
   )
 
