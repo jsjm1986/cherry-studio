@@ -1,0 +1,55 @@
+name: Build Windows (x64 + arm64) Test Package
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  build-win:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Delete old artifacts
+        uses: c-hive/gha-remove-artifacts@v1
+        with:
+          age: '0 seconds'
+          skip-tags: false
+          skip-recent: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Enable Yarn 4
+        run: |
+          corepack enable
+          corepack prepare yarn@4.9.1 --activate
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Prepare env
+        run: copy .env.example .env
+
+      - name: Build (x64 + arm64, unsigned)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: yarn build:win
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: win-build
+          path: |
+            dist/*.exe
+            dist/*.zip
+          retention-days: 1
