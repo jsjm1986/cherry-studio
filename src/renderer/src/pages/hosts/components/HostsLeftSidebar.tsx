@@ -32,6 +32,7 @@ interface Props {
   onSelectHost: (host: Host) => void
   onAddHost: () => void
   onEditHost: (host: Host) => void
+  onDeleteHost: (host: Host) => void
   // Tab 相关
   activeTab: TabType
   onTabChange: (tab: TabType) => void
@@ -65,6 +66,7 @@ const HostsLeftSidebar: FC<Props> = ({
   onSelectHost,
   onAddHost,
   onEditHost,
+  onDeleteHost,
   activeTab,
   onTabChange,
   topics,
@@ -174,6 +176,39 @@ const HostsLeftSidebar: FC<Props> = ({
                   $active={activeHost?.id === host.id}>
                   <span className="emoji">{host.emoji || '🏠'}</span>
                   <span className="name">{host.name}</span>
+                  <RoomItemActions className="actions">
+                    <Dropdown
+                      trigger={['click']}
+                      menu={{
+                        items: [
+                          {
+                            key: 'edit',
+                            label: '编辑',
+                            icon: <Pencil size={14} />,
+                            onClick: (e) => {
+                              e.domEvent.stopPropagation()
+                              onEditHost(host)
+                              setShowRoomDropdown(false)
+                            }
+                          },
+                          {
+                            key: 'delete',
+                            label: '删除',
+                            icon: <Trash2 size={14} />,
+                            danger: true,
+                            onClick: (e) => {
+                              e.domEvent.stopPropagation()
+                              onDeleteHost(host)
+                              setShowRoomDropdown(false)
+                            }
+                          }
+                        ]
+                      }}>
+                      <ActionIcon onClick={(e) => e.stopPropagation()}>
+                        <MoreHorizontal size={14} />
+                      </ActionIcon>
+                    </Dropdown>
+                  </RoomItemActions>
                 </RoomDropdownItem>
               ))}
               {hosts.length === 0 && <EmptyHint>暂无房间</EmptyHint>}
@@ -190,11 +225,11 @@ const HostsLeftSidebar: FC<Props> = ({
         <TabsContainer>
           <TabButton $active={activeTab === 'chat'} onClick={() => onTabChange('chat')}>
             <MessageSquare size={14} />
-            <span>Chat</span>
+            <span>话题</span>
           </TabButton>
           <TabButton $active={activeTab === 'configuration'} onClick={() => onTabChange('configuration')}>
             <Settings size={14} />
-            <span>Configuration</span>
+            <span>配置</span>
           </TabButton>
         </TabsContainer>
 
@@ -206,7 +241,7 @@ const HostsLeftSidebar: FC<Props> = ({
                 <CollapseIcon $collapsed={projectCollapsed} $disabled={disabled}>
                   <ChevronDown size={14} />
                 </CollapseIcon>
-                <SectionTitle $disabled={disabled}>Chat 对话</SectionTitle>
+                <SectionTitle $disabled={disabled}>话题列表</SectionTitle>
                 {topics.length > 0 && <Badge>{topics.length}</Badge>}
               </SectionHeaderLeft>
               {!disabled && (
@@ -647,6 +682,10 @@ const RoomDropdownItem = styled.div<{ $active?: boolean; $isAction?: boolean }>`
     background: ${({ $active }) => ($active ? 'var(--color-primary-soft)' : 'var(--color-background-soft)')};
   }
 
+  &:hover .actions {
+    opacity: 1;
+  }
+
   .emoji {
     font-size: 16px;
   }
@@ -905,6 +944,15 @@ const MemberActions = styled.div`
   gap: 2px;
   opacity: 0;
   transition: opacity 0.2s ease;
+`
+
+// Room item actions
+const RoomItemActions = styled.div`
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  margin-left: auto;
 `
 
 // Folder 样式

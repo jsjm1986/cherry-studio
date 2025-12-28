@@ -69,6 +69,8 @@ export type QuickPanelOpenOptions = {
   symbol: string
   /** 触发信息，记录面板是如何被打开的 */
   triggerInfo?: QuickPanelTriggerInfo
+  /** 面板最大宽度，default: 1000 */
+  maxWidth?: number
   beforeAction?: (options: QuickPanelCallBackOptions) => void
   afterAction?: (options: QuickPanelCallBackOptions) => void
   onClose?: (options: QuickPanelCallBackOptions) => void
@@ -119,6 +121,7 @@ export interface QuickPanelContextType {
   readonly defaultIndex: number
   readonly pageSize: number
   readonly multiple: boolean
+  readonly maxWidth: number
   readonly triggerInfo?: QuickPanelTriggerInfo
   readonly manageListExternally?: boolean
   readonly lastCloseAction?: QuickPanelCloseAction

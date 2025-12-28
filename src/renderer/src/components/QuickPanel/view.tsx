@@ -734,6 +734,7 @@ export const QuickPanelView: React.FC<Props> = ({ setInputText }) => {
   return (
     <QuickPanelContainer
       $pageSize={ctx.pageSize}
+      $maxWidth={ctx.maxWidth}
       $selectedColor={selectedColor}
       $selectedColorHover={selectedColorHover}
       $collapsed={collapsed}
@@ -803,6 +804,7 @@ export const QuickPanelView: React.FC<Props> = ({ setInputText }) => {
 
 const QuickPanelContainer = styled.div<{
   $pageSize: number
+  $maxWidth: number
   $selectedColor: string
   $selectedColorHover: string
   $collapsed?: boolean
@@ -813,10 +815,9 @@ const QuickPanelContainer = styled.div<{
   max-height: 0;
   position: absolute;
   top: 1px;
-  left: 0;
-  right: 0;
-  width: 100%;
-  padding: 0 35px 0 35px;
+  left: 35px;
+  right: auto;
+  width: min(${(props) => props.$maxWidth}px, calc(100vw - 100px));
   transform: translateY(-100%);
   transform-origin: bottom;
   transition: max-height 0.2s ease;
@@ -904,6 +905,7 @@ const QuickPanelItem = styled.div`
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.1s ease;
+  overflow: hidden;
 
   &:hover:not(.disabled) {
     background-color: var(--focused-color);
@@ -929,12 +931,12 @@ const QuickPanelItem = styled.div`
 `
 
 const QuickPanelItemLeft = styled.div`
-  max-width: 60%;
   display: flex;
   align-items: center;
   gap: 5px;
   flex: 1;
-  flex-shrink: 0;
+  min-width: 0;
+  overflow: hidden;
 `
 
 const QuickPanelItemIcon = styled.span`
@@ -951,23 +953,23 @@ const QuickPanelItemIcon = styled.span`
 `
 
 const QuickPanelItemLabel = styled.span`
-  flex: 1;
   font-size: 13px;
   line-height: 16px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex-shrink: 0;
 `
 
 const QuickPanelItemRight = styled.div`
-  min-width: 20%;
+  flex-shrink: 0;
+  max-width: 50%;
   font-size: 11px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 2px;
   color: var(--color-text-3);
+  overflow: hidden;
 `
 
 const QuickPanelItemDescription = styled.span`

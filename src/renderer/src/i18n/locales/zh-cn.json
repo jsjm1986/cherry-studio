@@ -1313,6 +1313,7 @@
     "add_custom": "自定义添加",
     "add_more": "添加更多",
     "clear_mentioned": "清除已选专家",
+    "clear_selection": "取消选择当前专家",
     "delete": "删除专家",
     "description": "描述",
     "edit": "编辑专家",
@@ -1450,6 +1451,8 @@
     "current": "当前主机",
     "delete": "删除主机",
     "description": "主机描述",
+    "description_help": "简短描述，显示在房间列表中",
+    "description_placeholder": "例如：写作超级工作组",
     "edit": "编辑主机",
     "emoji": "表情符号",
     "empty": "暂无主机，点击上方按钮创建",
@@ -1481,6 +1484,9 @@
     },
     "select_hint": "请先选择一个房间",
     "settings": "房间设置",
+    "system_prompt": "系统提示词",
+    "system_prompt_help": "当@专家时，此内容会作为背景信息发送给AI",
+    "system_prompt_placeholder": "例如：这是一个专注于写作的工作空间，成员包括各类写作专家...",
     "tabs": {
       "chat": "聊天",
       "configuration": "配置"

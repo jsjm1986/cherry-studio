@@ -28,6 +28,21 @@ import { ExpertProvider, useExpertContext } from './context/ExpertContext'
 import { useExperts, useHosts } from './hooks/useHosts'
 import { useInfoLibrary } from './hooks/useInfoLibrary'
 
+// localStorage 存储最后选中的主机
+const LAST_HOST_KEY = 'cherry-studio:last-active-host'
+
+const loadLastHostId = (): string | null => {
+  return localStorage.getItem(LAST_HOST_KEY)
+}
+
+const saveLastHostId = (hostId: string | null): void => {
+  if (hostId) {
+    localStorage.setItem(LAST_HOST_KEY, hostId)
+  } else {
+    localStorage.removeItem(LAST_HOST_KEY)
+  }
+}
+
 // 内部组件，使用 ExpertContext
 const HostsPageContent: FC = () => {
   const { t } = useTranslation()
@@ -36,7 +51,7 @@ const HostsPageContent: FC = () => {
   const dispatch = useAppDispatch()
 
   // 主机状态
-  const { hosts, createHost, updateHost } = useHosts()
+  const { hosts, createHost, updateHost, deleteHost } = useHosts()
   const [activeHost, setActiveHost] = useState<Host | null>(null)
   const [hostModalOpen, setHostModalOpen] = useState(false)
   const [editingHost, setEditingHost] = useState<Host | null>(null)
@@ -82,6 +97,24 @@ const HostsPageContent: FC = () => {
     [dispatch]
   )
 
+  // 恢复上次选中的主机
+  useEffect(() => {
+    if (hosts.length > 0 && !activeHost) {
+      const lastHostId = loadLastHostId()
+      if (lastHostId) {
+        const foundHost = hosts.find((h) => h.id === lastHostId)
+        if (foundHost) {
+          setActiveHost(foundHost)
+        }
+      }
+    }
+  }, [hosts, activeHost])
+
+  // 保存当前选中的主机
+  useEffect(() => {
+    saveLastHostId(activeHost?.id || null)
+  }, [activeHost?.id])
+
   // 当选择主机时，自动加载或创建 Topic
   useEffect(() => {
     const initTopic = async () => {
@@ -126,13 +159,13 @@ const HostsPageContent: FC = () => {
   }, [])
 
   const handleHostModalOk = useCallback(
-    (data: { name: string; emoji: string; description: string; welcomeMessage: string }) => {
+    (data: { name: string; emoji: string; description: string; prompt: string; welcomeMessage: string }) => {
       if (editingHost) {
         const updatedData = {
           name: data.name,
           emoji: data.emoji,
           description: data.description,
-          prompt: data.description,
+          prompt: data.prompt,
           welcomeMessage: data.welcomeMessage
         }
         updateHost(editingHost.id, updatedData)
@@ -140,12 +173,30 @@ const HostsPageContent: FC = () => {
           setActiveHost({ ...activeHost, ...updatedData } as Host)
         }
       } else {
-        const newHost = createHost({ ...data, welcomeMessage: data.welcomeMessage })
+        const newHost = createHost({ ...data })
         setActiveHost(newHost)
       }
       setHostModalOpen(false)
     },
     [editingHost, createHost, updateHost, activeHost]
+  )
+
+  const handleDeleteHost = useCallback(
+    (host: Host) => {
+      Modal.confirm({
+        title: '删除房间',
+        content: `确定要删除房间 "${host.name}" 吗？删除后所有相关数据将无法恢复。`,
+        okButtonProps: { danger: true },
+        onOk: () => {
+          deleteHost(host.id)
+          if (activeHost?.id === host.id) {
+            const remainingHosts = hosts.filter((h) => h.id !== host.id)
+            setActiveHost(remainingHosts.length > 0 ? remainingHosts[0] : null)
+          }
+        }
+      })
+    },
+    [deleteHost, activeHost, hosts]
   )
 
   // 专家操作
@@ -343,6 +394,7 @@ const HostsPageContent: FC = () => {
           onSelectHost={setActiveHost}
           onAddHost={handleAddHost}
           onEditHost={handleEditHost}
+          onDeleteHost={handleDeleteHost}
           activeTab={activeTab}
           onTabChange={setActiveTab}
           topics={currentAssistant?.topics || []}

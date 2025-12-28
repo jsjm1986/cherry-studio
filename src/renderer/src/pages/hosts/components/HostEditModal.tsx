@@ -9,7 +9,7 @@ import styled from 'styled-components'
 interface Props {
   open: boolean
   host?: Host | null
-  onOk: (data: { name: string; emoji: string; description: string; welcomeMessage: string }) => void
+  onOk: (data: { name: string; emoji: string; description: string; prompt: string; welcomeMessage: string }) => void
   onCancel: () => void
 }
 
@@ -18,6 +18,7 @@ const HostEditModal: FC<Props> = ({ open, host, onOk, onCancel }) => {
   const [name, setName] = useState('')
   const [emoji, setEmoji] = useState('🏠')
   const [description, setDescription] = useState('')
+  const [prompt, setPrompt] = useState('')
   const [welcomeMessage, setWelcomeMessage] = useState('')
 
   useEffect(() => {
@@ -25,12 +26,14 @@ const HostEditModal: FC<Props> = ({ open, host, onOk, onCancel }) => {
       if (host) {
         setName(host.name)
         setEmoji(host.emoji || '🏠')
-        setDescription(host.description || host.prompt || '')
+        setDescription(host.description || '')
+        setPrompt(host.prompt || '')
         setWelcomeMessage(host.welcomeMessage || '')
       } else {
         setName('')
         setEmoji('🏠')
         setDescription('')
+        setPrompt('')
         setWelcomeMessage('')
       }
     }
@@ -38,7 +41,13 @@ const HostEditModal: FC<Props> = ({ open, host, onOk, onCancel }) => {
 
   const handleOk = () => {
     if (!name.trim()) return
-    onOk({ name: name.trim(), emoji, description: description.trim(), welcomeMessage: welcomeMessage.trim() })
+    onOk({
+      name: name.trim(),
+      emoji,
+      description: description.trim(),
+      prompt: prompt.trim(),
+      welcomeMessage: welcomeMessage.trim()
+    })
   }
 
   return (
@@ -62,12 +71,24 @@ const HostEditModal: FC<Props> = ({ open, host, onOk, onCancel }) => {
         </FormItem>
         <FormItem>
           <Label>{t('hosts.description')}</Label>
-          <Input.TextArea
+          <Input
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder={t('hosts.description')}
-            rows={3}
+            placeholder={t('hosts.description_placeholder')}
+            maxLength={50}
+            showCount
           />
+          <HelpText>{t('hosts.description_help')}</HelpText>
+        </FormItem>
+        <FormItem>
+          <Label>{t('hosts.system_prompt')}</Label>
+          <Input.TextArea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder={t('hosts.system_prompt_placeholder')}
+            rows={4}
+          />
+          <HelpText>{t('hosts.system_prompt_help')}</HelpText>
         </FormItem>
         <FormItem>
           <Label>{t('hosts.welcome_message')}</Label>
@@ -100,6 +121,12 @@ const Label = styled.label`
   font-size: 13px;
   font-weight: 500;
   color: var(--color-text);
+`
+
+const HelpText = styled.div`
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  margin-top: 4px;
 `
 
 export default HostEditModal

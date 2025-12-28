@@ -373,7 +373,7 @@ const ExpertSelectorContainer = styled.div`
 `
 
 const SelectExpertButton = styled.button<{ $hasExperts: boolean }>`
-  display: inline-flex;
+  display: none; /* 隐藏按钮，功能保留但不显示 */
   align-items: center;
   gap: 4px;
   padding: 2px 10px;

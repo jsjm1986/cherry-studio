@@ -134,12 +134,13 @@ export const useMentionExpertsPanel = (params: Params, role: 'button' | 'manager
       })
     })
 
-    // 添加清除按钮
+    // 添加清除按钮（隐藏但保留逻辑）
     items.unshift({
       label: t('settings.input.clear.all'),
       description: t('experts.clear_selection'),
       icon: <CircleX size={16} />,
       alwaysVisible: true,
+      hidden: true, // 隐藏清除按钮
       isSelected: false,
       action: ({ context }) => {
         onClearSelectedExpert()
@@ -179,6 +180,7 @@ export const useMentionExpertsPanel = (params: Params, role: 'button' | 'manager
         list: expertItems,
         symbol: MENTION_EXPERTS_SYMBOL,
         multiple: false,
+        maxWidth: 450, // 专家面板使用较窄宽度
         triggerInfo: triggerInfo || { type: 'button' },
         afterAction({ item }) {
           item.isSelected = !item.isSelected
