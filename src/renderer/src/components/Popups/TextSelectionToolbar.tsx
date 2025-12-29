@@ -1,18 +1,22 @@
 import { useTheme } from '@renderer/context/ThemeProvider'
+import { Popover } from 'antd'
 import { Copy, FolderPlus } from 'lucide-react'
 import type { FC } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
+// 预设颜色
+const HIGHLIGHT_COLORS = ['#f5c518', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#a29bfe', '#fd79a8', '#00b894']
+
 interface Props {
   containerRef: React.RefObject<HTMLElement | null>
   onCopy?: (selectedText: string) => void
   onAskHer?: (selectedText: string) => void
-  onFormat?: (selectedText: string) => void
-  onHighlight?: (selectedText: string) => void
   onSaveToLibrary?: (selectedText: string) => void
   showSaveToLibrary?: boolean
+  onSaveToNotebook?: (selectedText: string, color: string) => void
+  showSaveToNotebook?: boolean
 }
 
 interface ToolbarPosition {
@@ -25,16 +29,18 @@ const TextSelectionToolbar: FC<Props> = ({
   containerRef,
   onCopy,
   onAskHer,
-  onFormat,
-  onHighlight,
   onSaveToLibrary,
-  showSaveToLibrary = false
+  showSaveToLibrary = false,
+  onSaveToNotebook,
+  showSaveToNotebook = false
 }) => {
   const { t } = useTranslation()
   const { theme } = useTheme()
   const toolbarRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState<ToolbarPosition>({ top: 0, left: 0, visible: false })
   const [selectedText, setSelectedText] = useState('')
+  const [highlightColor, setHighlightColor] = useState(HIGHLIGHT_COLORS[0])
+  const [colorPickerOpen, setColorPickerOpen] = useState(false)
 
   // 获取主题颜色
   const colors = useMemo(() => {
@@ -48,6 +54,14 @@ const TextSelectionToolbar: FC<Props> = ({
     }
   }, [theme])
 
+  // 计算工具栏宽度
+  const toolbarWidth = useMemo(() => {
+    let width = 140 // 复制按钮 + 问Her按钮 + 基础 padding
+    if (showSaveToNotebook) width += 70 // Aa按钮 + 颜色选择器
+    if (showSaveToLibrary) width += 45 // 保存资料库按钮
+    return width
+  }, [showSaveToLibrary, showSaveToNotebook])
+
   // 计算工具栏位置
   const calculatePosition = useCallback(
     (selection: Selection): ToolbarPosition | null => {
@@ -58,8 +72,6 @@ const TextSelectionToolbar: FC<Props> = ({
         return null
       }
 
-      // 工具栏宽度估算（包含保存按钮时更宽）
-      const toolbarWidth = showSaveToLibrary ? 220 : 180
       const toolbarHeight = 32
 
       // 计算位置：在选中文字上方居中
@@ -83,7 +95,7 @@ const TextSelectionToolbar: FC<Props> = ({
 
       return { top, left, visible: true }
     },
-    [showSaveToLibrary]
+    [toolbarWidth]
   )
 
   // 检查选中是否在容器内
@@ -130,7 +142,12 @@ const TextSelectionToolbar: FC<Props> = ({
 
   // 监听 mouseup 事件来检测选中
   useEffect(() => {
-    const handleMouseUp = () => {
+    const handleMouseUp = (e: MouseEvent) => {
+      // 如果点击在 Popover 上，不重新检查选中（避免关闭 toolbar）
+      const target = e.target as HTMLElement
+      if (target.closest('.ant-popover')) {
+        return
+      }
       // 延迟执行以确保选中已完成
       setTimeout(handleSelectionChange, 10)
     }
@@ -140,8 +157,14 @@ const TextSelectionToolbar: FC<Props> = ({
       if (toolbarRef.current?.contains(e.target as Node)) {
         return
       }
+      // 如果点击在 Popover 内容上（颜色选择器），不隐藏
+      const target = e.target as HTMLElement
+      if (target.closest('.ant-popover')) {
+        return
+      }
       // 点击其他地方时隐藏工具栏
       setPosition((prev) => ({ ...prev, visible: false }))
+      setColorPickerOpen(false)
     }
 
     // 监听键盘选择（Shift + 方向键）
@@ -176,24 +199,24 @@ const TextSelectionToolbar: FC<Props> = ({
     [onCopy, selectedText]
   )
 
-  // 处理按钮点击
-  const handleFormatClick = useCallback(
+  // 点击 Aa 按钮保存到 Notebook
+  const handleAaClick = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      onFormat?.(selectedText)
+      if (selectedText && onSaveToNotebook) {
+        onSaveToNotebook(selectedText, highlightColor)
+      }
+      setPosition((prev) => ({ ...prev, visible: false }))
     },
-    [onFormat, selectedText]
+    [selectedText, highlightColor, onSaveToNotebook]
   )
 
-  const handleHighlightClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-      onHighlight?.(selectedText)
-    },
-    [onHighlight, selectedText]
-  )
+  // 选择颜色
+  const handleColorSelect = useCallback((color: string) => {
+    setHighlightColor(color)
+    setColorPickerOpen(false)
+  }, [])
 
   const handleAskHerClick = useCallback(
     (e: React.MouseEvent) => {
@@ -217,6 +240,20 @@ const TextSelectionToolbar: FC<Props> = ({
     [onSaveToLibrary, selectedText]
   )
 
+  // 颜色选择器内容
+  const colorPickerContent = (
+    <ColorPickerContainer>
+      {HIGHLIGHT_COLORS.map((color) => (
+        <ColorOption
+          key={color}
+          $color={color}
+          $isActive={highlightColor === color}
+          onClick={() => handleColorSelect(color)}
+        />
+      ))}
+    </ColorPickerContainer>
+  )
+
   if (!position.visible) {
     return null
   }
@@ -236,17 +273,27 @@ const TextSelectionToolbar: FC<Props> = ({
         <Copy size={14} strokeWidth={1.5} />
       </IconButton>
 
-      <Divider />
-
-      {/* Aa 格式按钮 */}
-      <IconButton onClick={handleFormatClick} title={t('selection.format', { defaultValue: '格式' })}>
-        <AaText>Aa</AaText>
-      </IconButton>
-
-      {/* 高亮圆点 */}
-      <IconButton onClick={handleHighlightClick} title={t('selection.highlight', { defaultValue: '高亮' })}>
-        <HighlightDot />
-      </IconButton>
+      {/* Notebook 功能区：Aa 按钮 + 颜色选择器 */}
+      {showSaveToNotebook && (
+        <>
+          <Divider />
+          <IconButton onClick={handleAaClick} title={t('selection.save_to_notebook', { defaultValue: '保存到笔记本' })}>
+            <AaTextWithUnderline $color={highlightColor}>Aa</AaTextWithUnderline>
+          </IconButton>
+          <Popover
+            content={colorPickerContent}
+            trigger="click"
+            open={colorPickerOpen}
+            onOpenChange={setColorPickerOpen}
+            placement="bottom"
+            arrow={false}
+            overlayInnerStyle={{ padding: 6, overflow: 'hidden' }}>
+            <IconButton title={t('selection.highlight_color', { defaultValue: '选择颜色' })}>
+              <HighlightDot $color={highlightColor} />
+            </IconButton>
+          </Popover>
+        </>
+      )}
 
       {/* 保存到资料库按钮 */}
       {showSaveToLibrary && (
@@ -260,9 +307,8 @@ const TextSelectionToolbar: FC<Props> = ({
         </>
       )}
 
-      <Divider />
-
       {/* 问 Her 按钮 */}
+      <Divider />
       <AskHerButton onClick={handleAskHerClick} title={t('selection.ask_her', { defaultValue: '问 Her' })}>
         <AskHerBracket>[</AskHerBracket>
         <AskHerNumber>?</AskHerNumber>
@@ -318,10 +364,12 @@ const IconButton = styled.button`
   }
 `
 
-const AaText = styled.span`
+const AaTextWithUnderline = styled.span<{ $color: string }>`
   font-size: 13px;
   font-weight: 500;
   color: var(--color-text-secondary);
+  border-bottom: 2px solid ${(props) => props.$color};
+  padding-bottom: 1px;
 `
 
 const Divider = styled.div`
@@ -331,12 +379,34 @@ const Divider = styled.div`
   margin: 0 4px;
 `
 
-const HighlightDot = styled.div`
+const HighlightDot = styled.div<{ $color: string }>`
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #f5c518;
+  background: ${(props) => props.$color};
   border: 1px solid rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+`
+
+const ColorPickerContainer = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 2px;
+`
+
+const ColorOption = styled.div<{ $color: string; $isActive: boolean }>`
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: ${(props) => props.$color};
+  border: 2px solid ${(props) => (props.$isActive ? 'var(--color-primary)' : 'transparent')};
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+
+  &:hover {
+    border-color: ${(props) => (props.$isActive ? 'var(--color-primary)' : 'rgba(0, 0, 0, 0.2)')};
+  }
 `
 
 const AskHerButton = styled.button`

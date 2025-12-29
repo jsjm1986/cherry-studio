@@ -1330,6 +1330,13 @@
       "success": "成功导入 {{count}} 位专家",
       "title": "从助手库导入"
     },
+    "cartridge": {
+      "import": "人格卡带",
+      "importBtn": "导入",
+      "importSuccess": "卡带导入成功",
+      "importError": "卡带解析失败",
+      "loaded": "已加载卡带"
+    },
     "list": "专家列表",
     "mention": "提及专家",
     "mention_title": "选择专家",

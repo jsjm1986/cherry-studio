@@ -3,9 +3,8 @@ import { ResetIcon } from '@renderer/components/Icons'
 import { HStack } from '@renderer/components/Layout'
 import TextBadge from '@renderer/components/TextBadge'
 import { isMac, THEME_COLOR_PRESETS } from '@renderer/config/constant'
-import { DEFAULT_SIDEBAR_ICONS } from '@renderer/config/sidebar'
 import { useTheme } from '@renderer/context/ThemeProvider'
-import { useNavbarPosition, useSettings } from '@renderer/hooks/useSettings'
+import { useSettings } from '@renderer/hooks/useSettings'
 import useUserTheme from '@renderer/hooks/useUserTheme'
 import { useAppDispatch } from '@renderer/store'
 import type { AssistantIconType } from '@renderer/store/settings'
@@ -14,8 +13,7 @@ import {
   setClickAssistantToShowTopic,
   setCustomCss,
   setPinTopicsToTop,
-  setShowTopicTime,
-  setSidebarIcons
+  setShowTopicTime
 } from '@renderer/store/settings'
 import { ThemeMode } from '@renderer/types'
 import { Button, ColorPicker, Segmented, Select, Switch } from 'antd'
@@ -26,7 +24,6 @@ import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
 import { SettingContainer, SettingDivider, SettingGroup, SettingRow, SettingRowTitle, SettingTitle } from '..'
-import SidebarIconsManager from './SidebarIconsManager'
 
 const ColorCircleWrapper = styled.div`
   width: 24px;
@@ -65,20 +62,16 @@ const DisplaySettings: FC = () => {
     showTopicTime,
     pinTopicsToTop,
     customCss,
-    sidebarIcons,
     setTheme,
     assistantIconType,
     userTheme
   } = useSettings()
-  const { navbarPosition, setNavbarPosition } = useNavbarPosition()
   const { theme, settedTheme } = useTheme()
   const { t } = useTranslation()
   const dispatch = useAppDispatch()
   const [currentZoom, setCurrentZoom] = useState(1.0)
   const { setUserTheme } = useUserTheme()
 
-  const [visibleIcons, setVisibleIcons] = useState(sidebarIcons?.visible || DEFAULT_SIDEBAR_ICONS)
-  const [disabledIcons, setDisabledIcons] = useState(sidebarIcons?.disabled || [])
   const [fontList, setFontList] = useState<string[]>([])
 
   const handleWindowStyleChange = useCallback(
@@ -97,12 +90,6 @@ const DisplaySettings: FC = () => {
     },
     [setUserTheme, userTheme]
   )
-
-  const handleReset = useCallback(() => {
-    setVisibleIcons([...DEFAULT_SIDEBAR_ICONS])
-    setDisabledIcons([])
-    dispatch(setSidebarIcons({ visible: DEFAULT_SIDEBAR_ICONS, disabled: [] }))
-  }, [dispatch])
 
   const themeOptions = useMemo(
     () => [
@@ -246,24 +233,7 @@ const DisplaySettings: FC = () => {
           </>
         )}
       </SettingGroup>
-      <SettingGroup theme={theme}>
-        <SettingTitle style={{ justifyContent: 'flex-start', gap: 5 }}>
-          {t('settings.display.navbar.title')} <TextBadge text="New" />
-        </SettingTitle>
-        <SettingDivider />
-        <SettingRow>
-          <SettingRowTitle>{t('settings.display.navbar.position.label')}</SettingRowTitle>
-          <Segmented
-            value={navbarPosition}
-            shape="round"
-            onChange={setNavbarPosition}
-            options={[
-              { label: t('settings.display.navbar.position.left'), value: 'left' },
-              { label: t('settings.display.navbar.position.top'), value: 'top' }
-            ]}
-          />
-        </SettingRow>
-      </SettingGroup>
+      {/* 导航栏位置设置已锁定为左侧，不允许用户修改 */}
       <SettingGroup theme={theme}>
         <SettingTitle>{t('settings.display.zoom.title')}</SettingTitle>
         <SettingDivider />
@@ -403,24 +373,6 @@ const DisplaySettings: FC = () => {
           />
         </SettingRow>
       </SettingGroup>
-      {navbarPosition === 'left' && (
-        <SettingGroup theme={theme}>
-          <SettingTitle
-            style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>{t('settings.display.sidebar.title')}</span>
-            <ResetButtonWrapper>
-              <Button onClick={handleReset}>{t('common.reset')}</Button>
-            </ResetButtonWrapper>
-          </SettingTitle>
-          <SettingDivider />
-          <SidebarIconsManager
-            visibleIcons={visibleIcons}
-            disabledIcons={disabledIcons}
-            setVisibleIcons={setVisibleIcons}
-            setDisabledIcons={setDisabledIcons}
-          />
-        </SettingGroup>
-      )}
       <SettingGroup theme={theme}>
         <SettingTitle>
           {t('settings.display.custom.css.label')}
@@ -458,11 +410,6 @@ const TitleExtra = styled.div`
   cursor: pointer;
   text-decoration: underline;
   opacity: 0.7;
-`
-const ResetButtonWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
 `
 const ZoomButtonGroup = styled.div`
   display: flex;

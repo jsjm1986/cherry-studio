@@ -7,6 +7,7 @@ import {
   ChevronDown,
   Download,
   FileText,
+  FileUp,
   Folder,
   Info,
   MessageSquare,
@@ -20,7 +21,7 @@ import {
   Users
 } from 'lucide-react'
 import type { FC } from 'react'
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 export type TabType = 'chat' | 'configuration'
@@ -47,6 +48,7 @@ interface Props {
   members: Expert[]
   onAddMember: () => void
   onImportMember?: () => void
+  onImportCartridge?: (file: File) => void
   onEditMember: (member: Expert) => void
   onDeleteMember: (member: Expert) => void
   onMentionMember: (member: Expert) => void
@@ -78,6 +80,7 @@ const HostsLeftSidebar: FC<Props> = ({
   members,
   onAddMember,
   onImportMember,
+  onImportCartridge,
   onEditMember,
   onDeleteMember,
   onMentionMember,
@@ -95,6 +98,9 @@ const HostsLeftSidebar: FC<Props> = ({
   const [aboutCollapsed, setAboutCollapsed] = useState(false)
   const [renamingTopicId, setRenamingTopicId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
+
+  // 卡带导入文件输入
+  const cartridgeInputRef = useRef<HTMLInputElement>(null)
 
   // 用户信息编辑状态
   const [isEditingUserInfo, setIsEditingUserInfo] = useState(false)
@@ -344,6 +350,15 @@ const HostsLeftSidebar: FC<Props> = ({
                             e.domEvent.stopPropagation()
                             onImportMember?.()
                           }
+                        },
+                        {
+                          key: 'cartridge',
+                          label: '从卡带导入',
+                          icon: <FileUp size={14} />,
+                          onClick: (e) => {
+                            e.domEvent.stopPropagation()
+                            cartridgeInputRef.current?.click()
+                          }
                         }
                       ]
                     }}>
@@ -558,6 +573,21 @@ const HostsLeftSidebar: FC<Props> = ({
           <span>Settings</span>
         </SettingsButton>
       </BottomSection>
+
+      {/* 隐藏的卡带文件输入 */}
+      <input
+        ref={cartridgeInputRef}
+        type="file"
+        accept=".md,.markdown"
+        style={{ display: 'none' }}
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file && onImportCartridge) {
+            onImportCartridge(file)
+          }
+          e.target.value = '' // 重置以允许重复选择同一文件
+        }}
+      />
     </Container>
   )
 }

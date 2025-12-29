@@ -2,7 +2,6 @@ import EmojiPicker from '@renderer/components/EmojiPicker'
 import { HStack } from '@renderer/components/Layout'
 import AssistantKnowledgeBaseSettings from '@renderer/pages/settings/AssistantSettings/AssistantKnowledgeBaseSettings'
 import AssistantMCPSettings from '@renderer/pages/settings/AssistantSettings/AssistantMCPSettings'
-import AssistantModelSettings from '@renderer/pages/settings/AssistantSettings/AssistantModelSettings'
 import type { Assistant, AssistantSettings, Expert, ExpertPromptSettings } from '@renderer/types'
 import { Button, Divider, Input, Modal, Popover, Select, Switch, Tabs } from 'antd'
 import type { FC } from 'react'
@@ -233,19 +232,6 @@ const ExpertSettingsPopup: FC<Props> = ({ open, expert, onSave, onCancel }) => {
               </HintText>
             </FormItem>
           </FormSection>
-        </TabContent>
-      )
-    },
-    {
-      key: 'model',
-      label: t('assistants.settings.model'),
-      children: (
-        <TabContent>
-          <AssistantModelSettings
-            assistant={localExpert}
-            updateAssistant={updateExpertAsAssistant}
-            updateAssistantSettings={updateExpertSettings}
-          />
         </TabContent>
       )
     },

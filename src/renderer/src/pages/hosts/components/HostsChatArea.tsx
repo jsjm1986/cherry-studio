@@ -3,7 +3,10 @@ import SaveToLibraryPopup from '@renderer/components/Popups/SaveToLibraryPopup'
 import TextSelectionToolbar from '@renderer/components/Popups/TextSelectionToolbar'
 import CustomTag from '@renderer/components/Tags/CustomTag'
 import { useChatContext } from '@renderer/hooks/useChatContext'
+import { useAppDispatch } from '@renderer/store'
+import { addNotebookItem } from '@renderer/store/assistants'
 import type { Assistant, Expert, Host, Model, Topic } from '@renderer/types'
+import { nanoid } from '@reduxjs/toolkit'
 import { AtSign, Settings2 } from 'lucide-react'
 import type { FC } from 'react'
 import { useCallback, useRef, useState } from 'react'
@@ -26,6 +29,7 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
   const { t } = useTranslation()
   const { isMultiSelectMode } = useChatContext(topic)
   const chatContentRef = useRef<HTMLDivElement>(null)
+  const dispatch = useAppDispatch()
 
   // 提升的状态：选中的专家和模型
   const [selectedExpert, setSelectedExpert] = useState<Expert | null>(null)
@@ -41,25 +45,14 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
     setMentionedModels((prev) => prev.filter((m) => m.id !== model.id))
   }, [])
 
-  // 处理选中文字后的操作（暂时只打印，后续实现功能）
+  // 处理选中文字后的操作
   const handleCopy = useCallback((selectedText: string) => {
-    console.log('Copy:', selectedText)
     navigator.clipboard.writeText(selectedText)
   }, [])
 
   const handleAskHer = useCallback((selectedText: string) => {
     console.log('Ask Her:', selectedText)
     // TODO: 实现问 Her 功能
-  }, [])
-
-  const handleFormat = useCallback((selectedText: string) => {
-    console.log('Format:', selectedText)
-    // TODO: 实现格式化功能
-  }, [])
-
-  const handleHighlight = useCallback((selectedText: string) => {
-    console.log('Highlight:', selectedText)
-    // TODO: 实现高亮功能
   }, [])
 
   const handleSaveToLibrary = useCallback(
@@ -72,6 +65,29 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
       })
     },
     [activeHost, topic.id]
+  )
+
+  const handleSaveToNotebook = useCallback(
+    (selectedText: string, color: string) => {
+      if (!activeHost) return
+      const now = Date.now()
+      dispatch(
+        addNotebookItem({
+          hostId: activeHost.id,
+          item: {
+            id: nanoid(),
+            content: selectedText,
+            color,
+            createdAt: now,
+            updatedAt: now,
+            sourceTopicId: topic.id,
+            sourceTopicName: topic.name
+          }
+        })
+      )
+      window.message?.success?.(t('notebook.save.success', { defaultValue: '已保存到笔记本' }))
+    },
+    [activeHost, topic.id, topic.name, dispatch, t]
   )
 
   return (
@@ -150,10 +166,10 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
         containerRef={chatContentRef}
         onCopy={handleCopy}
         onAskHer={handleAskHer}
-        onFormat={handleFormat}
-        onHighlight={handleHighlight}
         showSaveToLibrary={!!activeHost}
         onSaveToLibrary={handleSaveToLibrary}
+        showSaveToNotebook={!!activeHost}
+        onSaveToNotebook={handleSaveToNotebook}
       />
     </>
   )

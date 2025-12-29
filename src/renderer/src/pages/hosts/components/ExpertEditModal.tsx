@@ -1,6 +1,11 @@
 import EmojiPicker from '@renderer/components/EmojiPicker'
 import type { Expert } from '@renderer/types'
-import { Button, Input, Modal, Popover } from 'antd'
+import {
+  compileCartridgeToPrompt,
+  extractExpertInfoFromCartridge,
+  parseCartridgeMarkdown
+} from '@renderer/utils/cartridge'
+import { Button, Input, Modal, Popover, Upload, message } from 'antd'
 import type { FC } from 'react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -16,6 +21,7 @@ interface Props {
     handle: string
     triggerKeywords: string[]
     prompt: string
+    cartridgeMarkdown?: string
   }) => void
   onCancel: () => void
 }
@@ -28,6 +34,7 @@ const ExpertEditModal: FC<Props> = ({ open, expert, onOk, onCancel }) => {
   const [handle, setHandle] = useState('')
   const [triggerKeywords, setTriggerKeywords] = useState('')
   const [prompt, setPrompt] = useState('')
+  const [cartridgeMarkdown, setCartridgeMarkdown] = useState<string | undefined>()
 
   useEffect(() => {
     if (open) {
@@ -38,6 +45,7 @@ const ExpertEditModal: FC<Props> = ({ open, expert, onOk, onCancel }) => {
         setHandle(expert.handle || `@${expert.name}`)
         setTriggerKeywords(expert.triggerKeywords?.join(', ') || '')
         setPrompt(expert.prompt || '')
+        setCartridgeMarkdown(expert.cartridgeMarkdown)
       } else {
         setName('')
         setEmoji('👤')
@@ -45,6 +53,7 @@ const ExpertEditModal: FC<Props> = ({ open, expert, onOk, onCancel }) => {
         setHandle('')
         setTriggerKeywords('')
         setPrompt('')
+        setCartridgeMarkdown(undefined)
       }
     }
   }, [open, expert])
@@ -60,8 +69,38 @@ const ExpertEditModal: FC<Props> = ({ open, expert, onOk, onCancel }) => {
         .split(',')
         .map((k) => k.trim())
         .filter(Boolean),
-      prompt: prompt.trim()
+      prompt: prompt.trim(),
+      cartridgeMarkdown
     })
+  }
+
+  const handleImportCartridge = (file: File) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const markdown = e.target?.result as string
+        const cartridgeData = parseCartridgeMarkdown(markdown)
+        const compiledPrompt = compileCartridgeToPrompt(cartridgeData)
+        const expertInfo = extractExpertInfoFromCartridge(cartridgeData)
+
+        // 填充表单
+        setName(expertInfo.name)
+        setHandle(expertInfo.handle)
+        setTriggerKeywords(expertInfo.triggerKeywords.join(', '))
+        setPrompt(compiledPrompt)
+        setCartridgeMarkdown(markdown)
+
+        if (cartridgeData.identity.profession) {
+          setDescription(cartridgeData.identity.profession)
+        }
+
+        message.success(t('experts.cartridge.importSuccess'))
+      } catch {
+        message.error(t('experts.cartridge.importError'))
+      }
+    }
+    reader.readAsText(file, 'UTF-8')
+    return false // 阻止自动上传
   }
 
   return (
@@ -85,6 +124,12 @@ const ExpertEditModal: FC<Props> = ({ open, expert, onOk, onCancel }) => {
             <Label>{t('experts.name')}</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('experts.name')} autoFocus />
           </FormItem>
+          <FormItem style={{ flex: 0 }}>
+            <Label>{t('experts.cartridge.import')}</Label>
+            <Upload accept=".md,.markdown" showUploadList={false} beforeUpload={handleImportCartridge}>
+              <Button>{t('experts.cartridge.importBtn')}</Button>
+            </Upload>
+          </FormItem>
         </FormRow>
         <FormItem>
           <Label>{t('experts.handle')}</Label>
@@ -107,7 +152,10 @@ const ExpertEditModal: FC<Props> = ({ open, expert, onOk, onCancel }) => {
           />
         </FormItem>
         <FormItem>
-          <Label>{t('experts.stylePrompt')}</Label>
+          <LabelRow>
+            <Label>{t('experts.stylePrompt')}</Label>
+            {cartridgeMarkdown && <CartridgeBadge>{t('experts.cartridge.loaded')}</CartridgeBadge>}
+          </LabelRow>
           <Input.TextArea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
@@ -142,6 +190,20 @@ const Label = styled.label`
   font-size: 13px;
   font-weight: 500;
   color: var(--color-text);
+`
+
+const LabelRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`
+
+const CartridgeBadge = styled.span`
+  font-size: 11px;
+  padding: 2px 6px;
+  background: var(--color-primary);
+  color: white;
+  border-radius: 4px;
 `
 
 export default ExpertEditModal

@@ -1330,6 +1330,13 @@
       "success": "Successfully imported {{count}} experts",
       "title": "Import from Assistants"
     },
+    "cartridge": {
+      "import": "Cartridge",
+      "importBtn": "Import",
+      "importSuccess": "Cartridge imported successfully",
+      "importError": "Failed to parse cartridge",
+      "loaded": "Cartridge Loaded"
+    },
     "list": "Expert List",
     "mention": "Mention Expert",
     "mention_title": "Select Expert",

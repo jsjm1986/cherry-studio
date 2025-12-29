@@ -1,21 +1,10 @@
 import type { SidebarIcon } from '@renderer/types'
 
 /**
- * 默认显示的侧边栏图标
- * 这些图标会在侧边栏中默认显示
+ * 默认显示的侧边栏图标（锁定配置，用户不可修改）
+ * 只显示：助手、主机、文件、笔记
  */
-export const DEFAULT_SIDEBAR_ICONS: SidebarIcon[] = [
-  'assistants',
-  'hosts',
-  'store',
-  'paintings',
-  'translate',
-  'minapp',
-  'knowledge',
-  'files',
-  'code_tools',
-  'notes'
-]
+export const DEFAULT_SIDEBAR_ICONS: SidebarIcon[] = ['assistants', 'hosts', 'files', 'notes']
 
 /**
  * 必须显示的侧边栏图标（不能被隐藏）

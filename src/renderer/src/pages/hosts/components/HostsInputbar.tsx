@@ -1,6 +1,7 @@
 import { useQuickPanel } from '@renderer/components/QuickPanel'
 import { useAssistant } from '@renderer/hooks/useAssistant'
 import { useInputbarToolsDispatch } from '@renderer/pages/home/Inputbar/context/InputbarToolsProvider'
+import { getDefaultModel } from '@renderer/services/AssistantService'
 import type { Assistant, Expert, Model, RoomUserInfo, Topic } from '@renderer/types'
 import type { Message, MessageBlock } from '@renderer/types/newMessage'
 import { AtSign, ChevronDown } from 'lucide-react'
@@ -286,6 +287,9 @@ const HostsInputbar: FC<Props> = ({
 
   // 获取实际用于发送消息的 assistant（选中专家时合并专家和主机的设置）
   const getEffectiveAssistant = useCallback(() => {
+    // 始终使用全局默认模型，确保所有专家和主机使用统一的模型配置
+    const defaultModel = getDefaultModel()
+
     if (selectedExpert) {
       // 从最新的 experts 列表中获取专家数据，确保使用最新状态
       const latestExpert = experts.find((e) => e.id === selectedExpert.id) || selectedExpert
@@ -294,7 +298,7 @@ const HostsInputbar: FC<Props> = ({
       const enhancedPrompt = buildExpertPrompt(latestExpert, assistant.prompt, userInfo)
 
       // 合并主机和专家的设置
-      // 优先使用专家的设置，但如果专家没有设置某项，则使用主机的设置
+      // 专家统一使用全局默认模型配置
       return {
         ...assistant,
         // 专家的基本信息
@@ -304,9 +308,9 @@ const HostsInputbar: FC<Props> = ({
         prompt: enhancedPrompt, // 使用增强后的提示词
         type: latestExpert.type,
         hostId: latestExpert.hostId,
-        // 模型设置：优先使用专家的，否则使用主机的
-        model: latestExpert.model || assistant.model,
-        defaultModel: latestExpert.defaultModel || assistant.defaultModel,
+        // 模型设置：统一使用全局默认模型
+        model: defaultModel,
+        defaultModel: defaultModel,
         // 工具设置：合并主机和专家的设置（专家有设置则用专家的，否则用主机的）
         webSearchProviderId: latestExpert.webSearchProviderId || assistant.webSearchProviderId,
         enableWebSearch: latestExpert.enableWebSearch ?? assistant.enableWebSearch,
@@ -318,16 +322,15 @@ const HostsInputbar: FC<Props> = ({
         enableGenerateImage: latestExpert.enableGenerateImage ?? assistant.enableGenerateImage,
         // 保留主机的 topics（专家没有自己的 topics）
         topics: assistant.topics,
-        // 设置：合并（确保有默认的 toolUseMode 等关键设置）
+        // 设置：统一使用主机的模型设置
         settings: {
           toolUseMode: 'function' as const, // 确保工具使用模式默认为 function
-          ...assistant.settings,
-          ...latestExpert.settings
+          ...assistant.settings
         }
       }
     }
 
-    // 没有选中专家时，也将用户信息添加到主机的提示词中
+    // 没有选中专家时，也将用户信息添加到主机的提示词中，并使用全局默认模型
     if (userInfo && (userInfo.role || userInfo.introduction)) {
       const basePrompt = assistant.prompt || ''
       let userInfoSection = '[对话用户信息]'
@@ -342,11 +345,18 @@ const HostsInputbar: FC<Props> = ({
       const hostPromptWithUserInfo = basePrompt ? `${basePrompt}\n\n${userInfoSection}` : userInfoSection
       return {
         ...assistant,
-        prompt: hostPromptWithUserInfo
+        prompt: hostPromptWithUserInfo,
+        model: defaultModel,
+        defaultModel: defaultModel
       }
     }
 
-    return assistant
+    // 即使没有专家也没有用户信息，也统一使用全局默认模型
+    return {
+      ...assistant,
+      model: defaultModel,
+      defaultModel: defaultModel
+    }
   }, [selectedExpert, assistant, experts, userInfo])
 
   return (

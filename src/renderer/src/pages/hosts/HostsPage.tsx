@@ -10,8 +10,13 @@ import { newMessagesActions } from '@renderer/store/newMessage'
 import { loadTopicMessagesThunk, saveMessageAndBlocksToDB } from '@renderer/store/thunk/messageThunk'
 import type { Assistant, Expert, Host, InfoFolder, RoomUserInfo, Topic } from '@renderer/types'
 import { AssistantMessageStatus, MessageBlockStatus } from '@renderer/types/newMessage'
+import {
+  compileCartridgeToPrompt,
+  extractExpertInfoFromCartridge,
+  parseCartridgeMarkdown
+} from '@renderer/utils/cartridge'
 import { createAssistantMessage, createMainTextBlock } from '@renderer/utils/messageUtils/create'
-import { Input, Modal } from 'antd'
+import { Input, Modal, message } from 'antd'
 import type { FC } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -24,12 +29,14 @@ import HostsChatArea from './components/HostsChatArea'
 import HostsLeftSidebar, { type TabType } from './components/HostsLeftSidebar'
 import ImportExpertModal from './components/ImportExpertModal'
 import InfoFolderContentPanel from './components/InfoFolderContentPanel'
+import NotebookPanel from './components/NotebookPanel'
 import { ExpertProvider, useExpertContext } from './context/ExpertContext'
 import { useExperts, useHosts } from './hooks/useHosts'
 import { useInfoLibrary } from './hooks/useInfoLibrary'
 
 // localStorage 存储最后选中的主机
 const LAST_HOST_KEY = 'cherry-studio:last-active-host'
+const NOTEBOOK_COLLAPSED_KEY = 'cherry-studio:notebook-collapsed'
 
 const loadLastHostId = (): string | null => {
   return localStorage.getItem(LAST_HOST_KEY)
@@ -41,6 +48,14 @@ const saveLastHostId = (hostId: string | null): void => {
   } else {
     localStorage.removeItem(LAST_HOST_KEY)
   }
+}
+
+const loadNotebookCollapsed = (): boolean => {
+  return localStorage.getItem(NOTEBOOK_COLLAPSED_KEY) === 'true'
+}
+
+const saveNotebookCollapsed = (collapsed: boolean): void => {
+  localStorage.setItem(NOTEBOOK_COLLAPSED_KEY, String(collapsed))
 }
 
 // 内部组件，使用 ExpertContext
@@ -61,6 +76,18 @@ const HostsPageContent: FC = () => {
 
   // Tab 状态
   const [activeTab, setActiveTab] = useState<TabType>('chat')
+
+  // Notebook 面板折叠状态
+  const [notebookCollapsed, setNotebookCollapsed] = useState(loadNotebookCollapsed)
+
+  // 切换 Notebook 面板折叠状态
+  const handleToggleNotebook = useCallback(() => {
+    setNotebookCollapsed((prev) => {
+      const newValue = !prev
+      saveNotebookCollapsed(newValue)
+      return newValue
+    })
+  }, [])
 
   // 使用 useAssistant hook 获取完整的 assistant 数据
   const { assistant: currentAssistant, addTopic, removeTopic, updateTopic } = useAssistant(activeHost?.id || '')
@@ -105,6 +132,19 @@ const HostsPageContent: FC = () => {
         const foundHost = hosts.find((h) => h.id === lastHostId)
         if (foundHost) {
           setActiveHost(foundHost)
+        }
+      }
+    }
+  }, [hosts, activeHost])
+
+  // 同步 activeHost 与 Redux store（当 hosts 更新时同步 activeHost）
+  useEffect(() => {
+    if (activeHost) {
+      const updatedHost = hosts.find((h) => h.id === activeHost.id)
+      if (updatedHost) {
+        // 使用 JSON 比较避免不必要的更新
+        if (JSON.stringify(updatedHost) !== JSON.stringify(activeHost)) {
+          setActiveHost(updatedHost)
         }
       }
     }
@@ -242,6 +282,7 @@ const HostsPageContent: FC = () => {
       handle: string
       triggerKeywords: string[]
       prompt: string
+      cartridgeMarkdown?: string
     }) => {
       if (editingExpert) {
         updateExpert(editingExpert.id, data)
@@ -264,6 +305,38 @@ const HostsPageContent: FC = () => {
     if (!activeHost) return
     setImportModalOpen(true)
   }, [activeHost])
+
+  const handleImportCartridge = useCallback(
+    (file: File) => {
+      if (!activeHost) return
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        try {
+          const markdown = e.target?.result as string
+          const cartridgeData = parseCartridgeMarkdown(markdown)
+          const compiledPrompt = compileCartridgeToPrompt(cartridgeData)
+          const expertInfo = extractExpertInfoFromCartridge(cartridgeData)
+
+          // 创建专家
+          createExpert({
+            name: expertInfo.name,
+            emoji: '👤',
+            description: cartridgeData.identity.profession || '',
+            handle: expertInfo.handle,
+            triggerKeywords: expertInfo.triggerKeywords,
+            prompt: compiledPrompt,
+            cartridgeMarkdown: markdown
+          })
+
+          message.success(t('experts.cartridge.importSuccess'))
+        } catch {
+          message.error(t('experts.cartridge.importError'))
+        }
+      }
+      reader.readAsText(file, 'UTF-8')
+    },
+    [activeHost, createExpert, t]
+  )
 
   // 话题操作
   const handleAddTopic = useCallback(async () => {
@@ -406,6 +479,7 @@ const HostsPageContent: FC = () => {
           members={experts}
           onAddMember={handleAddExpert}
           onImportMember={handleOpenImport}
+          onImportCartridge={handleImportCartridge}
           onEditMember={handleEditExpert}
           onDeleteMember={handleDeleteExpert}
           onMentionMember={handleMentionExpert}
@@ -455,6 +529,11 @@ const HostsPageContent: FC = () => {
             <InfoFolderContentPanel folder={selectedInfoFolder} hostId={activeHost.id} onClose={handleCloseInfoPanel} />
           )}
         </ContentArea>
+
+        {/* 右侧 Notebook 面板 */}
+        {activeHost && (
+          <NotebookPanel host={activeHost} collapsed={notebookCollapsed} onToggleCollapse={handleToggleNotebook} />
+        )}
       </MainContent>
 
       <HostEditModal

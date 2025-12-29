@@ -13,6 +13,7 @@ import type {
   InfoFolder,
   InfoItem,
   Model,
+  NotebookItem,
   Topic
 } from '@renderer/types'
 import { isEmpty, uniqBy } from 'lodash'
@@ -315,6 +316,32 @@ const assistantsSlice = createSlice({
           }
         }
       }
+    },
+    // === Notebook 功能 ===
+    /** 添加笔记到 Notebook */
+    addNotebookItem: (state, action: PayloadAction<{ hostId: string; item: NotebookItem }>) => {
+      const host = state.assistants.find((a) => a.id === action.payload.hostId && a.type === 'host') as Host | undefined
+      if (host) {
+        if (!host.notebook) host.notebook = []
+        host.notebook.unshift(action.payload.item)
+      }
+    },
+    /** 更新 Notebook 笔记 */
+    updateNotebookItem: (state, action: PayloadAction<{ hostId: string; item: NotebookItem }>) => {
+      const host = state.assistants.find((a) => a.id === action.payload.hostId && a.type === 'host') as Host | undefined
+      if (host && host.notebook) {
+        const index = host.notebook.findIndex((n) => n.id === action.payload.item.id)
+        if (index !== -1) {
+          host.notebook[index] = action.payload.item
+        }
+      }
+    },
+    /** 删除 Notebook 笔记 */
+    removeNotebookItem: (state, action: PayloadAction<{ hostId: string; itemId: string }>) => {
+      const host = state.assistants.find((a) => a.id === action.payload.hostId && a.type === 'host') as Host | undefined
+      if (host && host.notebook) {
+        host.notebook = host.notebook.filter((n) => n.id !== action.payload.itemId)
+      }
     }
   }
 })
@@ -353,7 +380,11 @@ export const {
   updateInfoFolder,
   addInfoItem,
   removeInfoItem,
-  updateInfoItem
+  updateInfoItem,
+  // Notebook 功能
+  addNotebookItem,
+  updateNotebookItem,
+  removeNotebookItem
 } = assistantsSlice.actions
 
 export const selectAllTopics = createSelector([(state: RootState) => state.assistants.assistants], (assistants) =>

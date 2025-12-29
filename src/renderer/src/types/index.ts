@@ -68,6 +68,8 @@ export type Assistant = {
   triggerKeywords?: string[]
   /** 专家提示词设置 (仅 type='expert' 时使用) */
   promptSettings?: ExpertPromptSettings
+  /** 人格卡带 Markdown 原文 (仅 type='expert' 时使用) */
+  cartridgeMarkdown?: string
 }
 
 /** 专家提示词设置 */
@@ -99,6 +101,28 @@ export type RoomUserInfo = {
   notes?: string
 }
 
+/** Notebook 笔记项 */
+export type NotebookItem = {
+  /** 唯一ID */
+  id: string
+  /** 笔记内容 */
+  content: string
+  /** 高亮颜色 */
+  color: string
+  /** 创建时间 */
+  createdAt: number
+  /** 更新时间 */
+  updatedAt: number
+  /** 来源话题ID */
+  sourceTopicId?: string
+  /** 来源话题名称 */
+  sourceTopicName?: string
+  /** 来源专家ID */
+  sourceExpertId?: string
+  /** 来源专家名称 */
+  sourceExpertName?: string
+}
+
 /** 主机类型 - 智能体群容器 (UI中显示为"房间") */
 export type Host = Assistant & {
   type: 'host'
@@ -108,6 +132,8 @@ export type Host = Assistant & {
   userInfo?: RoomUserInfo
   /** 资料文件夹列表 */
   infoFolders?: InfoFolder[]
+  /** Notebook 笔记列表 */
+  notebook?: NotebookItem[]
 }
 
 /** 专家类型 - 主机内的单个智能体 (UI中显示为"成员") */
