@@ -85,7 +85,7 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
           }
         })
       )
-      window.message?.success?.(t('notebook.save.success', { defaultValue: '已保存到笔记本' }))
+      window.toast?.success?.(t('notebook.save.success', { defaultValue: '已保存到笔记本' }))
     },
     [activeHost, topic.id, topic.name, dispatch, t]
   )

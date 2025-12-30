@@ -91,6 +91,7 @@ export function useExperts(hostId: string) {
       handle?: string
       triggerKeywords?: string[]
       prompt?: string
+      cartridgeMarkdown?: string
     }) => {
       const expertId = uuid()
 
@@ -103,6 +104,7 @@ export function useExperts(hostId: string) {
         handle: data.handle || `@${data.name}`,
         triggerKeywords: data.triggerKeywords || [data.name],
         prompt: data.prompt || '',
+        cartridgeMarkdown: data.cartridgeMarkdown,
         type: 'expert',
         topics: [], // 专家不独立存储 topics
         // 添加默认设置，确保专家可以使用工具（如 web search）
