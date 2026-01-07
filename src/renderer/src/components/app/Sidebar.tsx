@@ -26,6 +26,7 @@ import {
   Palette,
   Settings,
   Sparkle,
+  Sparkles,
   Sun,
   Users
 } from 'lucide-react'
@@ -90,6 +91,17 @@ const Sidebar: FC = () => {
         )}
       </MainMenusContainer>
       <Menus>
+        <Tooltip title="墨韵设计系统" mouseEnterDelay={0.8} placement="right">
+          <StyledLink
+            onClick={async () => {
+              hideMinappPopup()
+              await to('/design')
+            }}>
+            <Icon theme={theme} className={pathname === '/design' && !minappShow ? 'active' : ''}>
+              <Sparkles size={20} className="icon" />
+            </Icon>
+          </StyledLink>
+        </Tooltip>
         <Tooltip
           title={t('settings.theme.title') + ': ' + getThemeModeLabel(settedTheme)}
           mouseEnterDelay={0.8}

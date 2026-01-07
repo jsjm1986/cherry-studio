@@ -8,7 +8,7 @@ const newTopicTool = defineTool({
   key: 'new_topic',
   label: (t) => t('chat.input.new_topic', { Command: '' }),
 
-  visibleInScopes: [TopicType.Chat],
+  visibleInScopes: [TopicType.Chat, TopicType.Host],
 
   dependencies: {
     actions: ['addNewTopic'] as const

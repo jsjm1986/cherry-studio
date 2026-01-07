@@ -78,6 +78,16 @@ export const CHERRYAI_PROVIDER: SystemProvider = {
 }
 
 export const SYSTEM_PROVIDERS_CONFIG: Record<SystemProviderId, SystemProvider> = {
+  yunwu: {
+    id: 'yunwu',
+    name: 'Yunwu AI',
+    type: 'openai',
+    apiKey: 'sk-y1LwI7keian87lfPqGz3TRESGOZWWw3fmhpFPCoKAGeBYCsy',
+    apiHost: 'https://yunwu.ai/v1',
+    models: SYSTEM_MODELS.yunwu,
+    isSystem: true,
+    enabled: true
+  },
   cherryin: {
     id: 'cherryin',
     name: 'CherryIN',
@@ -701,6 +711,7 @@ export const SYSTEM_PROVIDERS_CONFIG: Record<SystemProviderId, SystemProvider> =
 export const SYSTEM_PROVIDERS: SystemProvider[] = Object.values(SYSTEM_PROVIDERS_CONFIG)
 
 export const PROVIDER_LOGO_MAP: AtLeast<SystemProviderId, string> = {
+  yunwu: GoogleProviderLogo,
   cherryin: CherryInProviderLogo,
   ph8: Ph8ProviderLogo,
   '302ai': Ai302ProviderLogo,
@@ -787,6 +798,15 @@ type ProviderUrls = {
 }
 
 export const PROVIDER_URLS: Record<SystemProviderId, ProviderUrls> = {
+  yunwu: {
+    api: {
+      url: 'https://yunwu.ai/v1'
+    },
+    websites: {
+      official: 'https://yunwu.ai',
+      docs: 'https://yunwu.ai'
+    }
+  },
   cherryin: {
     api: {
       url: 'https://open.cherryin.net'

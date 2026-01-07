@@ -1,0 +1,324 @@
+/**
+ * 墨韵 (MoYun) Design System - Design Tokens
+ *
+ * 设计理念：水墨画的留白与层次，东方美学的沉静与现代感
+ * 核心目标：帮助用户快速进入心流状态
+ *
+ * 特点：
+ * - 柔和的色彩对比，减少视觉疲劳
+ * - 蓝紫渐变强调色，专业而不刺眼
+ * - 大量留白，呼吸感设计
+ * - 微妙动效，即时反馈
+ */
+
+/* ============================================
+   墨韵设计系统 - 暗色模式 (默认)
+   "深夜书房" - 沉浸、专注、护眼
+   ============================================ */
+:root {
+  /* === 背景层级 === */
+  /* 使用深蓝灰而非纯黑，更柔和护眼 */
+  --mo-bg-base: #0d1117;           /* 最深底色 - 如深夜 */
+  --mo-bg-surface: #161b22;        /* 卡片/面板背景 */
+  --mo-bg-elevated: #1c2128;       /* 悬浮/弹窗背景 */
+  --mo-bg-hover: #252c35;          /* 悬停状态 */
+  --mo-bg-active: #2d3640;         /* 激活/选中状态 */
+  --mo-bg-subtle: #0d111780;       /* 半透明背景 */
+
+  /* === 文字层级 === */
+  /* 不用纯白，减少刺眼感 */
+  --mo-text-primary: #e6edf3;      /* 主文字 - 柔和白 */
+  --mo-text-secondary: #8b949e;    /* 次要文字 */
+  --mo-text-muted: #6e7681;        /* 辅助/禁用文字 */
+  --mo-text-placeholder: #484f58;  /* 占位符文字 */
+
+  /* === 强调色 - 蓝紫渐变 === */
+  /* 静谧蓝到薰衣草紫，专业而有深度 */
+  --mo-accent-primary: #7c8aff;    /* 主强调色 - 静谧蓝 */
+  --mo-accent-secondary: #a78bfa;  /* 次强调色 - 薰衣草紫 */
+  --mo-accent-tertiary: #c4b5fd;   /* 第三强调色 - 淡紫 */
+  --mo-accent-subtle: rgba(124, 138, 255, 0.15);  /* 强调色背景 */
+  --mo-accent-glow: rgba(124, 138, 255, 0.25);    /* 光晕效果 */
+
+  /* === 语义色 === */
+  --mo-success: #3fb950;           /* 成功 - 柔和绿 */
+  --mo-success-subtle: rgba(63, 185, 80, 0.15);
+  --mo-warning: #d29922;           /* 警告 - 暖黄 */
+  --mo-warning-subtle: rgba(210, 153, 34, 0.15);
+  --mo-error: #f85149;             /* 错误 - 柔和红 */
+  --mo-error-subtle: rgba(248, 81, 73, 0.15);
+  --mo-info: #58a6ff;              /* 信息 - 天蓝 */
+  --mo-info-subtle: rgba(88, 166, 255, 0.15);
+
+  /* === 边界 === */
+  --mo-border: rgba(255, 255, 255, 0.08);      /* 默认边框 */
+  --mo-border-subtle: rgba(255, 255, 255, 0.04); /* 极淡边框 */
+  --mo-border-emphasis: rgba(255, 255, 255, 0.15); /* 强调边框 */
+
+  /* === 阴影 === */
+  --mo-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --mo-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --mo-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --mo-shadow-glow: 0 0 20px rgba(124, 138, 255, 0.15);
+
+  /* === 圆角 === */
+  --mo-radius-sm: 6px;
+  --mo-radius-md: 10px;
+  --mo-radius-lg: 14px;
+  --mo-radius-xl: 20px;
+  --mo-radius-full: 9999px;
+
+  /* === 间距 === */
+  --mo-space-1: 4px;
+  --mo-space-2: 8px;
+  --mo-space-3: 12px;
+  --mo-space-4: 16px;
+  --mo-space-5: 20px;
+  --mo-space-6: 24px;
+  --mo-space-8: 32px;
+  --mo-space-10: 40px;
+  --mo-space-12: 48px;
+
+  /* === 动画 === */
+  --mo-duration-fast: 150ms;
+  --mo-duration-normal: 250ms;
+  --mo-duration-slow: 350ms;
+  --mo-easing-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --mo-easing-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* === 字体 === */
+  --mo-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --mo-font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
+
+  /* === 字号 === */
+  --mo-text-xs: 12px;
+  --mo-text-sm: 13px;
+  --mo-text-base: 14px;
+  --mo-text-lg: 16px;
+  --mo-text-xl: 18px;
+  --mo-text-2xl: 22px;
+  --mo-text-3xl: 28px;
+
+  /* === 行高 === */
+  --mo-leading-tight: 1.25;
+  --mo-leading-normal: 1.5;
+  --mo-leading-relaxed: 1.75;
+
+  /* === 特殊效果 === */
+  --mo-blur-sm: 4px;
+  --mo-blur-md: 8px;
+  --mo-blur-lg: 16px;
+
+  /* === 聊天相关 === */
+  --mo-chat-user-bg: rgba(124, 138, 255, 0.08);
+  --mo-chat-assistant-bg: transparent;
+  --mo-chat-thinking-bg: rgba(167, 139, 250, 0.06);
+
+  /* === 侧边栏 === */
+  --mo-sidebar-bg: var(--mo-bg-surface);
+  --mo-sidebar-hover: var(--mo-bg-hover);
+  --mo-sidebar-active: var(--mo-accent-subtle);
+}
+
+/* ============================================
+   墨韵设计系统 - 明亮模式
+   "晨间茶室" - 清新、明亮、舒适
+   ============================================ */
+[theme-mode='light'] {
+  /* === 背景层级 === */
+  /* 使用暖米白而非纯白，更温和 */
+  --mo-bg-base: #f6f8fa;           /* 底色 - 宣纸白 */
+  --mo-bg-surface: #ffffff;        /* 卡片背景 */
+  --mo-bg-elevated: #ffffff;       /* 悬浮背景 */
+  --mo-bg-hover: #f3f4f6;          /* 悬停状态 */
+  --mo-bg-active: #e5e7eb;         /* 激活状态 */
+  --mo-bg-subtle: #f6f8fa80;       /* 半透明背景 */
+
+  /* === 文字层级 === */
+  /* 不用纯黑，用墨灰色 */
+  --mo-text-primary: #1f2328;      /* 主文字 - 墨色 */
+  --mo-text-secondary: #656d76;    /* 次要文字 */
+  --mo-text-muted: #8b949e;        /* 辅助文字 */
+  --mo-text-placeholder: #afb8c1;  /* 占位符 */
+
+  /* === 强调色 - 更鲜明的蓝紫 === */
+  --mo-accent-primary: #6366f1;    /* 主强调 - 靛蓝 */
+  --mo-accent-secondary: #8b5cf6;  /* 次强调 - 紫罗兰 */
+  --mo-accent-tertiary: #a78bfa;   /* 第三强调 */
+  --mo-accent-subtle: rgba(99, 102, 241, 0.1);
+  --mo-accent-glow: rgba(99, 102, 241, 0.2);
+
+  /* === 语义色 === */
+  --mo-success: #16a34a;
+  --mo-success-subtle: rgba(22, 163, 74, 0.1);
+  --mo-warning: #ca8a04;
+  --mo-warning-subtle: rgba(202, 138, 4, 0.1);
+  --mo-error: #dc2626;
+  --mo-error-subtle: rgba(220, 38, 38, 0.1);
+  --mo-info: #2563eb;
+  --mo-info-subtle: rgba(37, 99, 235, 0.1);
+
+  /* === 边界 === */
+  --mo-border: rgba(0, 0, 0, 0.08);
+  --mo-border-subtle: rgba(0, 0, 0, 0.04);
+  --mo-border-emphasis: rgba(0, 0, 0, 0.15);
+
+  /* === 阴影 === */
+  --mo-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --mo-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --mo-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --mo-shadow-glow: 0 0 20px rgba(99, 102, 241, 0.1);
+
+  /* === 聊天相关 === */
+  --mo-chat-user-bg: rgba(99, 102, 241, 0.06);
+  --mo-chat-assistant-bg: transparent;
+  --mo-chat-thinking-bg: rgba(139, 92, 246, 0.04);
+
+  /* === 侧边栏 === */
+  --mo-sidebar-bg: #f0f2f5;
+  --mo-sidebar-hover: #e8eaed;
+  --mo-sidebar-active: var(--mo-accent-subtle);
+}
+
+/* ============================================
+   映射到 shadcn/ui 变量系统
+   ============================================ */
+:root {
+  /* shadcn 核心变量映射 */
+  --background: var(--mo-bg-base);
+  --foreground: var(--mo-text-primary);
+  --card: var(--mo-bg-surface);
+  --card-foreground: var(--mo-text-primary);
+  --popover: var(--mo-bg-elevated);
+  --popover-foreground: var(--mo-text-primary);
+  --primary: var(--mo-accent-primary);
+  --primary-foreground: #ffffff;
+  --secondary: var(--mo-bg-hover);
+  --secondary-foreground: var(--mo-text-primary);
+  --muted: var(--mo-bg-hover);
+  --muted-foreground: var(--mo-text-muted);
+  --accent: var(--mo-accent-subtle);
+  --accent-foreground: var(--mo-accent-primary);
+  --destructive: var(--mo-error);
+  --destructive-foreground: #ffffff;
+  --border: var(--mo-border);
+  --input: var(--mo-border);
+  --ring: var(--mo-accent-primary);
+  --radius: var(--mo-radius-md);
+
+  /* 侧边栏映射 */
+  --sidebar: var(--mo-sidebar-bg);
+  --sidebar-foreground: var(--mo-text-primary);
+  --sidebar-primary: var(--mo-accent-primary);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--mo-sidebar-active);
+  --sidebar-accent-foreground: var(--mo-accent-primary);
+  --sidebar-border: var(--mo-border);
+  --sidebar-ring: var(--mo-accent-primary);
+}
+
+[theme-mode='light'] {
+  --primary-foreground: #ffffff;
+  --destructive-foreground: #ffffff;
+}
+
+/* ============================================
+   兼容原有 color.css 变量系统
+   渐进式迁移，保持向后兼容
+   ============================================ */
+:root {
+  --color-primary: var(--mo-accent-primary);
+  --color-primary-soft: var(--mo-accent-glow);
+  --color-primary-mute: var(--mo-accent-subtle);
+
+  --color-background: var(--mo-bg-base);
+  --color-background-soft: var(--mo-bg-surface);
+  --color-background-mute: var(--mo-bg-elevated);
+
+  --color-text: var(--mo-text-primary);
+  --color-text-1: var(--mo-text-primary);
+  --color-text-2: var(--mo-text-secondary);
+  --color-text-3: var(--mo-text-muted);
+  --color-text-secondary: var(--mo-text-secondary);
+
+  --color-icon: var(--mo-text-secondary);
+  --color-icon-white: var(--mo-text-primary);
+
+  --color-border: var(--mo-border);
+  --color-border-soft: var(--mo-border-subtle);
+  --color-border-mute: var(--mo-border-subtle);
+
+  --color-hover: var(--mo-bg-hover);
+  --color-active: var(--mo-bg-active);
+
+  --color-error: var(--mo-error);
+  --color-link: var(--mo-accent-primary);
+
+  --chat-background-user: var(--mo-chat-user-bg);
+  --chat-background-assistant: var(--mo-chat-assistant-bg);
+
+  --color-list-item: var(--mo-bg-surface);
+  --color-list-item-hover: var(--mo-bg-hover);
+
+  --modal-background: var(--mo-bg-elevated);
+  --navbar-background: var(--mo-bg-surface);
+  --navbar-background-mac: var(--mo-bg-subtle);
+
+  --list-item-border-radius: var(--mo-radius-md);
+}
+
+[theme-mode='light'] {
+  --color-icon: var(--mo-text-muted);
+  --color-icon-white: var(--mo-text-primary);
+}
+
+/* ============================================
+   工具类
+   ============================================ */
+@layer utilities {
+  /* 心流状态专用样式 */
+  .mo-focus-ring {
+    outline: 2px solid var(--mo-accent-primary);
+    outline-offset: 2px;
+  }
+
+  .mo-glow {
+    box-shadow: var(--mo-shadow-glow);
+  }
+
+  .mo-glass {
+    background: var(--mo-bg-subtle);
+    backdrop-filter: blur(var(--mo-blur-md));
+  }
+
+  /* 渐变文字 */
+  .mo-gradient-text {
+    background: linear-gradient(135deg, var(--mo-accent-primary), var(--mo-accent-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* 柔和卡片 */
+  .mo-card {
+    background: var(--mo-bg-surface);
+    border: 1px solid var(--mo-border-subtle);
+    border-radius: var(--mo-radius-lg);
+    box-shadow: var(--mo-shadow-sm);
+    transition: all var(--mo-duration-normal) var(--mo-easing-default);
+  }
+
+  .mo-card:hover {
+    border-color: var(--mo-border);
+    box-shadow: var(--mo-shadow-md);
+  }
+
+  /* 动画过渡 */
+  .mo-transition {
+    transition: all var(--mo-duration-normal) var(--mo-easing-default);
+  }
+
+  .mo-transition-fast {
+    transition: all var(--mo-duration-fast) var(--mo-easing-default);
+  }
+}

@@ -134,6 +134,22 @@ export type Host = Assistant & {
   infoFolders?: InfoFolder[]
   /** Notebook 笔记列表 */
   notebook?: NotebookItem[]
+  /** 项目文件夹路径 (用于保存对话资料到本地) */
+  projectFolderPath?: string
+}
+
+/** 项目文件信息 */
+export type ProjectFile = {
+  /** 文件名 */
+  name: string
+  /** 完整路径 */
+  path: string
+  /** 文件大小 (字节) */
+  size: number
+  /** 修改时间戳 */
+  modifiedAt: number
+  /** 是否为目录 */
+  isDirectory: boolean
 }
 
 /** 专家类型 - 主机内的单个智能体 (UI中显示为"成员") */
@@ -296,7 +312,8 @@ export type Metrics = {
 
 export enum TopicType {
   Chat = 'chat',
-  Session = 'session'
+  Session = 'session',
+  Host = 'host'
 }
 
 export type Topic = {

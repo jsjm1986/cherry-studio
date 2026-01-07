@@ -312,7 +312,7 @@
     },
     "authHeaderText": "認証ヘッダーで使用：",
     "configuration": "設定",
-    "description": "OpenAI 互換の HTTP API を通じて Cherry Studio の AI 機能を公開します",
+    "description": "OpenAI 互換の HTTP API を通じて Her の AI 機能を公開します",
     "documentation": {
       "title": "API ドキュメント"
     },
@@ -1312,7 +1312,15 @@
     "add": "[to be translated]:Add Expert",
     "add_custom": "[to be translated]:Add Custom",
     "add_more": "[to be translated]:Add More",
+    "cartridge": {
+      "import": "[to be translated]:Cartridge",
+      "importBtn": "[to be translated]:Import",
+      "importError": "[to be translated]:Failed to parse cartridge",
+      "importSuccess": "[to be translated]:Cartridge imported successfully",
+      "loaded": "[to be translated]:Cartridge Loaded"
+    },
     "clear_mentioned": "[to be translated]:Clear selected experts",
+    "clear_selection": "[to be translated]:Clear current expert selection",
     "delete": "[to be translated]:Delete Expert",
     "description": "[to be translated]:Description",
     "edit": "[to be translated]:Edit Expert",
@@ -1431,22 +1439,57 @@
     "current": "[to be translated]:Current Host",
     "delete": "[to be translated]:Delete Host",
     "description": "[to be translated]:Host Description",
+    "description_help": "[to be translated]:Short description, shown in room list",
+    "description_placeholder": "[to be translated]:e.g., Writing Super Workgroup",
     "edit": "[to be translated]:Edit Host",
     "emoji": "[to be translated]:Emoji",
     "empty": "[to be translated]:No hosts yet. Click the button above to create one.",
     "list": "[to be translated]:Host List",
     "name": "[to be translated]:Host Name",
+    "project": {
+      "content_preview": "[to be translated]:Content Preview",
+      "filename": "[to be translated]:Filename",
+      "filename_placeholder": "[to be translated]:Enter filename",
+      "files": "[to be translated]:Project Files",
+      "folder": "[to be translated]:Project Folder",
+      "folder_empty": "[to be translated]:No project folder set",
+      "folder_help": "[to be translated]:Local folder for saving conversation materials, saved content can be viewed here",
+      "folder_placeholder": "[to be translated]:e.g., D:/projects/my-project",
+      "generate_filename": "[to be translated]:AI Generate Filename",
+      "generating_filename": "[to be translated]:Generating filename...",
+      "no_files": "[to be translated]:No files",
+      "open_folder": "[to be translated]:Open Folder",
+      "refresh": "[to be translated]:Refresh",
+      "save_full_context": "[to be translated]:Save Full Context",
+      "save_path": "[to be translated]:Save Path",
+      "save_success": "[to be translated]:Saved to project folder",
+      "save_to_folder": "[to be translated]:Save to Project Folder",
+      "save_to_project": "[to be translated]:Save as Material",
+      "select_folder": "[to be translated]:Select Folder",
+      "title": "[to be translated]:Project"
+    },
+    "project_folder": "[to be translated]:Project Folder",
+    "project_folder_help": "[to be translated]:Local folder for saving conversation materials",
+    "project_folder_placeholder": "[to be translated]:e.g., D:/projects/my-project",
+    "select_folder": "[to be translated]:Select Folder",
     "select_hint": "[to be translated]:Please select a host first",
     "settings": "[to be translated]:Host Settings",
+    "system_prompt": "[to be translated]:System Prompt",
+    "system_prompt_help": "[to be translated]:This content will be sent to AI as background info when @mentioning experts",
+    "system_prompt_placeholder": "[to be translated]:e.g., This is a workspace focused on writing, with various writing experts...",
     "title": "[to be translated]:Hosts",
     "topics": {
       "add": "[to be translated]:New Chat",
       "default_name": "[to be translated]:New Chat",
+      "delete": "[to be translated]:Delete Chat",
+      "delete_confirm": "[to be translated]:Are you sure you want to delete this chat? This action cannot be undone.",
       "empty": "[to be translated]:No chat history",
       "title": "[to be translated]:Chat History"
     },
     "welcome": "[to be translated]:Welcome to Hosts & Experts",
-    "welcome_desc": "[to be translated]:Create hosts and add experts to start multi-role collaborative conversations"
+    "welcome_desc": "[to be translated]:Create hosts and add experts to start multi-role collaborative conversations",
+    "welcome_message": "[to be translated]:Welcome Message",
+    "welcome_message_placeholder": "[to be translated]:Guide message shown when entering the room, e.g.: Hello, welcome to XXX room. This room can XXX, you can @XXX expert"
   },
   "html_artifacts": {
     "capture": {
@@ -2968,7 +3011,7 @@
           },
           "description": {
             "0": "テキスト選択ツールは、<strong>アクセシビリティー権限</strong>が必要です。",
-            "1": "「<strong>設定に移動</strong>」をクリックし、後で表示される権限要求ポップアップで「<strong>システム設定を開く</strong>」ボタンをクリックします。その後、表示されるアプリケーションリストで「<strong>Cherry Studio</strong>」を見つけ、権限スイッチをオンにしてください。",
+            "1": "「<strong>設定に移動</strong>」をクリックし、後で表示される権限要求ポップアップで「<strong>システム設定を開く</strong>」ボタンをクリックします。その後、表示されるアプリケーションリストで「<strong>Her</strong>」を見つけ、権限スイッチをオンにしてください。",
             "2": "設定が完了したら、テキスト選択ツールを再起動してください。"
           },
           "title": "アクセシビリティー権限"
@@ -2980,7 +3023,7 @@
         "title": "アプリケーションフィルターリスト",
         "user_tips": {
           "mac": "アプリケーションのBundle IDを1行ずつ入力してください。大文字小文字は区別しません。例: com.google.Chrome, com.apple.mail, など。",
-          "windows": "アプリケーションの実行ファイル名を1行ずつ入力してください。大文字小文字は区別しません。例: chrome.exe, weixin.exe, Cherry Studio.exe, など。"
+          "windows": "アプリケーションの実行ファイル名を1行ずつ入力してください。大文字小文字は区別しません。例: chrome.exe, weixin.exe, Her.exe, など。"
         }
       },
       "search_modal": {
@@ -3231,7 +3274,7 @@
           "confirm_close_title": "閉じることを確認",
           "connected": "接続済み",
           "connection_failed": "接続に失敗しました",
-          "content": "コンピューターとスマートフォンが同じネットワークに接続されていることを確認し、ローカルエリアネットワーク転送を使用してください。Cherry Studioアプリを開き、このQRコードをスキャンしてください。",
+          "content": "コンピューターとスマートフォンが同じネットワークに接続されていることを確認し、ローカルエリアネットワーク転送を使用してください。Herアプリを開き、このQRコードをスキャンしてください。",
           "error": {
             "init_failed": "初期化に失敗しました",
             "no_file": "ファイルが選択されていません",
@@ -4014,7 +4057,7 @@
       },
       "oauth": {
         "callback": {
-          "message": "このページを閉じてCherry Studioに戻ることができます",
+          "message": "このページを閉じてHerに戻ることができます",
           "title": "認証成功"
         }
       },

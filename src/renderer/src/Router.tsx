@@ -22,6 +22,7 @@ import PaintingsRoutePage from './pages/paintings/PaintingsRoutePage'
 import SettingsPage from './pages/settings/SettingsPage'
 import AssistantPresetsPage from './pages/store/assistants/presets/AssistantPresetsPage'
 import TranslatePage from './pages/translate/TranslatePage'
+import MoYunDemo from './pages/MoYunDemo'
 
 const Router: FC = () => {
   const { navbarPosition } = useNavbarPosition()
@@ -43,6 +44,7 @@ const Router: FC = () => {
           <Route path="/code" element={<CodeToolsPage />} />
           <Route path="/settings/*" element={<SettingsPage />} />
           <Route path="/launchpad" element={<LaunchpadPage />} />
+          <Route path="/design" element={<MoYunDemo />} />
         </Routes>
       </ErrorBoundary>
     )

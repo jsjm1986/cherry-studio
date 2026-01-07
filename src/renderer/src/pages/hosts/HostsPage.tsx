@@ -1,5 +1,6 @@
-import { Navbar, NavbarCenter } from '@renderer/components/app/Navbar'
 import { QuickPanelProvider } from '@renderer/components/QuickPanel'
+import WindowControls from '@renderer/components/WindowControls'
+import { useTheme } from '@renderer/context/ThemeProvider'
 import { db } from '@renderer/databases'
 import { useAssistant } from '@renderer/hooks/useAssistant'
 import { useNavbarPosition } from '@renderer/hooks/useSettings'
@@ -9,6 +10,7 @@ import { upsertManyBlocks } from '@renderer/store/messageBlock'
 import { newMessagesActions } from '@renderer/store/newMessage'
 import { loadTopicMessagesThunk, saveMessageAndBlocksToDB } from '@renderer/store/thunk/messageThunk'
 import type { Assistant, Expert, Host, InfoFolder, RoomUserInfo, Topic } from '@renderer/types'
+import { TopicType } from '@renderer/types'
 import { AssistantMessageStatus, MessageBlockStatus } from '@renderer/types/newMessage'
 import {
   compileCartridgeToPrompt,
@@ -64,6 +66,8 @@ const HostsPageContent: FC = () => {
   const { navbarPosition } = useNavbarPosition()
   const { setMentionedExpert } = useExpertContext()
   const dispatch = useAppDispatch()
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
 
   // 主机状态
   const { hosts, createHost, updateHost, deleteHost } = useHosts()
@@ -164,9 +168,11 @@ const HostsPageContent: FC = () => {
       }
 
       if (currentAssistant.topics && currentAssistant.topics.length > 0) {
-        setActiveTopic(currentAssistant.topics[0])
+        // 确保话题有正确的 type 字段（用于控制工具栏显示）
+        const existingTopic = currentAssistant.topics[0]
+        setActiveTopic({ ...existingTopic, type: TopicType.Host })
       } else {
-        const newTopic = getDefaultTopic(activeHost.id)
+        const newTopic = getDefaultTopic(activeHost.id, TopicType.Host)
         await db.topics.add({ id: newTopic.id, messages: [] })
         addTopic(newTopic)
         setActiveTopic(newTopic)
@@ -199,14 +205,22 @@ const HostsPageContent: FC = () => {
   }, [])
 
   const handleHostModalOk = useCallback(
-    (data: { name: string; emoji: string; description: string; prompt: string; welcomeMessage: string }) => {
+    (data: {
+      name: string
+      emoji: string
+      description: string
+      prompt: string
+      welcomeMessage: string
+      projectFolderPath: string
+    }) => {
       if (editingHost) {
         const updatedData = {
           name: data.name,
           emoji: data.emoji,
           description: data.description,
           prompt: data.prompt,
-          welcomeMessage: data.welcomeMessage
+          welcomeMessage: data.welcomeMessage,
+          projectFolderPath: data.projectFolderPath
         }
         updateHost(editingHost.id, updatedData)
         if (activeHost?.id === editingHost.id) {
@@ -341,7 +355,7 @@ const HostsPageContent: FC = () => {
   // 话题操作
   const handleAddTopic = useCallback(async () => {
     if (!activeHost || !currentAssistant) return
-    const newTopic = getDefaultTopic(activeHost.id)
+    const newTopic = getDefaultTopic(activeHost.id, TopicType.Host)
     await db.topics.add({ id: newTopic.id, messages: [] })
     addTopic(newTopic)
     setActiveTopic(newTopic)
@@ -374,6 +388,18 @@ const HostsPageContent: FC = () => {
       updateTopic({ ...topic, name: newName, isNameManuallyEdited: true })
     },
     [updateTopic]
+  )
+
+  // 选择话题时确保设置正确的 type 字段
+  const handleSelectTopic = useCallback(
+    (topic: Topic | null) => {
+      if (topic) {
+        setActiveTopic({ ...topic, type: TopicType.Host })
+      } else {
+        setActiveTopic(null)
+      }
+    },
+    []
   )
 
   const handleImportExperts = useCallback(
@@ -452,14 +478,11 @@ const HostsPageContent: FC = () => {
   }, [])
 
   return (
-    <Container>
-      <Navbar>
-        <NavbarCenter style={{ borderRight: 'none' }}>
-          <span>{t('hosts.title')}</span>
-        </NavbarCenter>
-      </Navbar>
+    <Container $isDark={isDark}>
+      <DragRegion />
+      <WindowControls />
 
-      <MainContent $navbarPosition={navbarPosition}>
+      <MainContent $navbarPosition={navbarPosition} $isDark={isDark}>
         {/* 左侧边栏 */}
         <HostsLeftSidebar
           hosts={hosts}
@@ -472,7 +495,7 @@ const HostsPageContent: FC = () => {
           onTabChange={setActiveTab}
           topics={currentAssistant?.topics || []}
           activeTopic={activeTopic}
-          onSelectTopic={setActiveTopic}
+          onSelectTopic={handleSelectTopic}
           onAddTopic={handleAddTopic}
           onDeleteTopic={handleDeleteTopic}
           onRenameTopic={handleRenameTopic}
@@ -492,8 +515,8 @@ const HostsPageContent: FC = () => {
         />
 
         {/* 主内容区域 - 始终显示聊天界面 */}
-        <ContentArea>
-          <ChatArea>
+        <ContentArea $isDark={isDark}>
+          <ChatArea $isDark={isDark}>
             {currentAssistant && activeTopic ? (
               <QuickPanelProvider>
                 <HostsChatArea
@@ -532,7 +555,12 @@ const HostsPageContent: FC = () => {
 
         {/* 右侧 Notebook 面板 */}
         {activeHost && (
-          <NotebookPanel host={activeHost} collapsed={notebookCollapsed} onToggleCollapse={handleToggleNotebook} />
+          <NotebookPanel
+            host={activeHost}
+            collapsed={notebookCollapsed}
+            onToggleCollapse={handleToggleNotebook}
+            onUpdateHost={updateHost}
+          />
         )}
       </MainContent>
 
@@ -566,35 +594,68 @@ const HostsPageContent: FC = () => {
   )
 }
 
-const Container = styled.div`
+const Container = styled.div<{ $isDark: boolean }>`
   display: flex;
   flex-direction: column;
   flex: 1;
   height: 100%;
-  background-color: var(--color-background);
+  background-color: ${({ $isDark }) => ($isDark ? '#1a1a2e' : '#f8fafc')};
+
+  /* 覆盖全局主色为蓝色 - 影响所有子组件 */
+  --color-primary: #3b82f6;
+  --color-primary-soft: rgba(59, 130, 246, 0.15);
+  --color-primary-mute: rgba(59, 130, 246, 0.08);
+  --color-primary-hover: #2563eb;
+
+  /* 主题变量 */
+  --hosts-bg: ${({ $isDark }) => ($isDark ? '#1a1a2e' : '#f8fafc')};
+  --hosts-bg-soft: ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.03)' : '#f9fafb')};
+  --hosts-text: ${({ $isDark }) => ($isDark ? '#ffffff' : '#1f2937')};
+  --hosts-text-secondary: ${({ $isDark }) => ($isDark ? '#9ca3af' : '#6b7280')};
+  --hosts-primary: #3b82f6;
+  --hosts-primary-soft: ${({ $isDark }) => ($isDark ? 'rgba(59,130,246,0.15)' : 'rgba(59,130,246,0.08)')};
 `
 
-const MainContent = styled.div<{ $navbarPosition: string }>`
+const DragRegion = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 140px;
+  height: var(--navbar-height);
+  -webkit-app-region: drag;
+  z-index: 100;
+`
+
+const MainContent = styled.div<{ $navbarPosition: string; $isDark: boolean }>`
   display: flex;
   flex: 1;
   overflow: hidden;
-  height: ${({ $navbarPosition }) => ($navbarPosition === 'top' ? 'calc(100% - var(--navbar-height))' : '100%')};
+  height: 100%;
+  background-color: ${({ $isDark }) => ($isDark ? '#1a1a2e' : '#f8fafc')};
+  gap: 12px;
+  padding: 12px;
+  padding-top: calc(var(--navbar-height) + 4px);
 `
 
-const ContentArea = styled.div`
+const ContentArea = styled.div<{ $isDark: boolean }>`
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background-color: ${({ $isDark }) => ($isDark ? '#0f0f1a' : '#ffffff')};
+  border-radius: 12px;
+  box-shadow: ${({ $isDark }) =>
+    $isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.06)'};
 `
 
-const ChatArea = styled.div`
+const ChatArea = styled.div<{ $isDark: boolean }>`
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: var(--color-background);
+  background-color: ${({ $isDark }) => ($isDark ? '#0f0f1a' : '#ffffff')};
   overflow: hidden;
   position: relative;
+  border-radius: 12px;
 `
 
 const ChatPlaceholder = styled.div`
@@ -611,24 +672,24 @@ const PlaceholderIcon = styled.div`
   width: 80px;
   height: 80px;
   border-radius: 24px;
-  background: linear-gradient(135deg, var(--color-primary-soft) 0%, var(--color-background-mute) 100%);
+  background: linear-gradient(135deg, var(--hosts-primary-soft) 0%, var(--hosts-bg-soft) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 40px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.1);
 `
 
 const PlaceholderTitle = styled.div`
   font-size: 22px;
   font-weight: 600;
-  color: var(--color-text);
+  color: var(--hosts-text);
   margin-top: 8px;
 `
 
 const PlaceholderDesc = styled.div`
   font-size: 14px;
-  color: var(--color-text-secondary);
+  color: var(--hosts-text-secondary);
   text-align: center;
   max-width: 320px;
   line-height: 1.6;
@@ -648,24 +709,24 @@ const EmptyIcon = styled.div`
   width: 100px;
   height: 100px;
   border-radius: 28px;
-  background: linear-gradient(135deg, var(--color-background-mute) 0%, var(--color-background-soft) 100%);
+  background: linear-gradient(135deg, var(--hosts-primary-soft) 0%, var(--hosts-bg-soft) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 48px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
 `
 
 const EmptyTitle = styled.div`
   font-size: 20px;
   font-weight: 600;
-  color: var(--color-text);
+  color: var(--hosts-text);
   margin-top: 8px;
 `
 
 const EmptyDescription = styled.div`
   font-size: 14px;
-  color: var(--color-text-secondary);
+  color: var(--hosts-text-secondary);
   text-align: center;
   max-width: 360px;
   line-height: 1.6;

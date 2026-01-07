@@ -1,9 +1,28 @@
-import { lightbulbVariants } from '@renderer/utils/motionVariants'
 import { isEqual } from 'lodash'
-import { ChevronRight, Lightbulb } from 'lucide-react'
+import { Brain, ChevronRight } from 'lucide-react'
 import { motion } from 'motion/react'
 import React, { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
+
+// Animation variants for thinking indicator
+const thinkingVariants = {
+  active: {
+    opacity: [1, 0.5, 1],
+    transition: {
+      duration: 1.5,
+      ease: 'easeInOut',
+      times: [0, 0.5, 1],
+      repeat: Infinity
+    }
+  },
+  idle: {
+    opacity: 1,
+    transition: {
+      duration: 0.3,
+      ease: 'easeInOut'
+    }
+  }
+}
 
 interface Props {
   isThinking: boolean
@@ -39,9 +58,10 @@ const ThinkingEffect: React.FC<Props> = ({ isThinking, thinkingTimeText, content
   return (
     <ThinkingContainer style={{ height: containerHeight }} className={expanded ? 'expanded' : ''}>
       <LoadingContainer>
-        <motion.div variants={lightbulbVariants} animate={isThinking ? 'active' : 'idle'} initial="idle">
-          <Lightbulb
+        <motion.div variants={thinkingVariants} animate={isThinking ? 'active' : 'idle'} initial="idle">
+          <Brain
             size={!showThinking || messages.length < 2 ? 20 : 30}
+            color="var(--color-primary)"
             style={{ transition: 'width,height, 150ms' }}
           />
         </motion.div>

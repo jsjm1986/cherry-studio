@@ -31,13 +31,13 @@ export const ControlButton = styled.button<{ $isClose?: boolean }>`
   border-radius: 0;
 
   &:hover {
-    background: ${(props) => (props.$isClose ? '#e81123' : 'rgba(128, 128, 128, 0.3)')};
-    color: ${(props) => (props.$isClose ? '#ffffff' : 'var(--color-text)')};
+    background: ${(props) => (props.$isClose ? '#e81123' : 'rgba(59, 130, 246, 0.15)')};
+    color: ${(props) => (props.$isClose ? '#ffffff' : '#3b82f6')};
   }
 
   &:active {
-    background: ${(props) => (props.$isClose ? '#c50e1f' : 'rgba(128, 128, 128, 0.4)')};
-    color: ${(props) => (props.$isClose ? '#ffffff' : 'var(--color-text)')};
+    background: ${(props) => (props.$isClose ? '#c50e1f' : 'rgba(59, 130, 246, 0.25)')};
+    color: ${(props) => (props.$isClose ? '#ffffff' : '#3b82f6')};
   }
 
   svg {

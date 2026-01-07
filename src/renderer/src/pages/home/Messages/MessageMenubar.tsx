@@ -3,6 +3,7 @@ import { loggerService } from '@logger'
 import { CopyIcon, DeleteIcon, EditIcon, RefreshIcon } from '@renderer/components/Icons'
 import ObsidianExportPopup from '@renderer/components/Popups/ObsidianExportPopup'
 import SaveToKnowledgePopup from '@renderer/components/Popups/SaveToKnowledgePopup'
+import SaveToProjectPopup from '@renderer/components/Popups/SaveToProjectPopup'
 import { SelectModelPopup } from '@renderer/components/Popups/SelectModelPopup'
 import { isEmbeddingModel, isRerankModel, isVisionModel } from '@renderer/config/models'
 import type { MessageMenubarButtonId, MessageMenubarScope } from '@renderer/config/registry/messageMenubar'
@@ -22,7 +23,7 @@ import store, { useAppDispatch } from '@renderer/store'
 import { messageBlocksSelectors, removeOneBlock } from '@renderer/store/messageBlock'
 import { selectMessagesForTopic } from '@renderer/store/newMessage'
 import { TraceIcon } from '@renderer/trace/pages/Component'
-import type { Assistant, Model, Topic, TranslateLanguage } from '@renderer/types'
+import type { Assistant, Host, Model, Topic, TranslateLanguage } from '@renderer/types'
 import { type Message, MessageBlockType } from '@renderer/types/newMessage'
 import { captureScrollableAsBlob, captureScrollableAsDataURL, classNames } from '@renderer/utils'
 import { copyMessageAsPlainText } from '@renderer/utils/copy'
@@ -51,6 +52,8 @@ import {
   AtSign,
   Check,
   FilePenLine,
+  FileText,
+  FolderOutput,
   Languages,
   ListChecks,
   Menu,
@@ -312,8 +315,25 @@ const MessageMenubar: FC<Props> = (props) => {
             onClick: () => {
               SaveToKnowledgePopup.showForMessage(message)
             }
+          },
+          // 项目文件夹保存选项（仅在 Host 模式下显示）
+          assistant.type === 'host' && {
+            label: t('hosts.project.save_to_project'),
+            key: 'save-to-project',
+            icon: <FolderOutput size={14} />,
+            onClick: () => {
+              SaveToProjectPopup.showForMessage(message, assistant as Host, topic)
+            }
+          },
+          assistant.type === 'host' && {
+            label: t('hosts.project.save_full_context'),
+            key: 'save-full-context',
+            icon: <FileText size={14} />,
+            onClick: () => {
+              SaveToProjectPopup.showForFullContext(message, assistant as Host, topic)
+            }
           }
-        ]
+        ].filter(Boolean)
       },
       {
         label: t('chat.topics.export.title'),
@@ -431,6 +451,7 @@ const MessageMenubar: FC<Props> = (props) => {
       return false
     })
   }, [
+    assistant,
     dropdownRootAllowKeys,
     exportMenuOptions.docx,
     exportMenuOptions.image,
@@ -450,7 +471,7 @@ const MessageMenubar: FC<Props> = (props) => {
     onNewBranch,
     t,
     toggleMultiSelectMode,
-    topic.name
+    topic
   ])
 
   const onRegenerate = async (e: React.MouseEvent | undefined) => {

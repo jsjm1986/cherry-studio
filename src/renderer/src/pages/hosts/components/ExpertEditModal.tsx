@@ -1,11 +1,13 @@
 import EmojiPicker from '@renderer/components/EmojiPicker'
+import { FormGroup, FormInput, FormLabel, FormRow, FormTextArea, StyledModal } from '@renderer/components/StyledModal'
 import type { Expert } from '@renderer/types'
 import {
   compileCartridgeToPrompt,
   extractExpertInfoFromCartridge,
   parseCartridgeMarkdown
 } from '@renderer/utils/cartridge'
-import { Button, Input, Modal, Popover, Upload, message } from 'antd'
+import { Popover, Upload, message } from 'antd'
+import { Upload as UploadIcon } from 'lucide-react'
 import type { FC } from 'react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -104,7 +106,7 @@ const ExpertEditModal: FC<Props> = ({ open, expert, onOk, onCancel }) => {
   }
 
   return (
-    <Modal
+    <StyledModal
       title={expert ? t('experts.edit') : t('experts.add')}
       open={open}
       onOk={handleOk}
@@ -113,95 +115,147 @@ const ExpertEditModal: FC<Props> = ({ open, expert, onOk, onCancel }) => {
       destroyOnClose
       width={520}>
       <FormContainer>
+        {/* 头像和名称 - 优雅的头部布局 */}
+        <HeaderRow>
+          <Popover content={<EmojiPicker onEmojiClick={setEmoji} />} trigger="click" placement="bottomLeft">
+            <EmojiButton>{emoji}</EmojiButton>
+          </Popover>
+          <HeaderInfo>
+            <FormInput
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={t('experts.name')}
+              autoFocus
+              style={{ fontSize: 16, fontWeight: 500, height: 42 }}
+            />
+            <FormInput
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder={t('experts.description')}
+            />
+          </HeaderInfo>
+          <Upload accept=".md,.markdown" showUploadList={false} beforeUpload={handleImportCartridge}>
+            <ImportButton>
+              <UploadIcon size={16} />
+              {t('experts.cartridge.importBtn')}
+            </ImportButton>
+          </Upload>
+        </HeaderRow>
+
+        <Divider />
+
         <FormRow>
-          <FormItem style={{ flex: 0 }}>
-            <Label>{t('hosts.emoji')}</Label>
-            <Popover content={<EmojiPicker onEmojiClick={setEmoji} />} trigger="click">
-              <Button style={{ fontSize: 20, padding: '4px 12px' }}>{emoji}</Button>
-            </Popover>
-          </FormItem>
-          <FormItem style={{ flex: 1 }}>
-            <Label>{t('experts.name')}</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('experts.name')} autoFocus />
-          </FormItem>
-          <FormItem style={{ flex: 0 }}>
-            <Label>{t('experts.cartridge.import')}</Label>
-            <Upload accept=".md,.markdown" showUploadList={false} beforeUpload={handleImportCartridge}>
-              <Button>{t('experts.cartridge.importBtn')}</Button>
-            </Upload>
-          </FormItem>
+          <FormGroup>
+            <FormLabel>{t('experts.handle')}</FormLabel>
+            <FormInput value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="@name" />
+          </FormGroup>
+          <FormGroup>
+            <FormLabel>{t('experts.triggerKeywords')}</FormLabel>
+            <FormInput
+              value={triggerKeywords}
+              onChange={(e) => setTriggerKeywords(e.target.value)}
+              placeholder={t('experts.triggerKeywordsHint')}
+            />
+          </FormGroup>
         </FormRow>
-        <FormItem>
-          <Label>{t('experts.handle')}</Label>
-          <Input value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="@name" />
-        </FormItem>
-        <FormItem>
-          <Label>{t('experts.description')}</Label>
-          <Input
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder={t('experts.description')}
-          />
-        </FormItem>
-        <FormItem>
-          <Label>{t('experts.triggerKeywords')}</Label>
-          <Input
-            value={triggerKeywords}
-            onChange={(e) => setTriggerKeywords(e.target.value)}
-            placeholder={t('experts.triggerKeywordsHint')}
-          />
-        </FormItem>
-        <FormItem>
+
+        <FormGroup>
           <LabelRow>
-            <Label>{t('experts.stylePrompt')}</Label>
+            <FormLabel style={{ marginBottom: 0 }}>{t('experts.stylePrompt')}</FormLabel>
             {cartridgeMarkdown && <CartridgeBadge>{t('experts.cartridge.loaded')}</CartridgeBadge>}
           </LabelRow>
-          <Input.TextArea
+          <FormTextArea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder={t('experts.stylePrompt')}
             rows={6}
           />
-        </FormItem>
+        </FormGroup>
       </FormContainer>
-    </Modal>
+    </StyledModal>
   )
 }
 
 const FormContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px 0;
+  gap: 4px;
 `
 
-const FormRow = styled.div`
+const HeaderRow = styled.div`
   display: flex;
+  align-items: flex-start;
   gap: 16px;
+  padding: 8px 0 16px;
 `
 
-const FormItem = styled.div`
+const HeaderInfo = styled.div`
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 8px;
 `
 
-const Label = styled.label`
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text);
+const EmojiButton = styled.button`
+  width: 72px;
+  height: 72px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-background-soft);
+  font-size: 36px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.08);
+    transform: scale(1.02);
+  }
+`
+
+const ImportButton = styled.button`
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-background-soft);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+  }
+`
+
+const Divider = styled.div`
+  height: 1px;
+  background: var(--color-border);
+  margin: 8px 0 16px;
 `
 
 const LabelRow = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-bottom: 8px;
 `
 
 const CartridgeBadge = styled.span`
   font-size: 11px;
-  padding: 2px 6px;
-  background: var(--color-primary);
+  padding: 2px 8px;
+  background: #3b82f6;
   color: white;
   border-radius: 4px;
 `

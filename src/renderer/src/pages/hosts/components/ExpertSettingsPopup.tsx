@@ -1,9 +1,10 @@
 import EmojiPicker from '@renderer/components/EmojiPicker'
 import { HStack } from '@renderer/components/Layout'
+import { FormGroup, FormHint, FormInput, FormLabel, FormTextArea, StyledModal } from '@renderer/components/StyledModal'
 import AssistantKnowledgeBaseSettings from '@renderer/pages/settings/AssistantSettings/AssistantKnowledgeBaseSettings'
 import AssistantMCPSettings from '@renderer/pages/settings/AssistantSettings/AssistantMCPSettings'
 import type { Assistant, AssistantSettings, Expert, ExpertPromptSettings } from '@renderer/types'
-import { Button, Divider, Input, Modal, Popover, Select, Switch, Tabs } from 'antd'
+import { Button, Divider, Modal, Popover, Select, Switch, Tabs } from 'antd'
 import type { FC } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -119,7 +120,7 @@ const ExpertSettingsPopup: FC<Props> = ({ open, expert, onSave, onCancel }) => {
       children: (
         <TabContent>
           <FormSection>
-            {/* 头像和名称行 - 更紧凑的布局 */}
+            {/* 头像和名称行 - 优雅的头部布局 */}
             <AvatarNameRow>
               <Popover
                 content={<EmojiPicker onEmojiClick={(emoji) => updateBasicInfo('emoji', emoji)} />}
@@ -127,42 +128,36 @@ const ExpertSettingsPopup: FC<Props> = ({ open, expert, onSave, onCancel }) => {
                 placement="bottomLeft">
                 <AvatarButton>{localExpert.emoji || '👤'}</AvatarButton>
               </Popover>
-              <NameInputWrapper>
-                <Input
+              <HeaderInfo>
+                <FormInput
                   value={localExpert.name}
                   onChange={(e) => updateBasicInfo('name', e.target.value)}
                   placeholder={t('experts.name')}
-                  size="large"
-                  style={{ fontSize: 16, fontWeight: 500 }}
+                  style={{ fontSize: 16, fontWeight: 500, height: 42 }}
                 />
-              </NameInputWrapper>
+                <FormInput
+                  value={localExpert.description}
+                  onChange={(e) => updateBasicInfo('description', e.target.value)}
+                  placeholder={t('experts.description')}
+                />
+              </HeaderInfo>
             </AvatarNameRow>
 
-            {/* 提及名称 */}
-            <FormItem>
-              <Label>{t('experts.handle')}</Label>
-              <Input
+            {/* 提及名称和触发关键词 */}
+            <FormGroup>
+              <FormLabel>{t('experts.handle')}</FormLabel>
+              <FormInput
                 value={localExpert.handle}
                 onChange={(e) => updateBasicInfo('handle', e.target.value)}
                 placeholder="@name"
               />
-              <HintText>{t('experts.handleHint', { defaultValue: '用于在聊天中 @ 提及此专家' })}</HintText>
-            </FormItem>
-
-            {/* 描述 */}
-            <FormItem>
-              <Label>{t('experts.description')}</Label>
-              <Input
-                value={localExpert.description}
-                onChange={(e) => updateBasicInfo('description', e.target.value)}
-                placeholder={t('experts.description')}
-              />
-            </FormItem>
+              <FormHint>{t('experts.handleHint', { defaultValue: '用于在聊天中 @ 提及此专家' })}</FormHint>
+            </FormGroup>
 
             {/* 触发关键词 */}
-            <FormItem>
-              <Label>{t('experts.triggerKeywords')}</Label>
-              <Input
+            <FormGroup>
+              <FormLabel>{t('experts.triggerKeywords')}</FormLabel>
+              <FormInput
                 value={localExpert.triggerKeywords?.join(', ') || ''}
                 onChange={(e) =>
                   updateBasicInfo(
@@ -175,42 +170,44 @@ const ExpertSettingsPopup: FC<Props> = ({ open, expert, onSave, onCancel }) => {
                 }
                 placeholder={t('experts.triggerKeywordsHint')}
               />
-              <HintText>{t('experts.triggerKeywordsDesc', { defaultValue: '多个关键词用逗号分隔' })}</HintText>
-            </FormItem>
+              <FormHint>{t('experts.triggerKeywordsDesc', { defaultValue: '多个关键词用逗号分隔' })}</FormHint>
+            </FormGroup>
 
             {/* 风格提示词 */}
-            <FormItem>
-              <Label>{t('experts.stylePrompt')}</Label>
-              <StyledTextArea
+            <FormGroup>
+              <FormLabel>{t('experts.stylePrompt')}</FormLabel>
+              <FormTextArea
                 value={localExpert.prompt}
                 onChange={(e) => updateBasicInfo('prompt', e.target.value)}
                 placeholder={t('experts.stylePromptHint', { defaultValue: '定义专家的回复风格和专业领域...' })}
                 rows={6}
               />
-            </FormItem>
+            </FormGroup>
 
             <Divider style={{ margin: '12px 0' }} />
 
             {/* 提示词增强设置 */}
-            <FormItem>
+            <FormGroup>
               <HStack justifyContent="space-between" alignItems="center">
-                <Label>{t('experts.promptSettings.enhancedMode', { defaultValue: '提示词增强模式' })}</Label>
+                <FormLabel style={{ marginBottom: 0 }}>
+                  {t('experts.promptSettings.enhancedMode', { defaultValue: '提示词增强模式' })}
+                </FormLabel>
                 <Switch
                   checked={localExpert.promptSettings?.enableEnhancedMode ?? true}
                   onChange={(checked) => updatePromptSettings({ enableEnhancedMode: checked })}
                 />
               </HStack>
-              <HintText>
+              <FormHint>
                 {t('experts.promptSettings.enhancedModeHint', {
                   defaultValue: '启用后会自动添加身份强化指令，确保专家始终保持设定的风格'
                 })}
-              </HintText>
-            </FormItem>
+              </FormHint>
+            </FormGroup>
 
             {/* 主机提示词处理方式 */}
-            <FormItem>
-              <Label>{t('experts.promptSettings.hostPromptMode', { defaultValue: '主机提示词' })}</Label>
-              <Select
+            <FormGroup>
+              <FormLabel>{t('experts.promptSettings.hostPromptMode', { defaultValue: '主机提示词' })}</FormLabel>
+              <StyledSelect
                 value={localExpert.promptSettings?.hostPromptMode ?? 'append'}
                 onChange={(value) => updatePromptSettings({ hostPromptMode: value })}
                 style={{ width: '100%' }}
@@ -225,12 +222,12 @@ const ExpertSettingsPopup: FC<Props> = ({ open, expert, onSave, onCancel }) => {
                   }
                 ]}
               />
-              <HintText>
+              <FormHint>
                 {t('experts.promptSettings.hostPromptModeHint', {
                   defaultValue: '选择如何处理主机的提示词'
                 })}
-              </HintText>
-            </FormItem>
+              </FormHint>
+            </FormGroup>
           </FormSection>
         </TabContent>
       )
@@ -264,7 +261,7 @@ const ExpertSettingsPopup: FC<Props> = ({ open, expert, onSave, onCancel }) => {
   ]
 
   return (
-    <Modal
+    <StyledModal
       title={
         <HStack alignItems="center" gap={8}>
           <span style={{ fontSize: 18 }}>{localExpert.emoji || '👤'}</span>
@@ -276,10 +273,10 @@ const ExpertSettingsPopup: FC<Props> = ({ open, expert, onSave, onCancel }) => {
       onCancel={handleCancel}
       footer={
         <FooterContainer>
-          <Button onClick={handleCancel}>{t('common.cancel')}</Button>
-          <Button type="primary" onClick={handleSave} disabled={!hasChanges}>
+          <CancelButton onClick={handleCancel}>{t('common.cancel')}</CancelButton>
+          <SaveButton onClick={handleSave} disabled={!hasChanges}>
             {t('common.save')}
-          </Button>
+          </SaveButton>
         </FooterContainer>
       }
       width={600}
@@ -290,7 +287,7 @@ const ExpertSettingsPopup: FC<Props> = ({ open, expert, onSave, onCancel }) => {
       <ModalContent>
         <Tabs items={tabItems} defaultActiveKey="basic" style={{ height: '100%' }} />
       </ModalContent>
-    </Modal>
+    </StyledModal>
   )
 }
 
@@ -298,6 +295,27 @@ const ModalContent = styled.div`
   height: 60vh;
   max-height: 500px;
   overflow: hidden;
+
+  /* 统一蓝色主题 */
+  .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+    color: #3b82f6;
+  }
+
+  .ant-tabs-ink-bar {
+    background: #3b82f6;
+  }
+
+  .ant-tabs-tab:hover {
+    color: #3b82f6;
+  }
+
+  .ant-switch.ant-switch-checked {
+    background: #3b82f6;
+  }
+
+  .ant-switch.ant-switch-checked:hover:not(.ant-switch-disabled) {
+    background: #2563eb;
+  }
 
   .ant-tabs {
     height: 100%;
@@ -327,86 +345,110 @@ const TabContent = styled.div`
 const FormSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 4px;
 `
 
 const AvatarNameRow = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
-  padding-bottom: 8px;
+  padding: 8px 0 16px;
   border-bottom: 1px solid var(--color-border);
-  margin-bottom: 4px;
+  margin-bottom: 12px;
 `
 
 const AvatarButton = styled.button`
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
-  border: 2px dashed var(--color-border);
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
   background: var(--color-background-soft);
-  font-size: 28px;
+  font-size: 36px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   flex-shrink: 0;
 
   &:hover {
-    border-color: var(--color-primary);
-    background: var(--color-primary-soft);
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.08);
+    transform: scale(1.02);
   }
 `
 
-const NameInputWrapper = styled.div`
+const HeaderInfo = styled.div`
   flex: 1;
-
-  .ant-input {
-    border: none;
-    background: transparent;
-    padding-left: 0;
-
-    &:focus {
-      box-shadow: none;
-    }
-  }
-`
-
-const FormItem = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 `
 
-const Label = styled.label`
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text);
-`
+const StyledSelect = styled(Select)`
+  .ant-select-selector {
+    border-radius: 8px !important;
+    height: 38px !important;
+  }
 
-const HintText = styled.span`
-  font-size: 12px;
-  color: var(--color-text-tertiary);
-`
+  &.ant-select-focused .ant-select-selector {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+  }
 
-const StyledTextArea = styled(Input.TextArea)`
-  resize: none;
-
-  &.ant-input {
-    min-height: 120px;
+  &:hover .ant-select-selector {
+    border-color: #3b82f6 !important;
   }
 `
 
 const FooterContainer = styled.div`
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  padding: 12px 0;
+  gap: 12px;
+`
+
+const CancelButton = styled.button`
+  height: 36px;
+  padding: 0 20px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+  }
+`
+
+const SaveButton = styled.button`
+  height: 36px;
+  padding: 0 20px;
+  border-radius: 8px;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #2563eb;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `
 
 const UnsavedBadge = styled.span`
-  color: var(--color-warning);
+  color: #f59e0b;
   font-size: 16px;
   font-weight: bold;
 `

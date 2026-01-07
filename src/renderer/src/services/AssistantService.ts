@@ -23,6 +23,7 @@ import type {
   TranslateAssistant,
   TranslateLanguage
 } from '@renderer/types'
+import { TopicType } from '@renderer/types'
 import { uuid } from '@renderer/utils'
 
 const logger = loggerService.withContext('AssistantService')
@@ -100,9 +101,10 @@ export function getDefaultAssistantSettings() {
   return store.getState().assistants.defaultAssistant.settings
 }
 
-export function getDefaultTopic(assistantId: string): Topic {
+export function getDefaultTopic(assistantId: string, type?: TopicType): Topic {
   return {
     id: uuid(),
+    type,
     assistantId,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),

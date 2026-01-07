@@ -312,7 +312,7 @@
     },
     "authHeaderText": "Use in Authorization header:",
     "configuration": "Configuration",
-    "description": "Expose Cherry Studio's AI capabilities through OpenAI-compatible HTTP APIs",
+    "description": "Expose Her's AI capabilities through OpenAI-compatible HTTP APIs",
     "documentation": {
       "title": "API Documentation"
     },
@@ -1312,6 +1312,13 @@
     "add": "Add Expert",
     "add_custom": "Add Custom",
     "add_more": "Add More",
+    "cartridge": {
+      "import": "Cartridge",
+      "importBtn": "Import",
+      "importError": "Failed to parse cartridge",
+      "importSuccess": "Cartridge imported successfully",
+      "loaded": "Cartridge Loaded"
+    },
     "clear_mentioned": "Clear selected experts",
     "clear_selection": "Clear current expert selection",
     "delete": "Delete Expert",
@@ -1329,13 +1336,6 @@
       "select_all": "Select All",
       "success": "Successfully imported {{count}} experts",
       "title": "Import from Assistants"
-    },
-    "cartridge": {
-      "import": "Cartridge",
-      "importBtn": "Import",
-      "importSuccess": "Cartridge imported successfully",
-      "importError": "Failed to parse cartridge",
-      "loaded": "Cartridge Loaded"
     },
     "list": "Expert List",
     "mention": "Mention Expert",
@@ -1446,6 +1446,32 @@
     "empty": "No hosts yet. Click the button above to create one.",
     "list": "Host List",
     "name": "Host Name",
+    "project": {
+      "content_preview": "Content Preview",
+      "filename": "Filename",
+      "filename_placeholder": "Enter filename",
+      "files": "Project Files",
+      "folder": "Project Folder",
+      "folder_empty": "No project folder set",
+      "folder_help": "Local folder for saving conversation materials, saved content can be viewed here",
+      "folder_placeholder": "e.g., D:/projects/my-project",
+      "generate_filename": "AI Generate Filename",
+      "generating_filename": "Generating filename...",
+      "no_files": "No files",
+      "open_folder": "Open Folder",
+      "refresh": "Refresh",
+      "save_full_context": "Save Full Context",
+      "save_path": "Save Path",
+      "save_success": "Saved to project folder",
+      "save_to_folder": "Save to Project Folder",
+      "save_to_project": "Save as Material",
+      "select_folder": "Select Folder",
+      "title": "Project"
+    },
+    "project_folder": "Project Folder",
+    "project_folder_help": "Local folder for saving conversation materials",
+    "project_folder_placeholder": "e.g., D:/projects/my-project",
+    "select_folder": "Select Folder",
     "select_hint": "Please select a host first",
     "settings": "Host Settings",
     "system_prompt": "System Prompt",
@@ -2985,7 +3011,7 @@
           },
           "description": {
             "0": "Selection Assistant requires <strong>Accessibility Permission</strong> to work properly.",
-            "1": "Please click \"<strong>Go to Settings</strong>\" and click the \"<strong>Open System Settings</strong>\" button in the permission request popup that appears later. Then find \"<strong>Cherry Studio</strong>\" in the application list that appears later and turn on the permission switch.",
+            "1": "Please click \"<strong>Go to Settings</strong>\" and click the \"<strong>Open System Settings</strong>\" button in the permission request popup that appears later. Then find \"<strong>Her</strong>\" in the application list that appears later and turn on the permission switch.",
             "2": "After completing the settings, please reopen the selection assistant."
           },
           "title": "Accessibility Permission"
@@ -2997,7 +3023,7 @@
         "title": "Application Filter List",
         "user_tips": {
           "mac": "Please enter the Bundle ID of the application, one per line, case insensitive, can be fuzzy matched. For example: com.google.Chrome, com.apple.mail, etc.",
-          "windows": "Please enter the executable file name of the application, one per line, case insensitive, can be fuzzy matched. For example: chrome.exe, weixin.exe, Cherry Studio.exe, etc."
+          "windows": "Please enter the executable file name of the application, one per line, case insensitive, can be fuzzy matched. For example: chrome.exe, weixin.exe, Her.exe, etc."
         }
       },
       "search_modal": {
@@ -3248,7 +3274,7 @@
           "confirm_close_title": "Confirm Close",
           "connected": "Connected",
           "connection_failed": "Connection failed",
-          "content": "Please ensure your computer and phone are on the same network for LAN transfer. Open the Cherry Studio App to scan this QR code.",
+          "content": "Please ensure your computer and phone are on the same network for LAN transfer. Open the Her App to scan this QR code.",
           "error": {
             "init_failed": "Initialization failed",
             "no_file": "No file selected",
@@ -4031,7 +4057,7 @@
       },
       "oauth": {
         "callback": {
-          "message": "You can close this page and return to Cherry Studio",
+          "message": "You can close this page and return to Her",
           "title": "Authentication Successful"
         }
       },

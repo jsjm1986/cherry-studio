@@ -44,10 +44,24 @@ export const SESSION_MESSAGE_MENUBAR_BUTTON_IDS: MessageMenubarButtonId[] = [
   'more-menu'
 ]
 
+// Host scope: hide @ mention and translate buttons
+export const HOST_MESSAGE_MENUBAR_BUTTON_IDS: MessageMenubarButtonId[] = [
+  'user-regenerate',
+  'user-edit',
+  'copy',
+  'assistant-regenerate',
+  'useful',
+  'notes',
+  'delete',
+  'trace',
+  'more-menu'
+]
+
 const messageMenubarRegistry = new Map<MessageMenubarScope, MessageMenubarScopeConfig>([
   [DEFAULT_MESSAGE_MENUBAR_SCOPE, { buttonIds: [...DEFAULT_MESSAGE_MENUBAR_BUTTON_IDS] }],
   [TopicType.Chat, { buttonIds: [...DEFAULT_MESSAGE_MENUBAR_BUTTON_IDS] }],
-  [TopicType.Session, { buttonIds: [...SESSION_MESSAGE_MENUBAR_BUTTON_IDS], dropdownRootAllowKeys: ['save', 'export'] }]
+  [TopicType.Session, { buttonIds: [...SESSION_MESSAGE_MENUBAR_BUTTON_IDS], dropdownRootAllowKeys: ['save', 'export'] }],
+  [TopicType.Host, { buttonIds: [...HOST_MESSAGE_MENUBAR_BUTTON_IDS] }]
 ])
 
 export const registerMessageMenubarConfig = (scope: MessageMenubarScope, config: MessageMenubarScopeConfig) => {

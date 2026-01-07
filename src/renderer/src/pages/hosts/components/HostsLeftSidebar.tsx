@@ -1,3 +1,4 @@
+import { useTheme } from '@renderer/context/ThemeProvider'
 import { useAppSelector } from '@renderer/store'
 import { selectMessagesForTopic } from '@renderer/store/newMessage'
 import type { Expert, Host, InfoFolder, RoomUserInfo, Topic } from '@renderer/types'
@@ -91,6 +92,9 @@ const HostsLeftSidebar: FC<Props> = ({
   selectedInfoFolderId,
   onUpdateUserInfo
 }) => {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+
   const [showRoomDropdown, setShowRoomDropdown] = useState(false)
   const [projectCollapsed, setProjectCollapsed] = useState(false)
   const [memberCollapsed, setMemberCollapsed] = useState(false)
@@ -149,8 +153,8 @@ const HostsLeftSidebar: FC<Props> = ({
   const disabled = !activeHost
 
   return (
-    <Container>
-      <ScrollArea>
+    <Container $isDark={isDark}>
+      <ScrollArea $isDark={isDark}>
         {/* 房间选择器 */}
         <RoomSelector>
           <RoomButton onClick={() => setShowRoomDropdown(!showRoomDropdown)} $active={showRoomDropdown}>
@@ -335,7 +339,7 @@ const HostsLeftSidebar: FC<Props> = ({
                       items: [
                         {
                           key: 'add',
-                          label: '添加成员',
+                          label: '添加专家',
                           icon: <UserPlus size={14} />,
                           onClick: (e) => {
                             e.domEvent.stopPropagation()
@@ -344,7 +348,7 @@ const HostsLeftSidebar: FC<Props> = ({
                         },
                         {
                           key: 'import',
-                          label: '从助手导入',
+                          label: '从卡带库导入',
                           icon: <Download size={14} />,
                           onClick: (e) => {
                             e.domEvent.stopPropagation()
@@ -353,7 +357,7 @@ const HostsLeftSidebar: FC<Props> = ({
                         },
                         {
                           key: 'cartridge',
-                          label: '从卡带导入',
+                          label: '从MD导入卡带',
                           icon: <FileUp size={14} />,
                           onClick: (e) => {
                             e.domEvent.stopPropagation()
@@ -593,17 +597,30 @@ const HostsLeftSidebar: FC<Props> = ({
 }
 
 // Styled Components
-const Container = styled.div`
+const Container = styled.div<{ $isDark: boolean }>`
   display: flex;
   flex-direction: column;
   width: 280px;
   min-width: 280px;
   height: 100%;
-  background: var(--color-background);
-  border-right: 1px solid var(--color-border);
+  background: ${({ $isDark }) => ($isDark ? '#0f0f1a' : '#ffffff')};
+  border-radius: 12px;
+  box-shadow: ${({ $isDark }) =>
+    $isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.06)'};
+
+  /* 主题变量 - 供子组件使用 */
+  --sidebar-bg: ${({ $isDark }) => ($isDark ? '#0f0f1a' : '#ffffff')};
+  --sidebar-bg-hover: ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.03)' : '#f9fafb')};
+  --sidebar-bg-active: ${({ $isDark }) => ($isDark ? 'rgba(59,130,246,0.15)' : 'rgba(59,130,246,0.08)')};
+  --sidebar-border: ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.06)' : '#f0f0f0')};
+  --sidebar-text: ${({ $isDark }) => ($isDark ? '#ffffff' : '#1f2937')};
+  --sidebar-text-secondary: ${({ $isDark }) => ($isDark ? '#9ca3af' : '#6b7280')};
+  --sidebar-text-muted: ${({ $isDark }) => ($isDark ? '#6b7280' : '#9ca3af')};
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-soft: ${({ $isDark }) => ($isDark ? 'rgba(59,130,246,0.15)' : 'rgba(59,130,246,0.08)')};
 `
 
-const ScrollArea = styled.div`
+const ScrollArea = styled.div<{ $isDark?: boolean }>`
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
@@ -613,7 +630,7 @@ const ScrollArea = styled.div`
   }
 
   &::-webkit-scrollbar-thumb {
-    background: var(--color-border);
+    background: var(--sidebar-border);
     border-radius: 2px;
   }
 `
@@ -622,7 +639,7 @@ const ScrollArea = styled.div`
 const RoomSelector = styled.div`
   position: relative;
   padding: 12px;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--sidebar-border);
 `
 
 const RoomButton = styled.button<{ $active: boolean }>`
@@ -631,14 +648,15 @@ const RoomButton = styled.button<{ $active: boolean }>`
   gap: 10px;
   width: 100%;
   padding: 10px 12px;
-  background: ${({ $active }) => ($active ? 'var(--color-background-mute)' : 'var(--color-background-soft)')};
-  border: 1px solid var(--color-border);
+  background: ${({ $active }) => ($active ? 'var(--sidebar-bg-active)' : 'var(--sidebar-bg-hover)')};
+  border: 1px solid ${({ $active }) => ($active ? 'rgba(59,130,246,0.3)' : 'var(--sidebar-border)')};
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 
   &:hover {
-    background: var(--color-background-mute);
+    background: var(--sidebar-bg-active);
+    border-color: rgba(59,130,246,0.3);
   }
 
   .rotate {
@@ -646,8 +664,8 @@ const RoomButton = styled.button<{ $active: boolean }>`
   }
 
   svg {
-    color: var(--color-text-secondary);
-    transition: transform 0.2s ease;
+    color: var(--sidebar-text-secondary);
+    transition: transform 0.15s ease;
     flex-shrink: 0;
   }
 `
@@ -666,7 +684,7 @@ const RoomInfo = styled.div`
 const RoomName = styled.div`
   font-size: 14px;
   font-weight: 500;
-  color: var(--color-text);
+  color: var(--sidebar-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -674,7 +692,7 @@ const RoomName = styled.div`
 
 const RoomDesc = styled.div`
   font-size: 11px;
-  color: var(--color-text-tertiary);
+  color: var(--sidebar-text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -687,8 +705,8 @@ const RoomDropdown = styled.div`
   left: 12px;
   right: 12px;
   margin-top: 4px;
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
+  background: var(--sidebar-bg);
+  border: 1px solid var(--sidebar-border);
   border-radius: 10px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   z-index: 1000;
@@ -703,13 +721,15 @@ const RoomDropdownItem = styled.div<{ $active?: boolean; $isAction?: boolean }>`
   gap: 8px;
   padding: 8px 12px;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 13px;
-  color: ${({ $isAction }) => ($isAction ? 'var(--color-primary)' : 'var(--color-text)')};
-  background: ${({ $active }) => ($active ? 'var(--color-primary-soft)' : 'transparent')};
+  color: ${({ $isAction }) => ($isAction ? 'var(--sidebar-primary)' : 'var(--sidebar-text)')};
+  background: ${({ $active }) => ($active ? 'var(--sidebar-primary-soft)' : 'transparent')};
+  border: 1px solid ${({ $active }) => ($active ? 'rgba(59,130,246,0.3)' : 'transparent')};
+  transition: all 0.15s ease;
 
   &:hover {
-    background: ${({ $active }) => ($active ? 'var(--color-primary-soft)' : 'var(--color-background-soft)')};
+    background: ${({ $active }) => ($active ? 'var(--sidebar-primary-soft)' : 'var(--sidebar-bg-hover)')};
   }
 
   &:hover .actions {
@@ -730,14 +750,14 @@ const RoomDropdownItem = styled.div<{ $active?: boolean; $isAction?: boolean }>`
 
 const DropdownDivider = styled.div`
   height: 1px;
-  background: var(--color-border);
+  background: var(--sidebar-border);
   margin: 4px 0;
 `
 
 const EmptyHint = styled.div`
   padding: 12px;
   text-align: center;
-  color: var(--color-text-tertiary);
+  color: var(--sidebar-text-muted);
   font-size: 12px;
 `
 
@@ -746,7 +766,7 @@ const TabsContainer = styled.div`
   display: flex;
   padding: 8px 12px;
   gap: 4px;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--sidebar-border);
 `
 
 const TabButton = styled.button<{ $active: boolean }>`
@@ -756,23 +776,23 @@ const TabButton = styled.button<{ $active: boolean }>`
   justify-content: center;
   gap: 6px;
   padding: 8px;
-  background: ${({ $active }) => ($active ? 'var(--color-primary-soft)' : 'transparent')};
+  background: ${({ $active }) => ($active ? 'var(--sidebar-primary-soft)' : 'transparent')};
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-size: 12px;
   font-weight: 500;
-  color: ${({ $active }) => ($active ? 'var(--color-primary)' : 'var(--color-text-secondary)')};
-  transition: all 0.2s ease;
+  color: ${({ $active }) => ($active ? 'var(--sidebar-primary)' : 'var(--sidebar-text-secondary)')};
+  transition: all 0.15s ease;
 
   &:hover {
-    background: ${({ $active }) => ($active ? 'var(--color-primary-soft)' : 'var(--color-background-soft)')};
+    background: ${({ $active }) => ($active ? 'var(--sidebar-primary-soft)' : 'var(--sidebar-bg-hover)')};
   }
 `
 
 // Section 通用样式
 const Section = styled.div`
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--sidebar-border);
 `
 
 const SectionHeader = styled.div`
@@ -782,9 +802,10 @@ const SectionHeader = styled.div`
   padding: 10px 12px;
   cursor: pointer;
   user-select: none;
+  transition: all 0.15s ease;
 
   &:hover {
-    background: var(--color-background-soft);
+    background: var(--sidebar-bg-hover);
   }
 `
 
@@ -797,39 +818,40 @@ const SectionHeaderLeft = styled.div`
 const CollapseIcon = styled.div<{ $collapsed: boolean; $disabled?: boolean }>`
   display: flex;
   align-items: center;
-  color: ${({ $disabled }) => ($disabled ? 'var(--color-text-tertiary)' : 'var(--color-text-secondary)')};
-  transition: transform 0.2s ease;
+  color: ${({ $disabled }) => ($disabled ? 'var(--sidebar-text-muted)' : 'var(--sidebar-text-secondary)')};
+  transition: transform 0.15s ease;
   transform: rotate(${({ $collapsed }) => ($collapsed ? '-90deg' : '0deg')});
 `
 
 const SectionTitle = styled.div<{ $disabled?: boolean }>`
   font-size: 12px;
   font-weight: 600;
-  color: ${({ $disabled }) => ($disabled ? 'var(--color-text-tertiary)' : 'var(--color-text-secondary)')};
+  color: ${({ $disabled }) => ($disabled ? 'var(--sidebar-text-muted)' : 'var(--sidebar-text-secondary)')};
 `
 
 const Badge = styled.span`
   font-size: 10px;
-  color: var(--color-text-tertiary);
-  background: var(--color-background-mute);
-  padding: 1px 5px;
-  border-radius: 8px;
+  color: var(--sidebar-primary);
+  background: var(--sidebar-primary-soft);
+  padding: 2px 6px;
+  border-radius: 10px;
 `
 
 const AddButton = styled.button`
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border: none;
   background: transparent;
-  color: var(--color-text-secondary);
+  color: var(--sidebar-text-secondary);
   border-radius: 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.15s ease;
 
   &:hover {
-    background: var(--color-primary);
+    background: var(--sidebar-primary);
     color: white;
   }
 `
@@ -840,11 +862,11 @@ const SectionContent = styled.div`
 
 const EmptyState = styled.div`
   font-size: 12px;
-  color: var(--color-text-tertiary);
+  color: var(--sidebar-text-muted);
   padding: 12px;
   text-align: center;
-  background: var(--color-background-soft);
-  border-radius: 6px;
+  background: var(--sidebar-bg-hover);
+  border-radius: 8px;
 `
 
 // Topic 样式
@@ -853,13 +875,15 @@ const TopicItem = styled.div<{ $active?: boolean }>`
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  background: ${({ $active }) => ($active ? 'var(--color-primary-soft)' : 'transparent')};
-  color: ${({ $active }) => ($active ? 'var(--color-primary)' : 'var(--color-text)')};
+  background: ${({ $active }) => ($active ? 'var(--sidebar-primary-soft)' : 'transparent')};
+  color: ${({ $active }) => ($active ? 'var(--sidebar-primary)' : 'var(--sidebar-text)')};
+  border: 1px solid ${({ $active }) => ($active ? 'rgba(59,130,246,0.3)' : 'transparent')};
+  transition: all 0.15s ease;
 
   &:hover {
-    background: ${({ $active }) => ($active ? 'var(--color-primary-soft)' : 'var(--color-background-soft)')};
+    background: ${({ $active }) => ($active ? 'var(--sidebar-primary-soft)' : 'var(--sidebar-bg-hover)')};
   }
 
   &:hover .actions {
@@ -878,11 +902,11 @@ const TopicName = styled.span`
 const RenameInput = styled.input`
   flex: 1;
   font-size: 12px;
-  padding: 2px 4px;
-  border: 1px solid var(--color-primary);
+  padding: 2px 6px;
+  border: 1px solid var(--sidebar-primary);
   border-radius: 4px;
-  background: var(--color-background);
-  color: var(--color-text);
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
   outline: none;
 `
 
@@ -890,7 +914,7 @@ const TopicActions = styled.div`
   display: flex;
   gap: 2px;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.15s ease;
 `
 
 const ActionIcon = styled.div`
@@ -900,12 +924,13 @@ const ActionIcon = styled.div`
   width: 20px;
   height: 20px;
   border-radius: 4px;
-  color: var(--color-text-secondary);
+  color: var(--sidebar-text-secondary);
   cursor: pointer;
+  transition: all 0.15s ease;
 
   &:hover {
-    background: var(--color-background-mute);
-    color: var(--color-text);
+    background: var(--sidebar-bg-hover);
+    color: var(--sidebar-primary);
   }
 `
 
@@ -915,10 +940,11 @@ const MemberItem = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 6px 8px;
-  border-radius: 6px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
 
   &:hover {
-    background: var(--color-background-soft);
+    background: var(--sidebar-bg-hover);
   }
 
   &:hover .actions {
@@ -935,11 +961,12 @@ const MemberInfo = styled.div`
   overflow: hidden;
 `
 
-const MemberAvatar = styled.div`
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: var(--color-background-mute);
+const MemberAvatar = styled.div<{ $color?: string }>`
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: ${({ $color }) => ($color ? `${$color}15` : 'rgba(59,130,246,0.1)')};
+  color: ${({ $color }) => $color || '#3b82f6'};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -952,9 +979,9 @@ const MemberDetails = styled.div`
 `
 
 const MemberName = styled.div`
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
-  color: var(--color-text);
+  color: var(--sidebar-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -964,16 +991,15 @@ const MemberHandle = styled.div`
   display: flex;
   align-items: center;
   gap: 2px;
-  font-size: 10px;
-  color: var(--color-primary);
-  opacity: 0.8;
+  font-size: 11px;
+  color: var(--sidebar-primary);
 `
 
 const MemberActions = styled.div`
   display: flex;
   gap: 2px;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.15s ease;
 `
 
 // Room item actions
@@ -991,13 +1017,15 @@ const FolderItem = styled.div<{ $active?: boolean }>`
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  background: ${({ $active }) => ($active ? 'var(--color-primary-soft)' : 'transparent')};
-  color: ${({ $active }) => ($active ? 'var(--color-primary)' : 'var(--color-text)')};
+  background: ${({ $active }) => ($active ? 'var(--sidebar-primary-soft)' : 'transparent')};
+  color: ${({ $active }) => ($active ? 'var(--sidebar-primary)' : 'var(--sidebar-text)')};
+  border: 1px solid ${({ $active }) => ($active ? 'rgba(59,130,246,0.3)' : 'transparent')};
+  transition: all 0.15s ease;
 
   &:hover {
-    background: ${({ $active }) => ($active ? 'var(--color-primary-soft)' : 'var(--color-background-soft)')};
+    background: ${({ $active }) => ($active ? 'var(--sidebar-primary-soft)' : 'var(--sidebar-bg-hover)')};
   }
 
   &:hover .actions {
@@ -1015,10 +1043,10 @@ const FolderName = styled.span`
 
 const FolderBadge = styled.span`
   font-size: 10px;
-  color: var(--color-text-tertiary);
-  background: var(--color-background-mute);
-  padding: 1px 5px;
-  border-radius: 8px;
+  color: var(--sidebar-text-muted);
+  background: var(--sidebar-bg-hover);
+  padding: 2px 6px;
+  border-radius: 10px;
 `
 
 const FolderActions = styled.div`
@@ -1033,8 +1061,8 @@ const InfoItem = styled.div`
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 0;
-  color: var(--color-text-tertiary);
+  padding: 6px 0;
+  color: var(--sidebar-text-muted);
 `
 
 const InfoLabel = styled.span`
@@ -1050,24 +1078,25 @@ const EditButton = styled.button`
   height: 20px;
   border: none;
   background: transparent;
-  color: var(--color-text-tertiary);
+  color: var(--sidebar-text-muted);
   border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 
   &:hover {
-    background: var(--color-background-mute);
-    color: var(--color-primary);
+    background: var(--sidebar-bg-hover);
+    color: var(--sidebar-primary);
   }
 `
 
 const InfoContent = styled.div`
   font-size: 12px;
-  color: var(--color-text-secondary);
-  padding: 8px;
-  background: var(--color-background-soft);
-  border-radius: 6px;
+  color: var(--sidebar-text-secondary);
+  padding: 10px 12px;
+  background: var(--sidebar-bg-hover);
+  border-radius: 8px;
   margin-bottom: 8px;
+  line-height: 1.5;
 `
 
 const StatsRow = styled.div`
@@ -1077,47 +1106,50 @@ const StatsRow = styled.div`
 
 const StatBox = styled.div`
   flex: 1;
-  padding: 10px;
-  background: var(--color-background-soft);
-  border-radius: 6px;
+  padding: 12px;
+  background: var(--sidebar-bg-hover);
+  border-radius: 8px;
   text-align: center;
 `
 
 const StatValue = styled.div`
   font-size: 18px;
   font-weight: 600;
-  color: var(--color-primary);
+  color: var(--sidebar-primary);
 `
 
 const StatLabel = styled.div`
   font-size: 10px;
-  color: var(--color-text-tertiary);
-  margin-top: 2px;
+  color: var(--sidebar-text-muted);
+  margin-top: 4px;
 `
 
 // About 样式
 const AboutItem = styled.div`
   font-size: 12px;
-  color: var(--color-text);
-  padding: 6px 8px;
-  background: var(--color-background-soft);
-  border-radius: 6px;
-  margin-bottom: 4px;
+  color: var(--sidebar-text);
+  padding: 8px 12px;
+  background: var(--sidebar-bg-hover);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  line-height: 1.5;
 `
 
 const EmptyUserInfo = styled.div`
-  padding: 12px;
+  padding: 16px;
   text-align: center;
   font-size: 12px;
-  color: var(--color-text-tertiary);
-  background: var(--color-background-soft);
-  border: 1px dashed var(--color-border);
-  border-radius: 6px;
+  color: var(--sidebar-text-muted);
+  background: var(--sidebar-bg-hover);
+  border: 1px dashed var(--sidebar-border);
+  border-radius: 8px;
   cursor: pointer;
+  transition: all 0.15s ease;
 
   &:hover {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
+    border-color: var(--sidebar-primary);
+    color: var(--sidebar-primary);
+    background: var(--sidebar-primary-soft);
   }
 `
 
@@ -1135,36 +1167,41 @@ const FormGroup = styled.div`
 
 const FormLabel = styled.label`
   font-size: 11px;
-  color: var(--color-text-secondary);
+  font-weight: 500;
+  color: var(--sidebar-text-secondary);
 `
 
 const FormInput = styled.input`
-  padding: 6px 8px;
+  padding: 8px 10px;
   font-size: 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  background: var(--color-background);
-  color: var(--color-text);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 6px;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
   outline: none;
+  transition: all 0.15s ease;
 
   &:focus {
-    border-color: var(--color-primary);
+    border-color: var(--sidebar-primary);
+    box-shadow: 0 0 0 2px var(--sidebar-primary-soft);
   }
 `
 
 const FormTextarea = styled.textarea`
-  padding: 6px 8px;
+  padding: 8px 10px;
   font-size: 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  background: var(--color-background);
-  color: var(--color-text);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 6px;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
   outline: none;
   resize: none;
   font-family: inherit;
+  transition: all 0.15s ease;
 
   &:focus {
-    border-color: var(--color-primary);
+    border-color: var(--sidebar-primary);
+    box-shadow: 0 0 0 2px var(--sidebar-primary-soft);
   }
 `
 
@@ -1176,23 +1213,26 @@ const FormActions = styled.div`
 `
 
 const FormButton = styled.button<{ $primary?: boolean }>`
-  padding: 6px 12px;
+  padding: 8px 16px;
   font-size: 12px;
+  font-weight: 500;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  background: ${({ $primary }) => ($primary ? 'var(--color-primary)' : 'var(--color-background-mute)')};
-  color: ${({ $primary }) => ($primary ? 'white' : 'var(--color-text)')};
+  background: ${({ $primary }) => ($primary ? 'var(--sidebar-primary)' : 'var(--sidebar-bg-hover)')};
+  color: ${({ $primary }) => ($primary ? 'white' : 'var(--sidebar-text)')};
+  transition: all 0.15s ease;
 
   &:hover {
     opacity: 0.9;
+    transform: translateY(-1px);
   }
 `
 
 // 底部设置
 const BottomSection = styled.div`
   padding: 12px;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--sidebar-border);
 `
 
 const SettingsButton = styled.button`
@@ -1203,16 +1243,17 @@ const SettingsButton = styled.button`
   width: 100%;
   padding: 10px;
   background: transparent;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--sidebar-border);
   border-radius: 8px;
   cursor: pointer;
   font-size: 13px;
-  color: var(--color-text-secondary);
-  transition: all 0.2s ease;
+  color: var(--sidebar-text-secondary);
+  transition: all 0.15s ease;
 
   &:hover:not(:disabled) {
-    background: var(--color-background-soft);
-    color: var(--color-text);
+    background: var(--sidebar-bg-hover);
+    color: var(--sidebar-text);
+    border-color: var(--sidebar-primary);
   }
 
   &:disabled {

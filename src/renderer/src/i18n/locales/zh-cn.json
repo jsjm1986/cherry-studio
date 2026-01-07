@@ -312,7 +312,7 @@
     },
     "authHeaderText": "在授权标头中使用：",
     "configuration": "配置",
-    "description": "通过 OpenAI 兼容的 HTTP API 暴露 Cherry Studio 的 AI 功能",
+    "description": "通过 OpenAI 兼容的 HTTP API 暴露 Her 的 AI 功能",
     "documentation": {
       "title": "API 文档"
     },
@@ -389,20 +389,20 @@
     "zoomOut": "缩小"
   },
   "assistants": {
-    "abbr": "助手",
+    "abbr": "角色",
     "clear": {
-      "content": "清空话题会删除助手下所有话题和文件，确定要继续吗？",
+      "content": "清空话题会删除角色下所有话题和文件，确定要继续吗？",
       "title": "清空话题"
     },
     "copy": {
-      "title": "复制助手"
+      "title": "复制角色"
     },
     "delete": {
-      "content": "删除助手会删除所有该助手下的话题和文件，确定要继续吗？",
-      "title": "删除助手"
+      "content": "删除角色会删除所有该角色下的话题和文件，确定要继续吗？",
+      "title": "删除角色"
     },
     "edit": {
-      "title": "编辑助手"
+      "title": "编辑角色"
     },
     "icon": {
       "type": "助手图标"
@@ -413,7 +413,7 @@
     },
     "presets": {
       "add": {
-        "button": "添加到助手",
+        "button": "添加到卡带库",
         "knowledge_base": {
           "label": "知识库",
           "placeholder": "选择知识库"
@@ -432,12 +432,12 @@
             }
           }
         },
-        "title": "创建助手",
+        "title": "创建卡带",
         "unsaved_changes_warning": "你有未保存的内容，确定要关闭吗？"
       },
       "delete": {
         "popup": {
-          "content": "确定要删除此助手吗？"
+          "content": "确定要删除此卡带吗？"
         }
       },
       "edit": {
@@ -446,10 +446,10 @@
             "title": "选择模型"
           }
         },
-        "title": "编辑助手"
+        "title": "编辑卡带"
       },
       "export": {
-        "agent": "导出助手"
+        "agent": "导出卡带"
       },
       "import": {
         "button": "导入",
@@ -468,11 +468,11 @@
         "url_placeholder": "输入 JSON URL"
       },
       "manage": {
-        "title": "管理助手"
+        "title": "管理卡带"
       },
-      "my_agents": "我的助手",
+      "my_agents": "我的卡带",
       "search": {
-        "no_results": "没有找到相关助手"
+        "no_results": "没有找到相关卡带"
       },
       "settings": {
         "title": "助手配置"
@@ -486,13 +486,13 @@
         "new": "新建",
         "system": "系统"
       },
-      "title": "助手库"
+      "title": "卡带库"
     },
     "save": {
       "success": "保存成功",
-      "title": "保存到助手库"
+      "title": "保存到卡带库"
     },
-    "search": "搜索助手",
+    "search": "搜索角色",
     "settings": {
       "default_model": "默认模型",
       "knowledge_base": {
@@ -553,7 +553,7 @@
       },
       "untagged": "未分组"
     },
-    "title": "助手"
+    "title": "角色"
   },
   "auth": {
     "error": "自动获取密钥失败，请手动获取",
@@ -598,7 +598,7 @@
     "add": {
       "assistant": {
         "description": "日常对话和快速问答",
-        "title": "添加助手"
+        "title": "添加卡带"
       },
       "option": {
         "title": "选择添加类型"
@@ -1312,6 +1312,13 @@
     "add": "添加专家",
     "add_custom": "自定义添加",
     "add_more": "添加更多",
+    "cartridge": {
+      "import": "人格卡带",
+      "importBtn": "导入",
+      "importError": "卡带解析失败",
+      "importSuccess": "卡带导入成功",
+      "loaded": "已加载卡带"
+    },
     "clear_mentioned": "清除已选专家",
     "clear_selection": "取消选择当前专家",
     "delete": "删除专家",
@@ -1322,20 +1329,13 @@
     "import": {
       "confirm": "导入 ({{count}})",
       "deselect_all": "取消全选",
-      "from_assistants": "从助手库导入",
-      "no_assistants": "暂无可导入的助手",
-      "no_results": "未找到匹配的助手",
-      "search": "搜索助手...",
+      "from_assistants": "从卡带库导入",
+      "no_assistants": "暂无可导入的卡带",
+      "no_results": "未找到匹配的卡带",
+      "search": "搜索卡带...",
       "select_all": "全选",
       "success": "成功导入 {{count}} 位专家",
-      "title": "从助手库导入"
-    },
-    "cartridge": {
-      "import": "人格卡带",
-      "importBtn": "导入",
-      "importSuccess": "卡带导入成功",
-      "importError": "卡带解析失败",
-      "loaded": "已加载卡带"
+      "title": "从卡带库导入"
     },
     "list": "专家列表",
     "mention": "提及专家",
@@ -1433,27 +1433,8 @@
     "title": "话题搜索"
   },
   "hosts": {
-    "about": {
-      "introduction": "自我介绍",
-      "introduction_placeholder": "简单介绍一下自己，让成员们更了解您",
-      "my_info": "我的信息",
-      "no_user_info": "点击添加您的个人信息",
-      "notes": "备注信息",
-      "notes_placeholder": "其他想让成员知道的信息",
-      "role": "角色/身份",
-      "role_placeholder": "例如：产品经理、开发者、设计师",
-      "room_info": "房间信息",
-      "system_prompt": "系统提示词",
-      "title": "关于",
-      "user_info_hint": "填写您的信息，帮助房间内的成员更好地了解您并进行协作"
-    },
     "add": "添加主机",
     "chat_hint": "已添加 {{count}} 位专家，使用 @ 提及专家开始对话",
-    "configuration": {
-      "hint": "点击下方按钮编辑房间配置",
-      "select_room": "请先选择房间",
-      "select_room_hint": "选择一个房间后可查看和编辑配置"
-    },
     "create_first": "创建房间",
     "current": "当前主机",
     "delete": "删除主机",
@@ -1463,41 +1444,39 @@
     "edit": "编辑主机",
     "emoji": "表情符号",
     "empty": "暂无主机，点击上方按钮创建",
-    "information": {
-      "configured": "已配置模型",
-      "description": "房间描述",
-      "member_list": "成员列表",
-      "members": "成员统计",
-      "more_members": "还有 {{count}} 位成员...",
-      "no_description": "暂无描述",
-      "title": "信息",
-      "total_members": "总成员"
-    },
     "list": "主机列表",
-    "member": {
-      "add": "添加成员",
-      "empty": "暂无成员",
-      "title": "成员"
-    },
     "name": "主机名称",
     "project": {
+      "content_preview": "内容预览",
+      "filename": "文件名",
+      "filename_placeholder": "请输入文件名",
+      "files": "项目文件",
+      "folder": "项目文件夹",
+      "folder_empty": "未设置项目文件夹",
+      "folder_help": "用于保存对话资料的本地文件夹，保存的内容可在此处查看",
+      "folder_placeholder": "例如：D:/projects/my-project",
+      "generate_filename": "AI 生成文件名",
+      "generating_filename": "正在生成文件名...",
+      "no_files": "暂无文件",
+      "open_folder": "打开文件夹",
+      "refresh": "刷新",
+      "save_full_context": "保存完整对话上下文",
+      "save_path": "保存路径",
+      "save_success": "已保存到项目文件夹",
+      "save_to_folder": "保存到项目文件夹",
+      "save_to_project": "存为资料",
+      "select_folder": "选择文件夹",
       "title": "项目"
     },
-    "room": {
-      "create": "创建房间",
-      "empty": "暂无房间",
-      "select": "选择房间",
-      "title": "房间"
-    },
+    "project_folder": "项目文件夹",
+    "project_folder_help": "用于保存对话资料的本地文件夹",
+    "project_folder_placeholder": "例如：D:/projects/my-project",
+    "select_folder": "选择文件夹",
     "select_hint": "请先选择一个房间",
     "settings": "房间设置",
     "system_prompt": "系统提示词",
     "system_prompt_help": "当@专家时，此内容会作为背景信息发送给AI",
     "system_prompt_placeholder": "例如：这是一个专注于写作的工作空间，成员包括各类写作专家...",
-    "tabs": {
-      "chat": "聊天",
-      "configuration": "配置"
-    },
     "title": "主机",
     "topics": {
       "add": "新建对话",
@@ -1510,16 +1489,7 @@
     "welcome": "欢迎使用主机与专家",
     "welcome_desc": "创建主机并添加专家，开始多角色协作对话",
     "welcome_message": "欢迎消息",
-    "welcome_message_placeholder": "进入房间时显示的引导消息，如：你好，欢迎来到XXX房间。本房间可以XXX，您可以@XXX专家",
-    "world": {
-      "all": "所有世界",
-      "create": "创建世界",
-      "delete": "删除世界",
-      "edit": "编辑世界",
-      "select": "选择世界",
-      "title": "世界",
-      "ungrouped": "未分组"
-    }
+    "welcome_message_placeholder": "进入房间时显示的引导消息，如：你好，欢迎来到XXX房间。本房间可以XXX，您可以@XXX专家"
   },
   "html_artifacts": {
     "capture": {
@@ -3041,7 +3011,7 @@
           },
           "description": {
             "0": "划词助手需「<strong>辅助功能权限</strong>」才能正常工作。",
-            "1": "请点击「<strong>去设置</strong>」，并在稍后弹出的权限请求弹窗中点击 「<strong>打开系统设置</strong>」 按钮，然后在之后的应用列表中找到 「<strong>Cherry Studio</strong>」，并打开权限开关。",
+            "1": "请点击「<strong>去设置</strong>」，并在稍后弹出的权限请求弹窗中点击 「<strong>打开系统设置</strong>」 按钮，然后在之后的应用列表中找到 「<strong>Her</strong>」，并打开权限开关。",
             "2": "完成设置后，请再次开启划词助手。"
           },
           "title": "辅助功能权限"
@@ -3053,7 +3023,7 @@
         "title": "应用筛选名单",
         "user_tips": {
           "mac": "请输入应用的Bundle ID，每行一个，不区分大小写，可以模糊匹配。例如：com.google.Chrome、com.apple.mail等",
-          "windows": "请输入应用的执行文件名，每行一个，不区分大小写，可以模糊匹配。例如：chrome.exe、weixin.exe、Cherry Studio.exe等"
+          "windows": "请输入应用的执行文件名，每行一个，不区分大小写，可以模糊匹配。例如：chrome.exe、weixin.exe、Her.exe等"
         }
       },
       "search_modal": {
@@ -3304,7 +3274,7 @@
           "confirm_close_title": "确认关闭",
           "connected": "连接成功",
           "connection_failed": "连接失败",
-          "content": "请确保电脑和手机处于同一网络以使用局域网传输。请打开 Cherry Studio App 扫描此二维码。",
+          "content": "请确保电脑和手机处于同一网络以使用局域网传输。请打开 Her App 扫描此二维码。",
           "error": {
             "init_failed": "初始化失败",
             "no_file": "未选择文件",
@@ -4087,7 +4057,7 @@
       },
       "oauth": {
         "callback": {
-          "message": "您可以关闭此页面并返回 Cherry Studio",
+          "message": "您可以关闭此页面并返回 Her",
           "title": "认证成功"
         }
       },
@@ -4954,7 +4924,7 @@
     "notes": "笔记",
     "paintings": "绘画",
     "settings": "设置",
-    "store": "助手库",
+    "store": "卡带库",
     "translate": "翻译"
   },
   "trace": {

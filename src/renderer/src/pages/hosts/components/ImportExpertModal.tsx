@@ -1,8 +1,10 @@
 import { HStack } from '@renderer/components/Layout'
+import { FormInput, StyledModal } from '@renderer/components/StyledModal'
 import { useAppSelector } from '@renderer/store'
 import { selectRegularAssistants } from '@renderer/store/assistants'
 import type { Assistant } from '@renderer/types'
-import { Checkbox, Input, List, Modal } from 'antd'
+import { Checkbox, List } from 'antd'
+import { Search } from 'lucide-react'
 import type { FC } from 'react'
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -72,7 +74,7 @@ const ImportExpertModal: FC<Props> = ({ open, onImport, onCancel }) => {
   }, [onCancel])
 
   return (
-    <Modal
+    <StyledModal
       title={t('experts.import.title')}
       open={open}
       onOk={handleOk}
@@ -83,12 +85,18 @@ const ImportExpertModal: FC<Props> = ({ open, onImport, onCancel }) => {
       destroyOnClose>
       <ModalContent>
         <SearchBar>
-          <Input.Search
-            placeholder={t('experts.import.search')}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            allowClear
-          />
+          <SearchInputWrapper>
+            <SearchIcon>
+              <Search size={16} />
+            </SearchIcon>
+            <FormInput
+              placeholder={t('experts.import.search')}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              allowClear
+              style={{ paddingLeft: 36 }}
+            />
+          </SearchInputWrapper>
           <SelectAllButton onClick={toggleSelectAll}>
             {selectedIds.size === filteredAssistants.length && filteredAssistants.length > 0
               ? t('experts.import.deselect_all')
@@ -118,7 +126,7 @@ const ImportExpertModal: FC<Props> = ({ open, onImport, onCancel }) => {
           />
         )}
       </ModalContent>
-    </Modal>
+    </StyledModal>
   )
 }
 
@@ -133,20 +141,33 @@ const SearchBar = styled.div`
   display: flex;
   gap: 12px;
   align-items: center;
+`
 
-  .ant-input-search {
-    flex: 1;
-  }
+const SearchInputWrapper = styled.div`
+  flex: 1;
+  position: relative;
+`
+
+const SearchIcon = styled.span`
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-tertiary);
+  z-index: 1;
+  display: flex;
+  align-items: center;
 `
 
 const SelectAllButton = styled.span`
-  color: var(--color-primary);
+  color: #3b82f6;
   cursor: pointer;
   white-space: nowrap;
   font-size: 13px;
+  transition: all 0.15s ease;
 
   &:hover {
-    text-decoration: underline;
+    color: #2563eb;
   }
 `
 
@@ -167,7 +188,7 @@ const AssistantItem = styled.div`
   gap: 12px;
   padding: 12px 16px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.15s ease;
 
   &:hover {
     background-color: var(--color-background-soft);

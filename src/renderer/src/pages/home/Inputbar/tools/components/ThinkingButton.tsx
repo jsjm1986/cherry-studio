@@ -1,12 +1,4 @@
 import { ActionIconButton } from '@renderer/components/Buttons'
-import {
-  MdiLightbulbAutoOutline,
-  MdiLightbulbOffOutline,
-  MdiLightbulbOn,
-  MdiLightbulbOn30,
-  MdiLightbulbOn50,
-  MdiLightbulbOn80
-} from '@renderer/components/Icons/SVGIcon'
 import { QuickPanelReservedSymbol, useQuickPanel } from '@renderer/components/QuickPanel'
 import {
   getThinkModelType,
@@ -21,6 +13,7 @@ import { getReasoningEffortOptionsLabel } from '@renderer/i18n/label'
 import type { ToolQuickPanelApi } from '@renderer/pages/home/Inputbar/types'
 import type { Model, ThinkingOption } from '@renderer/types'
 import { Tooltip } from 'antd'
+import { Brain } from 'lucide-react'
 import type { FC, ReactElement } from 'react'
 import { useCallback, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -170,33 +163,8 @@ const ThinkingButton: FC<Props> = ({ quickPanel, model, assistantId }): ReactEle
 }
 
 const ThinkingIcon = (option?: ThinkingOption) => {
-  let IconComponent: React.FC<React.SVGProps<SVGSVGElement>> | null = null
-
-  switch (option) {
-    case 'minimal':
-      IconComponent = MdiLightbulbOn30
-      break
-    case 'low':
-      IconComponent = MdiLightbulbOn50
-      break
-    case 'medium':
-      IconComponent = MdiLightbulbOn80
-      break
-    case 'high':
-      IconComponent = MdiLightbulbOn
-      break
-    case 'auto':
-      IconComponent = MdiLightbulbAutoOutline
-      break
-    case 'none':
-      IconComponent = MdiLightbulbOffOutline
-      break
-    default:
-      IconComponent = MdiLightbulbOffOutline
-      break
-  }
-
-  return <IconComponent className="icon" width={18} height={18} style={{ marginTop: -2 }} />
+  const isEnabled = option !== undefined && option !== 'none'
+  return <Brain size={18} style={{ opacity: isEnabled ? 1 : 0.5 }} />
 }
 
 export default ThinkingButton

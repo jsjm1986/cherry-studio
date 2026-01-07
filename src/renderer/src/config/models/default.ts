@@ -25,6 +25,14 @@ export const SYSTEM_MODELS: Record<SystemProviderId | 'defaultModel', Model[]> =
     // Default quick assistant model
     glm45FlashModel
   ],
+  yunwu: [
+    {
+      id: 'gemini-3-pro-preview',
+      name: 'Gemini 3 Pro Preview',
+      provider: 'yunwu',
+      group: 'Gemini'
+    }
+  ],
   cherryin: [],
   vertexai: [],
   sophnet: [],

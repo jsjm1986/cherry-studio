@@ -2,18 +2,20 @@ import MultiSelectActionPopup from '@renderer/components/Popups/MultiSelectionPo
 import SaveToLibraryPopup from '@renderer/components/Popups/SaveToLibraryPopup'
 import TextSelectionToolbar from '@renderer/components/Popups/TextSelectionToolbar'
 import CustomTag from '@renderer/components/Tags/CustomTag'
+import { useTheme } from '@renderer/context/ThemeProvider'
 import { useChatContext } from '@renderer/hooks/useChatContext'
 import { useAppDispatch } from '@renderer/store'
 import { addNotebookItem } from '@renderer/store/assistants'
 import type { Assistant, Expert, Host, Model, Topic } from '@renderer/types'
 import { nanoid } from '@reduxjs/toolkit'
-import { AtSign, Settings2 } from 'lucide-react'
+import { AtSign, ChevronDown, Settings2, Users } from 'lucide-react'
 import type { FC } from 'react'
 import { useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
 import Messages from '../../home/Messages/Messages'
+import { useExpertContext } from '../context/ExpertContext'
 import HostsInputbar from './HostsInputbar'
 
 interface Props {
@@ -30,10 +32,14 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
   const { isMultiSelectMode } = useChatContext(topic)
   const chatContentRef = useRef<HTMLDivElement>(null)
   const dispatch = useAppDispatch()
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+  const { setMentionedExpert } = useExpertContext()
 
   // 提升的状态：选中的专家和模型
   const [selectedExpert, setSelectedExpert] = useState<Expert | null>(null)
   const [mentionedModels, setMentionedModels] = useState<Model[]>([])
+  const [isHeaderExpanded, setIsHeaderExpanded] = useState(false)
 
   // 清除选中的专家
   const handleClearExpert = useCallback(() => {
@@ -92,22 +98,29 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
 
   return (
     <>
-      <ChatHeader>
-        <ChatHeaderLeft>
-          <ChatHeaderIcon onClick={onHostClick}>{activeHost?.emoji || '🏠'}</ChatHeaderIcon>
-          <ChatHeaderInfo>
+      <ChatHeaderWrapper $isDark={isDark}>
+        <ChatHeader onClick={() => setIsHeaderExpanded(!isHeaderExpanded)}>
+          <ChatHeaderLeft>
+            <ChatHeaderIcon onClick={onHostClick}>{activeHost?.emoji || '🏠'}</ChatHeaderIcon>
             <ChatHeaderTitle>{activeHost?.name}</ChatHeaderTitle>
-            <ChatHeaderSubtitle>
-              {experts.length > 0 ? t('hosts.chat_hint', { count: experts.length }) : t('hosts.current')}
-            </ChatHeaderSubtitle>
-          </ChatHeaderInfo>
-        </ChatHeaderLeft>
+            {experts.length > 0 && (
+              <ExpertBadge>
+                <Users size={12} />
+                <span>{experts.length}</span>
+              </ExpertBadge>
+            )}
+          </ChatHeaderLeft>
 
-        {/* 标签显示区域 */}
-        {(selectedExpert || mentionedModels.length > 0) && (
-          <ChatHeaderTags>
+          <ChatHeaderCenter>
             {selectedExpert && (
-              <CustomTag icon={<AtSign size={12} />} color="var(--color-primary)" closable onClose={handleClearExpert}>
+              <CustomTag
+                icon={<AtSign size={12} />}
+                color="var(--color-primary)"
+                closable
+                onClose={(e) => {
+                  e?.stopPropagation()
+                  handleClearExpert()
+                }}>
                 <TagContent>
                   <span>{selectedExpert.emoji || '👤'}</span>
                   <span>{selectedExpert.name}</span>
@@ -120,29 +133,64 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
                 icon={<AtSign size={12} />}
                 color="#1677ff"
                 closable
-                onClose={() => handleRemoveModel(model)}>
+                onClose={(e) => {
+                  e?.stopPropagation()
+                  handleRemoveModel(model)
+                }}>
                 {model.name}
               </CustomTag>
             ))}
-          </ChatHeaderTags>
-        )}
+          </ChatHeaderCenter>
 
-        <ChatHeaderRight>
-          {experts.length > 0 && (
-            <ExpertAvatars>
-              {experts.slice(0, 3).map((expert) => (
-                <ExpertAvatarSmall key={expert.id} title={expert.name}>
-                  {expert.emoji || '👤'}
-                </ExpertAvatarSmall>
-              ))}
-              {experts.length > 3 && <ExpertCount>+{experts.length - 3}</ExpertCount>}
-            </ExpertAvatars>
-          )}
-          <SettingsButton onClick={onHostClick} title={t('hosts.settings')}>
-            <Settings2 size={18} />
-          </SettingsButton>
-        </ChatHeaderRight>
-      </ChatHeader>
+          <ChatHeaderRight>
+            {experts.length > 0 && (
+              <ExpertAvatars>
+                {experts.slice(0, 3).map((expert) => (
+                  <ExpertAvatarSmall key={expert.id} title={expert.name}>
+                    {expert.emoji || '👤'}
+                  </ExpertAvatarSmall>
+                ))}
+                {experts.length > 3 && <ExpertCount>+{experts.length - 3}</ExpertCount>}
+              </ExpertAvatars>
+            )}
+            <ExpandButton $expanded={isHeaderExpanded}>
+              <ChevronDown size={16} />
+            </ExpandButton>
+            <SettingsButton
+              onClick={(e) => {
+                e.stopPropagation()
+                onHostClick?.()
+              }}
+              title={t('hosts.settings')}>
+              <Settings2 size={18} />
+            </SettingsButton>
+          </ChatHeaderRight>
+        </ChatHeader>
+
+        {/* 展开的详情面板 */}
+        <ExpandedPanel $expanded={isHeaderExpanded}>
+          <PanelContent>
+            <PanelHint>
+              {experts.length > 0
+                ? t('hosts.chat_hint', { count: experts.length })
+                : t('hosts.no_experts_hint', { defaultValue: '添加专家开始对话' })}
+            </PanelHint>
+            {experts.length > 0 && (
+              <ExpertList>
+                {experts.map((expert) => (
+                  <ExpertChip
+                    key={expert.id}
+                    $active={selectedExpert?.id === expert.id}
+                    onClick={() => setMentionedExpert(expert)}>
+                    <span className="emoji">{expert.emoji || '👤'}</span>
+                    <span className="name">{expert.name}</span>
+                  </ExpertChip>
+                ))}
+              </ExpertList>
+            )}
+          </PanelContent>
+        </ExpandedPanel>
+      </ChatHeaderWrapper>
       <ChatContent ref={chatContentRef}>
         <Messages assistant={assistant} topic={topic} setActiveTopic={setActiveTopic} onHostClick={onHostClick} />
         {!isMultiSelectMode && (
@@ -175,40 +223,54 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
   )
 }
 
+const ChatHeaderWrapper = styled.div<{ $isDark: boolean }>`
+  flex-shrink: 0;
+  background: ${({ $isDark }) => ($isDark ? '#0f0f1a' : '#ffffff')};
+  border-bottom: 1px solid ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.06)' : '#f0f0f0')};
+
+  /* 主题变量 */
+  --chat-bg: ${({ $isDark }) => ($isDark ? '#0f0f1a' : '#ffffff')};
+  --chat-bg-soft: ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.05)' : '#f3f4f6')};
+  --chat-bg-mute: ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.08)' : '#e5e7eb')};
+  --chat-border: ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.06)' : '#f0f0f0')};
+  --chat-text: ${({ $isDark }) => ($isDark ? '#ffffff' : '#1f2937')};
+  --chat-text-secondary: ${({ $isDark }) => ($isDark ? '#9ca3af' : '#6b7280')};
+  --chat-primary: #3b82f6;
+  --chat-primary-soft: ${({ $isDark }) => ($isDark ? 'rgba(59,130,246,0.15)' : 'rgba(59,130,246,0.08)')};
+`
+
 const ChatHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px 20px;
-  background: var(--color-background-soft);
-  border-bottom: 1px solid var(--color-border);
-  flex-shrink: 0;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--chat-bg-soft);
+  }
 `
 
 const ChatHeaderLeft = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 `
 
-const ChatHeaderRight = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-`
-
-const ChatHeaderTags = styled.div`
+const ChatHeaderCenter = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
   flex: 1;
   justify-content: center;
   padding: 0 16px;
-  overflow-x: auto;
+`
 
-  &::-webkit-scrollbar {
-    height: 0;
-  }
+const ChatHeaderRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `
 
 const TagContent = styled.span`
@@ -218,37 +280,43 @@ const TagContent = styled.span`
 `
 
 const ChatHeaderIcon = styled.div`
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: var(--color-background-mute);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--chat-primary-soft);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 16px;
   cursor: pointer;
   transition: all 0.15s ease;
+  border: 1px solid transparent;
 
   &:hover {
-    background: var(--color-primary-soft);
+    border-color: rgba(59, 130, 246, 0.3);
+    transform: scale(1.05);
   }
-`
-
-const ChatHeaderInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
 `
 
 const ChatHeaderTitle = styled.div`
   font-size: 14px;
   font-weight: 600;
-  color: var(--color-text);
+  color: var(--chat-text);
 `
 
-const ChatHeaderSubtitle = styled.div`
+const ExpertBadge = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--chat-bg-soft);
+  border-radius: 12px;
   font-size: 12px;
-  color: var(--color-text-secondary);
+  color: var(--chat-text-secondary);
+
+  svg {
+    opacity: 0.7;
+  }
 `
 
 const ExpertAvatars = styled.div`
@@ -260,17 +328,23 @@ const ExpertAvatarSmall = styled.div`
   width: 26px;
   height: 26px;
   border-radius: 8px;
-  background: var(--color-background-mute);
+  background: var(--chat-primary-soft);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 12px;
   margin-left: -6px;
-  border: 2px solid var(--color-background-soft);
+  border: 2px solid var(--chat-bg);
   cursor: default;
+  transition: all 0.15s ease;
 
   &:first-child {
     margin-left: 0;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    z-index: 1;
   }
 `
 
@@ -278,15 +352,38 @@ const ExpertCount = styled.div`
   width: 26px;
   height: 26px;
   border-radius: 8px;
-  background: var(--color-background-mute);
+  background: var(--chat-bg-soft);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 10px;
-  font-weight: 500;
-  color: var(--color-text-secondary);
+  font-weight: 600;
+  color: var(--chat-primary);
   margin-left: -6px;
-  border: 2px solid var(--color-background-soft);
+  border: 2px solid var(--chat-bg);
+`
+
+const ExpandButton = styled.button<{ $expanded: boolean }>`
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--chat-text-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  svg {
+    transition: transform 0.2s ease;
+    transform: rotate(${({ $expanded }) => ($expanded ? '180deg' : '0deg')});
+  }
+
+  &:hover {
+    background: var(--chat-bg-soft);
+  }
 `
 
 const SettingsButton = styled.button`
@@ -294,17 +391,66 @@ const SettingsButton = styled.button`
   height: 32px;
   border: none;
   background: transparent;
-  color: var(--color-text-secondary);
+  color: var(--chat-text-secondary);
   border-radius: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 
   &:hover {
-    background: var(--color-background-mute);
-    color: var(--color-text);
+    background: var(--chat-primary-soft);
+    color: var(--chat-primary);
+  }
+`
+
+const ExpandedPanel = styled.div<{ $expanded: boolean }>`
+  max-height: ${({ $expanded }) => ($expanded ? '200px' : '0')};
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+  border-top: ${({ $expanded }) => ($expanded ? '1px solid var(--chat-border)' : 'none')};
+`
+
+const PanelContent = styled.div`
+  padding: 12px 20px 16px;
+`
+
+const PanelHint = styled.div`
+  font-size: 12px;
+  color: var(--chat-text-secondary);
+  margin-bottom: 12px;
+`
+
+const ExpertList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+`
+
+const ExpertChip = styled.button<{ $active: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid ${({ $active }) => ($active ? 'var(--chat-primary)' : 'var(--chat-border)')};
+  background: ${({ $active }) => ($active ? 'var(--chat-primary-soft)' : 'var(--chat-bg)')};
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 13px;
+
+  .emoji {
+    font-size: 14px;
+  }
+
+  .name {
+    color: ${({ $active }) => ($active ? 'var(--chat-primary)' : 'var(--chat-text)')};
+  }
+
+  &:hover {
+    border-color: var(--chat-primary);
+    background: var(--chat-primary-soft);
   }
 `
 
