@@ -117,10 +117,7 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
                 icon={<AtSign size={12} />}
                 color="var(--color-primary)"
                 closable
-                onClose={(e) => {
-                  e?.stopPropagation()
-                  handleClearExpert()
-                }}>
+                onClose={() => handleClearExpert()}>
                 <TagContent>
                   <span>{selectedExpert.emoji || '👤'}</span>
                   <span>{selectedExpert.name}</span>
@@ -133,10 +130,7 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
                 icon={<AtSign size={12} />}
                 color="#1677ff"
                 closable
-                onClose={(e) => {
-                  e?.stopPropagation()
-                  handleRemoveModel(model)
-                }}>
+                onClose={() => handleRemoveModel(model)}>
                 {model.name}
               </CustomTag>
             ))}

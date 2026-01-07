@@ -1,5 +1,5 @@
 import { FC, useState } from 'react'
-import styled, { keyframes } from 'styled-components'
+import styled from 'styled-components'
 import {
   Moon,
   Sun,
@@ -7,12 +7,7 @@ import {
   Send,
   Settings,
   User,
-  Bell,
   Search,
-  Check,
-  X,
-  AlertCircle,
-  MessageSquare,
   BookOpen,
   Mic,
   Layers,
@@ -20,9 +15,7 @@ import {
   Plus,
   FileText,
   Zap,
-  Globe,
-  Heart,
-  Star
+  Globe
 } from 'lucide-react'
 
 /**

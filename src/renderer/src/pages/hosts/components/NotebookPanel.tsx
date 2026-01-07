@@ -2,7 +2,7 @@ import { useTheme } from '@renderer/context/ThemeProvider'
 import { useAppDispatch } from '@renderer/store'
 import { removeNotebookItem, updateNotebookItem } from '@renderer/store/assistants'
 import type { Host, NotebookItem, ProjectFile } from '@renderer/types'
-import { Button, Empty, Popconfirm, Spin, Tabs, Tooltip } from 'antd'
+import { Button, Empty, Modal, Popconfirm, Spin, Tabs, Tooltip } from 'antd'
 import {
   ChevronLeft,
   ChevronRight,

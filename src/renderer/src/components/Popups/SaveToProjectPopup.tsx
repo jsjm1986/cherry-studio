@@ -78,7 +78,7 @@ ${mainText}`
         if (msg.role === 'user') {
           content += `### 用户\n${getMainTextContent(msg)}\n\n`
         } else if (msg.role === 'assistant') {
-          const expertName = msg.modelName || 'AI'
+          const expertName = msg.expertName || msg.model?.name || 'AI'
           content += `### ${expertName}\n${getMainTextContent(msg)}\n\n`
         }
       }

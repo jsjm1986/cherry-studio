@@ -4,7 +4,7 @@ import { FormGroup, FormHint, FormInput, FormLabel, FormTextArea, StyledModal } 
 import AssistantKnowledgeBaseSettings from '@renderer/pages/settings/AssistantSettings/AssistantKnowledgeBaseSettings'
 import AssistantMCPSettings from '@renderer/pages/settings/AssistantSettings/AssistantMCPSettings'
 import type { Assistant, AssistantSettings, Expert, ExpertPromptSettings } from '@renderer/types'
-import { Button, Divider, Modal, Popover, Select, Switch, Tabs } from 'antd'
+import { Divider, Modal, Popover, Select, Switch, Tabs } from 'antd'
 import type { FC } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -209,7 +209,7 @@ const ExpertSettingsPopup: FC<Props> = ({ open, expert, onSave, onCancel }) => {
               <FormLabel>{t('experts.promptSettings.hostPromptMode', { defaultValue: '主机提示词' })}</FormLabel>
               <StyledSelect
                 value={localExpert.promptSettings?.hostPromptMode ?? 'append'}
-                onChange={(value) => updatePromptSettings({ hostPromptMode: value })}
+                onChange={(value) => updatePromptSettings({ hostPromptMode: value as 'append' | 'ignore' })}
                 style={{ width: '100%' }}
                 options={[
                   {
