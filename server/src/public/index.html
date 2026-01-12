@@ -53,10 +53,14 @@
           <h3 class="text-gray-500 text-sm">注册赠送积分</h3>
           <div class="flex items-center gap-2 mt-1">
             <input type="number" id="defaultQuota" min="0"
-              class="w-24 px-2 py-1 text-xl font-bold text-purple-500 border border-gray-300 rounded focus:outline-none focus:border-purple-500"
-              onchange="saveSettings()">
+              class="w-24 px-2 py-1 text-xl font-bold text-purple-500 border border-gray-300 rounded focus:outline-none focus:border-purple-500">
             <span class="text-gray-400 text-sm">点</span>
+            <button onclick="saveSettings()"
+              class="px-3 py-1 bg-purple-500 text-white text-sm rounded hover:bg-purple-600 transition">
+              保存
+            </button>
           </div>
+          <p id="settingsSaved" class="text-green-500 text-xs mt-1 hidden">✓ 已保存</p>
         </div>
         <div class="bg-white rounded-lg shadow p-6">
           <h3 class="text-gray-500 text-sm">服务状态</h3>
@@ -224,6 +228,7 @@
     // 保存系统设置
     function saveSettings() {
       const defaultQuota = document.getElementById('defaultQuota').value
+      const savedEl = document.getElementById('settingsSaved')
 
       fetch('/api/admin/settings', {
         method: 'PUT',
@@ -236,10 +241,16 @@
         .then(res => res.json())
         .then(data => {
           if (data.success) {
-            // 可以显示保存成功提示
+            savedEl.classList.remove('hidden')
+            setTimeout(() => savedEl.classList.add('hidden'), 2000)
+          } else {
+            alert(data.message || '保存失败')
           }
         })
-        .catch(err => console.error('Save settings error:', err))
+        .catch(err => {
+          console.error('Save settings error:', err)
+          alert('保存失败')
+        })
     }
 
     // 加载用户列表
@@ -412,6 +423,7 @@
           .then(res => {
             if (res.ok) {
               showAdminPage()
+              loadSettings()
               loadUsers()
             } else {
               localStorage.removeItem('adminPassword')

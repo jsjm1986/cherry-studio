@@ -171,6 +171,7 @@ export type GeminiOptions = {
   streamOutput: boolean
   signal?: AbortSignal
   timeout?: number
+  headers?: Record<string, string>
 }
 
 /**
