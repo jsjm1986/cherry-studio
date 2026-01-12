@@ -1,9 +1,11 @@
 import { loggerService } from '@logger'
 import { autoRenameTopic } from '@renderer/hooks/useTopic'
 import i18n from '@renderer/i18n'
+import { authService } from '@renderer/services/AuthService'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import { NotificationService } from '@renderer/services/NotificationService'
 import { estimateMessagesUsage } from '@renderer/services/TokenService'
+import { setMessageQuota } from '@renderer/store/auth'
 import { selectMessagesForTopic } from '@renderer/store/newMessage'
 import { newMessagesActions } from '@renderer/store/newMessage'
 import type { Assistant } from '@renderer/types'
@@ -75,6 +77,21 @@ export const createBaseCallbacks = (deps: BaseCallbacksDependencies) => {
       const serializableError = serializeError(error)
       if (isErrorTypeAbort) {
         serializableError.message = 'pause_placeholder'
+      }
+
+      // 【安全关键】非用户中止的错误，退还已扣减的配额
+      // 用户主动暂停不退还，真正的网络/服务器错误才退还
+      if (!isErrorTypeAbort && authService.isLoggedIn()) {
+        authService
+          .refundQuota()
+          .then((result) => {
+            if (result.success && result.quota !== undefined) {
+              dispatch(setMessageQuota(result.quota))
+            }
+          })
+          .catch((err) => {
+            logger.warn('Failed to refund quota on error:', err)
+          })
       }
 
       const duration = Date.now() - startTime
@@ -166,6 +183,9 @@ export const createBaseCallbacks = (deps: BaseCallbacksDependencies) => {
 
         // 更新topic的name
         autoRenameTopic(assistant, topicId)
+
+        // 注意：配额已在 sendMessage 发送前预扣减
+        // 这里不再重复扣减，避免多模型回复时重复扣费
 
         // 处理usage估算
         // For OpenRouter, always use the accurate usage data from API, don't estimate

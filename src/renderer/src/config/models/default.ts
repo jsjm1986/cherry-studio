@@ -1,5 +1,14 @@
 import type { Model, SystemProviderId } from '@renderer/types'
 
+// 内置默认模型 - Yunwu AI Gemini 3 Pro Preview
+export const yunwuGeminiModel: Model = {
+  id: 'gemini-3-pro-preview',
+  name: 'Gemini 3 Pro Preview',
+  provider: 'yunwu',
+  group: 'Gemini'
+}
+
+// 以下模型仅作为兼容保留，实际不再使用
 export const glm45FlashModel: Model = {
   id: 'glm-4.5-flash',
   name: 'GLM-4.5-Flash',
@@ -16,23 +25,16 @@ export const qwen38bModel: Model = {
 
 export const SYSTEM_MODELS: Record<SystemProviderId | 'defaultModel', Model[]> = {
   defaultModel: [
-    // Default assistant model
-    glm45FlashModel,
+    // Default assistant model - 使用内置 Yunwu AI 模型
+    yunwuGeminiModel,
     // Default topic naming model
-    qwen38bModel,
+    yunwuGeminiModel,
     // Default translation model
-    glm45FlashModel,
+    yunwuGeminiModel,
     // Default quick assistant model
-    glm45FlashModel
+    yunwuGeminiModel
   ],
-  yunwu: [
-    {
-      id: 'gemini-3-pro-preview',
-      name: 'Gemini 3 Pro Preview',
-      provider: 'yunwu',
-      group: 'Gemini'
-    }
-  ],
+  yunwu: [yunwuGeminiModel],
   cherryin: [],
   vertexai: [],
   sophnet: [],

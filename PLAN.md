@@ -239,3 +239,173 @@ const importExpertFromAssistant = (assistant: Assistant, hostId: string): Expert
 3. [ ] 添加专家时可选择"从助手库导入"或"自定义添加"
 4. [ ] UI 整体风格统一，交互流畅
 5. [ ] 所有文本支持中英文切换
+
+---
+
+# 对话次数限制功能实现计划
+
+## 需求概述
+1. 用户注册时赠送 10 次对话机会
+2. 每次发送消息，大模型成功响应后，次数 -1
+3. 次数用完后不能继续对话
+4. 次数需要与服务器同步
+5. 服务端可以修改/增加用户次数
+6. 前端需要显示剩余次数
+
+## 技术分析
+
+### 关键代码位置
+- **后端用户数据**: `server/src/db.js` - JSON 文件存储
+- **前端认证状态**: `src/renderer/src/store/auth.ts` + `AuthService.ts`
+- **消息发送成功回调**: `src/renderer/src/services/messageStreaming/callbacks/baseCallbacks.ts:129` - `onComplete` 函数
+- **消息完成事件**: `EventEmitter.emit(EVENT_NAMES.MESSAGE_COMPLETE, ...)` 在响应成功时触发
+
+### 扣减时机
+在 `baseCallbacks.ts` 的 `onComplete` 回调中，当 `status === 'success'` 时，说明大模型成功响应，此时扣减次数。
+
+---
+
+## 实现计划
+
+### 第一阶段：后端改造
+
+#### 1.1 修改用户数据结构
+**文件**: `server/src/db.js`
+- 用户创建时添加 `message_quota: 10` 字段（默认10次）
+
+#### 1.2 添加次数相关 API
+**文件**: `server/src/routes/auth.js`
+- `POST /api/auth/consume` - 消耗一次对话次数（需认证）
+  - 检查次数是否 > 0
+  - 扣减次数
+  - 返回剩余次数
+- `GET /api/auth/quota` - 获取当前剩余次数（需认证）
+
+#### 1.3 管理员接口
+**文件**: `server/src/routes/admin.js`
+- 用户列表返回 `message_quota` 字段
+- 更新用户时支持修改 `message_quota`
+- 管理后台界面显示和编辑次数
+
+---
+
+### 第二阶段：前端状态管理
+
+#### 2.1 更新认证类型定义
+**文件**: `src/renderer/src/store/auth.ts`
+```typescript
+export interface AuthUser {
+  // ... 现有字段
+  messageQuota?: number  // 新增：剩余对话次数
+}
+```
+
+#### 2.2 添加次数相关 action
+**文件**: `src/renderer/src/store/auth.ts`
+- `setMessageQuota` - 设置次数
+- `decrementQuota` - 次数 -1
+
+#### 2.3 更新 AuthService
+**文件**: `src/renderer/src/services/AuthService.ts`
+- `consumeQuota()` - 调用后端消耗次数 API
+- `getQuota()` - 获取剩余次数
+- 登录/注册成功后返回 `message_quota`
+
+---
+
+### 第三阶段：消息发送拦截
+
+#### 3.1 发送前检查次数
+**文件**: `src/renderer/src/store/thunk/messageThunk.ts`
+- 在 `sendMessage` 开头检查：
+  - 用户是否登录
+  - 剩余次数是否 > 0
+  - 次数不足时显示提示并阻止发送
+
+#### 3.2 成功响应后扣减次数
+**文件**: `src/renderer/src/services/messageStreaming/callbacks/baseCallbacks.ts`
+- 在 `onComplete` 中当 `status === 'success'` 时：
+  - 调用 `authService.consumeQuota()` 扣减次数
+  - 更新 Redux store 中的 `messageQuota`
+
+---
+
+### 第四阶段：前端显示
+
+#### 4.1 侧边栏显示剩余次数
+**文件**: `src/renderer/src/components/app/Sidebar.tsx`
+- 在头像下方显示剩余次数徽标
+- 样式：小圆形徽标，显示数字
+- 未登录时不显示
+- 次数为 0 时显示红色警告
+
+#### 4.2 AuthPopup 显示次数
+**文件**: `src/renderer/src/components/Popups/AuthPopup.tsx`
+- 已登录状态下显示"剩余对话次数: X"
+- 次数为 0 时显示"次数已用完"提示
+
+#### 4.3 次数不足提示
+- 当用户尝试发送消息但次数为 0 时
+- 弹出提示框，引导用户联系管理员充值
+
+---
+
+### 第五阶段：管理后台
+
+#### 5.1 更新管理后台界面
+**文件**: `server/src/public/index.html`
+- 用户列表显示剩余次数列
+- 编辑用户时可修改次数
+- 添加"充值"按钮快速增加次数
+
+---
+
+## 文件修改清单
+
+### 后端 (server/)
+1. `src/db.js` - 用户数据结构添加 message_quota
+2. `src/routes/auth.js` - 添加 consume/quota API
+3. `src/routes/admin.js` - 返回和更新 message_quota
+4. `src/public/index.html` - 管理后台显示次数
+
+### 前端 (src/renderer/)
+1. `src/store/auth.ts` - 添加 messageQuota 字段和 actions
+2. `src/services/AuthService.ts` - 添加 consumeQuota/getQuota 方法
+3. `src/store/thunk/messageThunk.ts` - 发送前检查次数
+4. `src/services/messageStreaming/callbacks/baseCallbacks.ts` - 成功后扣减
+5. `src/components/app/Sidebar.tsx` - 显示剩余次数
+6. `src/components/Popups/AuthPopup.tsx` - 显示剩余次数
+
+---
+
+## 数据流程图
+
+```
+用户发送消息
+    ↓
+检查登录状态和剩余次数
+    ↓ (次数 > 0)
+发送消息到大模型
+    ↓
+大模型返回响应
+    ↓
+onComplete(status='success')
+    ↓
+调用 POST /api/auth/consume
+    ↓
+服务端次数 -1，返回剩余次数
+    ↓
+更新前端 Redux store
+    ↓
+UI 自动更新显示新次数
+```
+
+---
+
+## 注意事项
+
+1. **离线使用**: 如果网络断开，次数扣减会失败，需要处理这种情况
+2. **并发安全**: 服务端需要处理并发请求的次数扣减
+3. **用户体验**: 次数不足时给出清晰的提示和引导
+4. **数据同步**: 每次登录时重新获取最新次数，避免本地缓存不一致
+

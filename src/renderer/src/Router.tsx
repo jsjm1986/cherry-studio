@@ -17,12 +17,12 @@ import KnowledgePage from './pages/knowledge/KnowledgePage'
 import LaunchpadPage from './pages/launchpad/LaunchpadPage'
 import MinAppPage from './pages/minapps/MinAppPage'
 import MinAppsPage from './pages/minapps/MinAppsPage'
+import MoYunDemo from './pages/MoYunDemo'
 import NotesPage from './pages/notes/NotesPage'
 import PaintingsRoutePage from './pages/paintings/PaintingsRoutePage'
 import SettingsPage from './pages/settings/SettingsPage'
 import AssistantPresetsPage from './pages/store/assistants/presets/AssistantPresetsPage'
 import TranslatePage from './pages/translate/TranslatePage'
-import MoYunDemo from './pages/MoYunDemo'
 
 const Router: FC = () => {
   const { navbarPosition } = useNavbarPosition()

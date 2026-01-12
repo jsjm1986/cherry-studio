@@ -1,6 +1,6 @@
 import { useTheme } from '@renderer/context/ThemeProvider'
-import { Input, Modal } from 'antd'
 import type { ModalProps } from 'antd'
+import { Input, Modal } from 'antd'
 import type { FC, ReactNode } from 'react'
 import styled from 'styled-components'
 

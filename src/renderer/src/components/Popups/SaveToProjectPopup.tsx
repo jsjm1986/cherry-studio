@@ -128,6 +128,9 @@ ${mainText}`
 
       await window.api.file.save(filePath, content)
 
+      // 通知文件树刷新
+      window.dispatchEvent(new CustomEvent('project-file-saved', { detail: { filePath } }))
+
       window.toast?.success?.(t('hosts.project.save_success'))
       setOpen(false)
       resolve({ success: true, filePath })

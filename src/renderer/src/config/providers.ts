@@ -63,16 +63,16 @@ import type { AtLeast, SystemProvider, SystemProviderId } from '@renderer/types'
 import { OpenAIServiceTiers } from '@renderer/types'
 
 import { TOKENFLUX_HOST } from './constant'
-import { glm45FlashModel, qwen38bModel, SYSTEM_MODELS } from './models'
+import { SYSTEM_MODELS, yunwuGeminiModel } from './models'
 
+// 保留 CHERRYAI_PROVIDER 仅为兼容，实际使用 yunwu
 export const CHERRYAI_PROVIDER: SystemProvider = {
-  id: 'cherryai' as SystemProviderId,
-  name: 'CherryAI',
+  id: 'yunwu' as SystemProviderId,
+  name: 'Yunwu AI',
   type: 'openai',
-  apiKey: '',
-  apiHost: 'https://api.cherry-ai.com/',
-  anthropicApiHost: 'https://api.cherry-ai.com',
-  models: [glm45FlashModel, qwen38bModel],
+  apiKey: 'sk-rUWV5FtXH1x12FfAEAKdNrIk8uB3D0lOtdGcxc5jUJRCBHT9',
+  apiHost: 'https://yunwu.ai/v1',
+  models: [yunwuGeminiModel],
   isSystem: true,
   enabled: true
 }
@@ -82,7 +82,7 @@ export const SYSTEM_PROVIDERS_CONFIG: Record<SystemProviderId, SystemProvider> =
     id: 'yunwu',
     name: 'Yunwu AI',
     type: 'openai',
-    apiKey: 'sk-y1LwI7keian87lfPqGz3TRESGOZWWw3fmhpFPCoKAGeBYCsy',
+    apiKey: 'sk-rUWV5FtXH1x12FfAEAKdNrIk8uB3D0lOtdGcxc5jUJRCBHT9',
     apiHost: 'https://yunwu.ai/v1',
     models: SYSTEM_MODELS.yunwu,
     isSystem: true,
@@ -709,6 +709,12 @@ export const SYSTEM_PROVIDERS_CONFIG: Record<SystemProviderId, SystemProvider> =
 } as const
 
 export const SYSTEM_PROVIDERS: SystemProvider[] = Object.values(SYSTEM_PROVIDERS_CONFIG)
+
+// 内置 Provider - 只包含 Yunwu AI，用户不可修改
+export const BUILTIN_PROVIDER: SystemProvider = SYSTEM_PROVIDERS_CONFIG.yunwu
+
+// 内置 Providers 列表 - 应用启动时使用此列表，用户不可自定义
+export const BUILTIN_PROVIDERS: SystemProvider[] = [BUILTIN_PROVIDER]
 
 export const PROVIDER_LOGO_MAP: AtLeast<SystemProviderId, string> = {
   yunwu: GoogleProviderLogo,

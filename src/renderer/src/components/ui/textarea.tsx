@@ -1,6 +1,5 @@
-import * as React from 'react'
-
 import { cn } from '@renderer/lib/utils'
+import * as React from 'react'
 
 /**
  * 墨韵设计系统 - Textarea 组件
@@ -10,8 +9,7 @@ import { cn } from '@renderer/lib/utils'
  * - 聚焦时有柔和的蓝紫色光晕
  * - 支持自动调整高度
  */
-const Textarea = React.forwardRef<HTMLTextAreaElement, React.ComponentProps<'textarea'>>(
-  ({ className, ...props }, ref) => {
+const Textarea = ({ ref, className, ...props }: React.ComponentProps<'textarea'> & { ref?: React.RefObject<HTMLTextAreaElement | null> }) => {
     return (
       <textarea
         className={cn(
@@ -31,7 +29,6 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, React.ComponentProps<'tex
       />
     )
   }
-)
 Textarea.displayName = 'Textarea'
 
 export { Textarea }

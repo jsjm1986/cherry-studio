@@ -2,21 +2,18 @@ import { ErrorBoundary } from '@renderer/components/ErrorBoundary'
 import { useAgentSessionInitializer } from '@renderer/hooks/agents/useAgentSessionInitializer'
 import { useAssistants } from '@renderer/hooks/useAssistant'
 import { useRuntime } from '@renderer/hooks/useRuntime'
-import { useNavbarPosition, useSettings } from '@renderer/hooks/useSettings'
+import { useNavbarPosition } from '@renderer/hooks/useSettings'
 import { useActiveTopic } from '@renderer/hooks/useTopic'
 import NavigationService from '@renderer/services/NavigationService'
 import { newMessagesActions } from '@renderer/store/newMessage'
 import { setActiveAgentId, setActiveTopicOrSessionAction } from '@renderer/store/runtime'
 import type { Assistant, Topic } from '@renderer/types'
-import { MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH, SECOND_MIN_WINDOW_WIDTH } from '@shared/config/constant'
-import { AnimatePresence, motion } from 'motion/react'
 import type { FC } from 'react'
 import { startTransition, useCallback, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
-import Chat from './Chat'
 import Navbar from './Navbar'
 import HomeTabs from './Tabs'
 
@@ -37,7 +34,6 @@ const HomePage: FC = () => {
     state?.assistant || _activeAssistant || assistants[0]
   )
   const { activeTopic, setActiveTopic: _setActiveTopic } = useActiveTopic(activeAssistant?.id ?? '', state?.topic)
-  const { showAssistants, showTopics, topicPosition } = useSettings()
   const dispatch = useDispatch()
   const { chat } = useRuntime()
   const { activeTopicOrSession } = chat
@@ -82,15 +78,6 @@ const HomePage: FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state])
 
-  useEffect(() => {
-    const canMinimize = topicPosition == 'left' ? !showAssistants : !showAssistants && !showTopics
-    window.api.window.setMinimumSize(canMinimize ? SECOND_MIN_WINDOW_WIDTH : MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT)
-
-    return () => {
-      window.api.window.resetMinimumSize()
-    }
-  }, [showAssistants, showTopics, topicPosition])
-
   return (
     <Container id="home-page">
       {isLeftNavbar && (
@@ -104,32 +91,15 @@ const HomePage: FC = () => {
         />
       )}
       <ContentContainer id={isLeftNavbar ? 'content-container' : undefined}>
-        <AnimatePresence initial={false}>
-          {showAssistants && (
-            <ErrorBoundary>
-              <motion.div
-                initial={{ width: 0, opacity: 0 }}
-                animate={{ width: 'var(--assistants-width)', opacity: 1 }}
-                exit={{ width: 0, opacity: 0 }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-                style={{ overflow: 'hidden' }}>
-                <HomeTabs
-                  activeAssistant={activeAssistant}
-                  activeTopic={activeTopic}
-                  setActiveAssistant={setActiveAssistant}
-                  setActiveTopic={setActiveTopic}
-                  position="left"
-                />
-              </motion.div>
-            </ErrorBoundary>
-          )}
-        </AnimatePresence>
+        {/* 卡带商店 - 全宽显示，隐藏聊天窗口 */}
         <ErrorBoundary>
-          <Chat
-            assistant={activeAssistant}
+          <HomeTabs
+            activeAssistant={activeAssistant}
             activeTopic={activeTopic}
-            setActiveTopic={setActiveTopic}
             setActiveAssistant={setActiveAssistant}
+            setActiveTopic={setActiveTopic}
+            position="left"
+            style={{ width: '100%', flex: 1 }}
           />
         </ErrorBoundary>
       </ContentContainer>

@@ -20,7 +20,8 @@ import {
   File as FileIcon,
   FileImage,
   FileText,
-  FileType as FileTypeIcon
+  FileType as FileTypeIcon,
+  FolderOpen
 } from 'lucide-react'
 import type { FC } from 'react'
 import { useEffect, useState } from 'react'
@@ -28,6 +29,7 @@ import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
 import FileList from './FileList'
+import ProjectFilesView from './ProjectFilesView'
 
 type SortField = 'created_at' | 'size' | 'name'
 type SortOrder = 'asc' | 'desc'
@@ -36,7 +38,7 @@ const logger = loggerService.withContext('FilesPage')
 
 const FilesPage: FC = () => {
   const { t } = useTranslation()
-  const [fileType, setFileType] = useState<string>('document')
+  const [fileType, setFileType] = useState<string>('project')
   const [sortField, setSortField] = useState<SortField>('created_at')
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([])
@@ -137,11 +139,39 @@ const FilesPage: FC = () => {
   })
 
   const menuItems = [
+    { key: 'project', label: t('files.project.title'), icon: <FolderOpen size={16} /> },
     { key: FileTypes.DOCUMENT, label: t('files.document'), icon: <FileIcon size={16} /> },
     { key: FileTypes.IMAGE, label: t('files.image'), icon: <FileImage size={16} /> },
     { key: FileTypes.TEXT, label: t('files.text'), icon: <FileTypeIcon size={16} /> },
     { key: 'all', label: t('files.all'), icon: <FileText size={16} /> }
   ]
+
+  // 渲染项目文件夹视图
+  if (fileType === 'project') {
+    return (
+      <Container>
+        <Navbar>
+          <NavbarCenter style={{ borderRight: 'none' }}>{t('files.title')}</NavbarCenter>
+        </Navbar>
+        <ContentContainer id="content-container">
+          <SideNav>
+            {menuItems.map((item) => (
+              <ListItem
+                key={item.key}
+                icon={item.icon}
+                title={item.label}
+                active={fileType === item.key}
+                onClick={() => setFileType(item.key as FileTypes)}
+              />
+            ))}
+          </SideNav>
+          <MainContent>
+            <ProjectFilesView />
+          </MainContent>
+        </ContentContainer>
+      </Container>
+    )
+  }
 
   return (
     <Container>

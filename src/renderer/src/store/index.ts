@@ -6,6 +6,7 @@ import storage from 'redux-persist/lib/storage'
 
 import storeSyncService from '../services/StoreSyncService'
 import assistants from './assistants'
+import auth from './auth'
 import backup from './backup'
 import codeTools from './codeTools'
 import copilot from './copilot'
@@ -37,6 +38,7 @@ const logger = loggerService.withContext('Store')
 
 const rootReducer = combineReducers({
   assistants,
+  auth,
   backup,
   codeTools,
   nutstore,
@@ -67,8 +69,8 @@ const persistedReducer = persistReducer(
   {
     key: 'cherry-studio',
     storage,
-    version: 183,
-    blacklist: ['runtime', 'messages', 'messageBlocks', 'tabs', 'toolPermissions'],
+    version: 187,
+    blacklist: ['runtime', 'messages', 'messageBlocks', 'tabs', 'toolPermissions', 'auth'],
     migrate
   },
   rootReducer

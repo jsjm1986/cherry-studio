@@ -18,7 +18,7 @@ import {
   parseCartridgeMarkdown
 } from '@renderer/utils/cartridge'
 import { createAssistantMessage, createMainTextBlock } from '@renderer/utils/messageUtils/create'
-import { Input, Modal, message } from 'antd'
+import { Input, message,Modal } from 'antd'
 import type { FC } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -619,7 +619,7 @@ const Container = styled.div<{ $isDark: boolean }>`
 const DragRegion = styled.div`
   position: fixed;
   top: 0;
-  left: 0;
+  left: var(--sidebar-width);
   right: 140px;
   height: var(--navbar-height);
   -webkit-app-region: drag;

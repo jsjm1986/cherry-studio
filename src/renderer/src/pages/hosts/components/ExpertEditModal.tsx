@@ -6,7 +6,7 @@ import {
   extractExpertInfoFromCartridge,
   parseCartridgeMarkdown
 } from '@renderer/utils/cartridge'
-import { Popover, Upload, message } from 'antd'
+import { message,Popover, Upload } from 'antd'
 import { Upload as UploadIcon } from 'lucide-react'
 import type { FC } from 'react'
 import { useEffect, useState } from 'react'

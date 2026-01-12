@@ -12,7 +12,6 @@ import windowStateKeeper from 'electron-window-state'
 import { join } from 'path'
 
 import icon from '../../../build/icon.png?asset'
-import { titleBarOverlayDark, titleBarOverlayLight } from '../config'
 import { configManager } from './ConfigManager'
 import { contextMenu } from './ContextMenu'
 import { initSessionUserAgent } from './WebviewService'
@@ -70,8 +69,7 @@ export class WindowService {
       // For Mac, we keep the native title bar style
       ...(isMac
         ? {
-            titleBarStyle: 'hidden',
-            titleBarOverlay: nativeTheme.shouldUseDarkColors ? titleBarOverlayDark : titleBarOverlayLight,
+            titleBarStyle: 'hiddenInset',
             trafficLightPosition: { x: 8, y: 13 }
           }
         : {
@@ -293,7 +291,7 @@ export class WindowService {
       if (url.includes('http://file/')) {
         const fileName = url.replace('http://file/', '')
         const storageDir = getFilesDir()
-        const filePath = storageDir + '/' + fileName
+        const filePath = join(storageDir, fileName)
         shell.openPath(filePath).catch((err) => logger.error('Failed to open file:', err))
       } else {
         shell.openExternal(details.url)

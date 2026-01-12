@@ -23,19 +23,25 @@ export function useProjectFolder(host: Host | null) {
 
     try {
       const result = await window.api.file.listDirectory(projectFolderPath)
-      // 只显示 .md 文件，按修改时间倒序排列
-      const mdFiles: ProjectFile[] = result
-        .filter((file: any) => !file.isDirectory && file.name.endsWith('.md'))
-        .map((file: any) => ({
-          name: file.name,
-          path: file.path,
-          size: file.size || 0,
-          modifiedAt: file.mtime ? new Date(file.mtime).getTime() : Date.now(),
-          isDirectory: false
-        }))
-        .sort((a: ProjectFile, b: ProjectFile) => b.modifiedAt - a.modifiedAt)
+      // result 是文件路径字符串数组，需要从路径中提取文件名
+      const allFiles: ProjectFile[] = result
+        .map((filePath: string) => {
+          // 跨平台提取文件名：处理 Windows (\) 和 Unix/Mac (/) 路径分隔符
+          // 先去除末尾的分隔符，再提取最后一段
+          const normalizedPath = filePath.replace(/[/\\]+$/, '')
+          const segments = normalizedPath.split(/[/\\]/)
+          const name = segments[segments.length - 1] || normalizedPath
+          return {
+            name,
+            path: filePath,
+            size: 0,
+            modifiedAt: Date.now(),
+            isDirectory: false
+          }
+        })
+        .filter((file) => file.name && !file.name.startsWith('.')) // 过滤空名称和隐藏文件
 
-      setFiles(mdFiles)
+      setFiles(allFiles)
     } catch (err: any) {
       setError(err.message || 'Failed to list files')
       setFiles([])
@@ -132,6 +138,17 @@ export function useProjectFolder(host: Host | null) {
     } else {
       setFiles([])
     }
+  }, [projectFolderPath, refreshFiles])
+
+  // 监听文件保存事件，自动刷新文件列表
+  useEffect(() => {
+    const handleFileSaved = () => {
+      if (projectFolderPath) {
+        refreshFiles()
+      }
+    }
+    window.addEventListener('project-file-saved', handleFileSaved)
+    return () => window.removeEventListener('project-file-saved', handleFileSaved)
   }, [projectFolderPath, refreshFiles])
 
   return {

@@ -23,7 +23,7 @@ import type {
   TranslateAssistant,
   TranslateLanguage
 } from '@renderer/types'
-import { TopicType } from '@renderer/types'
+import type { TopicType } from '@renderer/types'
 import { uuid } from '@renderer/utils'
 
 const logger = loggerService.withContext('AssistantService')

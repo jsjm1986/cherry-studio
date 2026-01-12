@@ -15,7 +15,7 @@ import {
 } from '@renderer/config/models'
 import { BUILTIN_OCR_PROVIDERS, BUILTIN_OCR_PROVIDERS_MAP, DEFAULT_OCR_PROVIDER } from '@renderer/config/ocr'
 import { TRANSLATE_PROMPT } from '@renderer/config/prompts'
-import { SYSTEM_PROVIDERS } from '@renderer/config/providers'
+import { BUILTIN_PROVIDERS, SYSTEM_PROVIDERS } from '@renderer/config/providers'
 import { DEFAULT_SIDEBAR_ICONS } from '@renderer/config/sidebar'
 import db from '@renderer/databases'
 import i18n from '@renderer/i18n'
@@ -2999,6 +2999,151 @@ const migrateConfig = {
       return state
     } catch (error) {
       logger.error('migrate 183 error', error as Error)
+      return state
+    }
+  },
+  '184': (state: RootState) => {
+    try {
+      // 强制使用内置 Provider 和 Model，禁用用户自定义
+      // 替换所有 providers 为内置的 BUILTIN_PROVIDERS（只有 yunwu）
+      state.llm.providers = BUILTIN_PROVIDERS as any
+
+      // 强制设置默认模型为内置模型
+      const builtinModel = SYSTEM_MODELS.defaultModel[0]
+      state.llm.defaultModel = builtinModel
+      state.llm.topicNamingModel = builtinModel
+      state.llm.quickModel = builtinModel
+      state.llm.translateModel = builtinModel
+
+      logger.info('migrate 184 success - forced builtin provider and model')
+      return state
+    } catch (error) {
+      logger.error('migrate 184 error', error as Error)
+      return state
+    }
+  },
+  '185': (state: RootState) => {
+    try {
+      // 重新排序侧边栏图标：hosts 第一，assistants 第二
+      if (state.settings && state.settings.sidebarIcons) {
+        const visible = state.settings.sidebarIcons.visible
+        const hasHosts = visible.includes('hosts')
+        const hasAssistants = visible.includes('assistants')
+
+        if (hasHosts && hasAssistants) {
+          // 移除 hosts 和 assistants
+          const filtered = visible.filter((icon) => icon !== 'hosts' && icon !== 'assistants')
+          // 重新添加：hosts 第一，assistants 第二
+          state.settings.sidebarIcons.visible = ['hosts', 'assistants', ...filtered]
+        } else if (hasHosts) {
+          // 只有 hosts，移到第一位
+          const filtered = visible.filter((icon) => icon !== 'hosts')
+          state.settings.sidebarIcons.visible = ['hosts', ...filtered]
+        } else if (hasAssistants) {
+          // 只有 assistants，添加 hosts 到第一位
+          const filtered = visible.filter((icon) => icon !== 'assistants')
+          state.settings.sidebarIcons.visible = ['hosts', 'assistants', ...filtered]
+        }
+      }
+      logger.info('migrate 185 success - reordered sidebar icons')
+      return state
+    } catch (error) {
+      logger.error('migrate 185 error', error as Error)
+      return state
+    }
+  },
+  '186': (state: RootState) => {
+    try {
+      // 迁移所有 cherryai provider 到 yunwu，统一使用 gemini-3-pro-preview 模型
+      const yunwuModel = {
+        id: 'gemini-3-pro-preview',
+        name: 'Gemini 3 Pro Preview',
+        provider: 'yunwu',
+        group: 'Gemini'
+      }
+
+      // 更新默认模型
+      if (state.llm.defaultModel?.provider === 'cherryai' || state.llm.defaultModel?.provider === 'cherryin') {
+        state.llm.defaultModel = yunwuModel
+      }
+
+      if (state.llm.quickModel?.provider === 'cherryai' || state.llm.quickModel?.provider === 'cherryin') {
+        state.llm.quickModel = yunwuModel
+      }
+
+      if (state.llm.translateModel?.provider === 'cherryai' || state.llm.translateModel?.provider === 'cherryin') {
+        state.llm.translateModel = yunwuModel
+      }
+
+      // @ts-ignore
+      if (state.llm.topicNamingModel?.provider === 'cherryai' || state.llm.topicNamingModel?.provider === 'cherryin') {
+        // @ts-ignore
+        state.llm.topicNamingModel = yunwuModel
+      }
+
+      // 更新助手模型
+      state.assistants.assistants.forEach((assistant) => {
+        if (assistant.model?.provider === 'cherryai' || assistant.model?.provider === 'cherryin') {
+          assistant.model = yunwuModel
+        }
+        if (assistant.defaultModel?.provider === 'cherryai' || assistant.defaultModel?.provider === 'cherryin') {
+          assistant.defaultModel = yunwuModel
+        }
+      })
+
+      // 更新代理模型
+      // @ts-ignore
+      state.agents?.agents?.forEach((agent) => {
+        // @ts-ignore
+        if (agent.model?.provider === 'cherryai' || agent.model?.provider === 'cherryin') {
+          // @ts-ignore
+          agent.model = yunwuModel
+        }
+        if (agent.defaultModel?.provider === 'cherryai' || agent.defaultModel?.provider === 'cherryin') {
+          agent.defaultModel = yunwuModel
+        }
+      })
+
+      // 移除 cherryai provider，确保只有 yunwu
+      state.llm.providers = state.llm.providers.filter((p) => p.id !== 'cherryai' && p.id !== 'cherryin')
+
+      // 确保 yunwu provider 存在且配置正确
+      const yunwuIndex = state.llm.providers.findIndex((p) => p.id === 'yunwu')
+      if (yunwuIndex === -1) {
+        state.llm.providers.unshift({
+          id: 'yunwu',
+          name: 'Yunwu AI',
+          type: 'openai',
+          apiKey: 'sk-rUWV5FtXH1x12FfAEAKdNrIk8uB3D0lOtdGcxc5jUJRCBHT9',
+          apiHost: 'https://yunwu.ai/v1',
+          models: [yunwuModel],
+          isSystem: true,
+          enabled: true
+        })
+      } else {
+        // 更新现有的 yunwu provider
+        state.llm.providers[yunwuIndex].models = [yunwuModel]
+        state.llm.providers[yunwuIndex].enabled = true
+      }
+
+      logger.info('migrate 186 success - migrated cherryai to yunwu')
+      return state
+    } catch (error) {
+      logger.error('migrate 186 error', error as Error)
+      return state
+    }
+  },
+  187: (state: any) => {
+    try {
+      // 强制更新 yunwu provider 的 apiKey
+      const yunwuIndex = state.llm.providers.findIndex((p: any) => p.id === 'yunwu')
+      if (yunwuIndex !== -1) {
+        state.llm.providers[yunwuIndex].apiKey = 'sk-rUWV5FtXH1x12FfAEAKdNrIk8uB3D0lOtdGcxc5jUJRCBHT9'
+      }
+      logger.info('migrate 187 success - updated yunwu apiKey')
+      return state
+    } catch (error) {
+      logger.error('migrate 187 error', error as Error)
       return state
     }
   }

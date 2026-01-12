@@ -1,8 +1,6 @@
-import EmojiAvatar from '@renderer/components/Avatar/EmojiAvatar'
+import HerLogo from '@renderer/assets/images/logo.png'
 import { isMac } from '@renderer/config/constant'
-import { UserAvatar } from '@renderer/config/env'
 import { useTheme } from '@renderer/context/ThemeProvider'
-import useAvatar from '@renderer/hooks/useAvatar'
 import { useFullscreen } from '@renderer/hooks/useFullscreen'
 import { useMinappPopup } from '@renderer/hooks/useMinappPopup'
 import { useMinapps } from '@renderer/hooks/useMinapps'
@@ -11,22 +9,20 @@ import { modelGenerating, useRuntime } from '@renderer/hooks/useRuntime'
 import { useSettings } from '@renderer/hooks/useSettings'
 import { getSidebarIconLabel, getThemeModeLabel } from '@renderer/i18n/label'
 import { ThemeMode } from '@renderer/types'
-import { isEmoji } from '@renderer/utils'
-import { Avatar, Tooltip } from 'antd'
+import { Tooltip } from 'antd'
 import {
   Code,
+  Cpu,
   FileSearch,
   Folder,
   Languages,
   LayoutGrid,
-  MessageSquare,
   Monitor,
   Moon,
   NotepadText,
   Palette,
   Settings,
   Sparkle,
-  Sparkles,
   Sun,
   Users
 } from 'lucide-react'
@@ -35,7 +31,7 @@ import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
-import UserPopup from '../Popups/UserPopup'
+import AuthPopup from '../Popups/AuthPopup'
 import { SidebarOpenedMinappTabs, SidebarPinnedApps } from './PinnedMinapps'
 
 const Sidebar: FC = () => {
@@ -48,10 +44,12 @@ const Sidebar: FC = () => {
   const navigate = useNavigate()
 
   const { theme, settedTheme, toggleTheme } = useTheme()
-  const avatar = useAvatar()
   const { t } = useTranslation()
 
-  const onEditUser = () => UserPopup.show()
+  const onEditUser = () => {
+    // 显示认证弹窗（包含登录/注册/用户信息）
+    AuthPopup.show()
+  }
 
   const backgroundColor = useNavBackgroundColor()
 
@@ -69,13 +67,9 @@ const Sidebar: FC = () => {
       $isFullscreen={isFullscreen}
       id="app-sidebar"
       style={{ backgroundColor, zIndex: minappShow ? 10000 : 'initial' }}>
-      {isEmoji(avatar) ? (
-        <EmojiAvatar onClick={onEditUser} className="sidebar-avatar" size={31} fontSize={18}>
-          {avatar}
-        </EmojiAvatar>
-      ) : (
-        <AvatarImg src={avatar || UserAvatar} draggable={false} className="nodrag" onClick={onEditUser} />
-      )}
+      <AvatarWrapper>
+        <LogoImg src={HerLogo} draggable={false} className="nodrag sidebar-avatar" onClick={onEditUser} />
+      </AvatarWrapper>
       <MainMenusContainer>
         <Menus onClick={hideMinappPopup}>
           <MainMenus />
@@ -91,17 +85,6 @@ const Sidebar: FC = () => {
         )}
       </MainMenusContainer>
       <Menus>
-        <Tooltip title="墨韵设计系统" mouseEnterDelay={0.8} placement="right">
-          <StyledLink
-            onClick={async () => {
-              hideMinappPopup()
-              await to('/design')
-            }}>
-            <Icon theme={theme} className={pathname === '/design' && !minappShow ? 'active' : ''}>
-              <Sparkles size={20} className="icon" />
-            </Icon>
-          </StyledLink>
-        </Tooltip>
         <Tooltip
           title={t('settings.theme.title') + ': ' + getThemeModeLabel(settedTheme)}
           mouseEnterDelay={0.8}
@@ -144,7 +127,7 @@ const MainMenus: FC = () => {
   const isRoutes = (path: string): string => (pathname.startsWith(path) && !minappShow ? 'active' : '')
 
   const iconMap = {
-    assistants: <MessageSquare size={18} className="icon" />,
+    assistants: <Cpu size={18} className="icon" />,
     hosts: <Users size={18} className="icon" />,
     store: <Sparkle size={18} className="icon" />,
     paintings: <Palette size={18} className="icon" />,
@@ -203,20 +186,16 @@ const Container = styled.div<{ $isFullscreen: boolean }>`
   margin-top: ${({ $isFullscreen }) => (isMac && !$isFullscreen ? 'env(titlebar-area-height)' : 0)};
 
   .sidebar-avatar {
-    margin-bottom: ${isMac ? '12px' : '12px'};
-    margin-top: ${isMac ? '0px' : '2px'};
     -webkit-app-region: none;
   }
 `
 
-const AvatarImg = styled(Avatar)`
+const LogoImg = styled.img`
   width: 31px;
   height: 31px;
-  background-color: var(--color-background-soft);
-  margin-bottom: ${isMac ? '12px' : '12px'};
-  margin-top: ${isMac ? '0px' : '2px'};
-  border: none;
+  border-radius: 50%;
   cursor: pointer;
+  object-fit: cover;
 `
 
 const MainMenusContainer = styled.div`
@@ -313,6 +292,15 @@ const Divider = styled.div`
   width: 50%;
   margin: 8px 0;
   border-bottom: 0.5px solid var(--color-border);
+`
+
+const AvatarWrapper = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: ${isMac ? '12px' : '12px'};
+  margin-top: ${isMac ? '0px' : '2px'};
 `
 
 export default Sidebar

@@ -1,6 +1,6 @@
 import type { Expert } from '@renderer/types'
 import type { FC, ReactNode } from 'react'
-import { createContext, useCallback, useContext, useMemo, useState } from 'react'
+import { createContext, use, useCallback, useMemo, useState } from 'react'
 
 /** localStorage key for recent experts */
 const RECENT_EXPERTS_KEY = 'cherry-studio:recent-mentioned-experts'
@@ -138,11 +138,11 @@ export const ExpertProvider: FC<ExpertProviderProps> = ({ children }) => {
     ]
   )
 
-  return <ExpertContext.Provider value={value}>{children}</ExpertContext.Provider>
+  return <ExpertContext value={value}>{children}</ExpertContext>
 }
 
 export const useExpertContext = (): ExpertContextValue => {
-  const context = useContext(ExpertContext)
+  const context = use(ExpertContext)
   if (!context) {
     throw new Error('useExpertContext must be used within an ExpertProvider')
   }
@@ -153,7 +153,7 @@ export const useExpertContext = (): ExpertContextValue => {
  * 安全版本的 useExpertContext，在 ExpertProvider 外部使用时返回 null
  */
 export const useExpertContextSafe = (): ExpertContextValue | null => {
-  return useContext(ExpertContext)
+  return use(ExpertContext)
 }
 
 export default ExpertContext

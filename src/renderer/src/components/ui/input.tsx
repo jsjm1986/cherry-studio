@@ -1,6 +1,5 @@
-import * as React from 'react'
-
 import { cn } from '@renderer/lib/utils'
+import * as React from 'react'
 
 /**
  * 墨韵设计系统 - Input 组件
@@ -10,8 +9,7 @@ import { cn } from '@renderer/lib/utils'
  * - 背景色与卡片一致，融入界面
  * - 占位符使用低对比度颜色
  */
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<'input'>>(
-  ({ className, type, ...props }, ref) => {
+const Input = ({ ref, className, type, ...props }: React.ComponentProps<'input'> & { ref?: React.RefObject<HTMLInputElement | null> }) => {
     return (
       <input
         type={type}
@@ -32,7 +30,6 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<'input'>>(
       />
     )
   }
-)
 Input.displayName = 'Input'
 
 export { Input }

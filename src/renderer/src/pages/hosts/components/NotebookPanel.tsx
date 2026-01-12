@@ -1,8 +1,9 @@
 import { useTheme } from '@renderer/context/ThemeProvider'
 import { useAppDispatch } from '@renderer/store'
 import { removeNotebookItem, updateNotebookItem } from '@renderer/store/assistants'
-import type { Host, NotebookItem, ProjectFile } from '@renderer/types'
-import { Button, Empty, Modal, Popconfirm, Spin, Tabs, Tooltip } from 'antd'
+import type { Host, NotebookItem } from '@renderer/types'
+import { formatFileSize } from '@renderer/utils'
+import { Button, Empty, Modal, Tabs, Tooltip } from 'antd'
 import {
   ChevronLeft,
   ChevronRight,
@@ -63,7 +64,7 @@ const NotebookPanel: FC<Props> = ({ host, collapsed, onToggleCollapse, onUpdateH
   const notebook = host?.notebook || []
 
   // 项目文件夹 Hook
-  const { files, loading, hasProjectFolder, projectFolderPath, refreshFiles, deleteFile, openFile, openFolder } =
+  const { files, hasProjectFolder, projectFolderPath, refreshFiles, openFolder } =
     useProjectFolder(host)
 
   // 拖拽调整宽度
@@ -163,24 +164,6 @@ const NotebookPanel: FC<Props> = ({ host, collapsed, onToggleCollapse, onUpdateH
     })
   }
 
-  // 格式化文件日期
-  const formatFileDate = (timestamp: number) => {
-    const date = new Date(timestamp)
-    return date.toLocaleDateString('zh-CN', {
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
-
-  // 格式化文件大小
-  const formatSize = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-  }
-
   // 渲染笔记卡片
   const renderNotebookItem = (item: NotebookItem) => {
     const isEditing = editingItem?.id === item.id
@@ -247,30 +230,6 @@ const NotebookPanel: FC<Props> = ({ host, collapsed, onToggleCollapse, onUpdateH
     )
   }
 
-  // 渲染文件项
-  const renderFileItem = (file: ProjectFile) => (
-    <FileItem key={file.path}>
-      <FileInfo onClick={() => openFile(file.path)}>
-        <File size={14} />
-        <FileName title={file.name}>{file.name}</FileName>
-      </FileInfo>
-      <FileMeta>
-        <FileDate>{formatFileDate(file.modifiedAt)}</FileDate>
-        <FileSize>{formatSize(file.size)}</FileSize>
-        <Popconfirm
-          title="确定删除此文件？"
-          onConfirm={() => deleteFile(file.path)}
-          okText="删除"
-          cancelText="取消"
-          okButtonProps={{ danger: true }}>
-          <DeleteButton onClick={(e) => e.stopPropagation()}>
-            <Trash2 size={12} />
-          </DeleteButton>
-        </Popconfirm>
-      </FileMeta>
-    </FileItem>
-  )
-
   // 折叠状态
   if (collapsed) {
     return (
@@ -328,43 +287,58 @@ const NotebookPanel: FC<Props> = ({ host, collapsed, onToggleCollapse, onUpdateH
       ),
       children: (
         <TabContent>
-          {/* 文件夹路径和操作按钮 */}
-          {hasProjectFolder && (
-            <FilesHeader>
-              <FolderPath title={projectFolderPath}>📁 {projectFolderPath}</FolderPath>
-              <HeaderActions>
-                <Tooltip title={t('hosts.project.refresh')}>
-                  <SmallActionButton onClick={refreshFiles}>
-                    <RefreshCw size={14} />
-                  </SmallActionButton>
-                </Tooltip>
-                <Tooltip title={t('hosts.project.open_folder')}>
-                  <SmallActionButton onClick={openFolder}>
-                    <FolderOpen size={14} />
-                  </SmallActionButton>
-                </Tooltip>
-              </HeaderActions>
-            </FilesHeader>
-          )}
-
-          {/* 文件列表 */}
-          {loading ? (
-            <LoadingContainer>
-              <Spin />
-            </LoadingContainer>
-          ) : !hasProjectFolder ? (
+          {!hasProjectFolder ? (
             <EmptyContainer>
               <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('hosts.project.folder_empty')} />
               <Button type="primary" onClick={handleSelectFolder} icon={<Folder size={14} />}>
                 {t('hosts.project.select_folder')}
               </Button>
             </EmptyContainer>
-          ) : files.length === 0 ? (
-            <EmptyContainer>
-              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('hosts.project.no_files')} />
-            </EmptyContainer>
           ) : (
-            <FileList>{files.map(renderFileItem)}</FileList>
+            <FilesQuickView>
+              <FilesHeader>
+                <FolderPath title={projectFolderPath}>
+                  <FolderOpen size={14} />
+                  <span>{projectFolderPath}</span>
+                </FolderPath>
+                <HeaderActions>
+                  <Tooltip title={t('hosts.project.refresh')}>
+                    <SmallActionButton onClick={refreshFiles}>
+                      <RefreshCw size={14} />
+                    </SmallActionButton>
+                  </Tooltip>
+                  <Tooltip title={t('hosts.project.open_folder')}>
+                    <SmallActionButton onClick={openFolder}>
+                      <FolderOpen size={14} />
+                    </SmallActionButton>
+                  </Tooltip>
+                </HeaderActions>
+              </FilesHeader>
+
+              {files.length === 0 ? (
+                <EmptyFiles>
+                  <File size={32} />
+                  <span>{t('files.empty', { defaultValue: '暂无文件' })}</span>
+                </EmptyFiles>
+              ) : (
+                <FilesList>
+                  {files.map((file) => (
+                    <FileItem key={file.path} onClick={() => window.api.file.openPath(file.path)}>
+                      <FileIcon>
+                        <File size={16} />
+                      </FileIcon>
+                      <FileInfo>
+                        <FileName title={file.name}>{file.name}</FileName>
+                        <FileMeta>
+                          {new Date(file.modifiedAt).toLocaleDateString('zh-CN')}
+                          {file.size > 0 && ` · ${formatFileSize(file.size)}`}
+                        </FileMeta>
+                      </FileInfo>
+                    </FileItem>
+                  ))}
+                </FilesList>
+              )}
+            </FilesQuickView>
           )}
         </TabContent>
       )
@@ -635,12 +609,15 @@ const FilesHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   padding-bottom: 10px;
   border-bottom: 1px solid var(--panel-border);
 `
 
 const FolderPath = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 11px;
   color: var(--panel-text-muted);
   white-space: nowrap;
@@ -648,6 +625,11 @@ const FolderPath = styled.div`
   text-overflow: ellipsis;
   flex: 1;
   margin-right: 8px;
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 `
 
 const HeaderActions = styled.div`
@@ -675,13 +657,6 @@ const SmallActionButton = styled.button`
   }
 `
 
-const LoadingContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 150px;
-`
-
 const EmptyContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -691,91 +666,76 @@ const EmptyContainer = styled.div`
   padding: 30px 20px;
 `
 
-const FileList = styled.div`
+const FilesQuickView = styled.div`
   display: flex;
   flex-direction: column;
+  height: 100%;
+`
+
+const EmptyFiles = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  color: var(--panel-text-muted);
+  font-size: 13px;
+`
+
+const FilesList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  overflow-y: auto;
 `
 
 const FileItem = styled.div`
   display: flex;
-  flex-direction: column;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--panel-border);
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
   transition: all 0.15s ease;
 
-  &:last-child {
-    border-bottom: none;
-  }
-
   &:hover {
-    background: var(--panel-bg-hover);
-    margin: 0 -12px;
-    padding: 10px 12px;
-    border-radius: 8px;
+    background: var(--panel-bg-soft);
   }
+`
+
+const FileIcon = styled.div`
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--panel-primary-soft);
+  color: var(--panel-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 `
 
 const FileInfo = styled.div`
+  flex: 1;
+  min-width: 0;
   display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  color: var(--panel-text);
-
-  &:hover {
-    color: var(--panel-primary);
-  }
+  flex-direction: column;
+  gap: 2px;
 `
 
-const FileName = styled.span`
+const FileName = styled.div`
   font-size: 13px;
-  flex: 1;
+  color: var(--panel-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 `
 
 const FileMeta = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 4px;
-  padding-left: 22px;
-`
-
-const FileDate = styled.span`
   font-size: 11px;
   color: var(--panel-text-muted);
-`
-
-const FileSize = styled.span`
-  font-size: 11px;
-  color: var(--panel-text-muted);
-`
-
-const DeleteButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border: none;
-  background: transparent;
-  border-radius: 4px;
-  cursor: pointer;
-  color: var(--panel-text-muted);
-  margin-left: auto;
-  opacity: 0;
-  transition: all 0.15s ease;
-
-  ${FileItem}:hover & {
-    opacity: 1;
-  }
-
-  &:hover {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-  }
 `
 
 export default NotebookPanel

@@ -73,7 +73,7 @@ export const getSendMessageShortcutLabel = (shortcut: SendMessageShortcut) => {
     case 'Enter':
       return 'Enter'
     case 'Ctrl+Enter':
-      return 'Ctrl + Enter'
+      return `${isMac ? '⌃' : 'Ctrl'} + Enter`
     case 'Alt+Enter':
       return `${isMac ? '⌥' : 'Alt'} + Enter`
     case 'Command+Enter':

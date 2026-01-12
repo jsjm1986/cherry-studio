@@ -390,6 +390,18 @@
   },
   "assistants": {
     "abbr": "角色",
+    "cartridgeStore": {
+      "title": "卡带商店",
+      "addCartridge": "添加卡带",
+      "importCartridge": "导入卡带",
+      "importSuccess": "卡带导入成功",
+      "importError": "卡带导入失败，请检查文件格式",
+      "noDescription": "暂无描述",
+      "topicCount": "{{count}} 话题",
+      "insertToHost": "插入房间",
+      "noHosts": "暂无房间",
+      "importToHostSuccess": "已导入到房间「{{hostName}}」"
+    },
     "clear": {
       "content": "清空话题会删除角色下所有话题和文件，确定要继续吗？",
       "title": "清空话题"
@@ -1274,6 +1286,7 @@
     "name": "错误名称",
     "no_api_key": "API 密钥未配置",
     "no_response": "无响应",
+    "quota_exhausted": "对话次数已用完，请联系管理员充值",
     "originalError": "原错误",
     "originalMessage": "原消息",
     "parameter": "参数",
@@ -1401,6 +1414,15 @@
     "open": "打开",
     "preview": {
       "error": "打开文件失败"
+    },
+    "project": {
+      "title": "项目文件夹",
+      "files_count": "个文件",
+      "hosts_count": "个房间设置了项目文件夹",
+      "empty_title": "暂无项目文件夹",
+      "empty_desc": "请先在房间设置中配置项目文件夹",
+      "go_to_hosts": "前往房间设置",
+      "go_to_files": "查看全部项目文件"
     },
     "size": "大小",
     "text": "文本",

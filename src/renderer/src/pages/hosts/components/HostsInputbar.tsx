@@ -247,6 +247,7 @@ const HostsInputbar: FC<Props> = ({
   const handleBeforeSend = useCallback(
     (message: Message, blocks: MessageBlock[]): { message: Message; blocks: MessageBlock[] } => {
       if (selectedExpert) {
+        // 选择了专家，使用专家信息
         return {
           message: {
             ...message,
@@ -257,9 +258,19 @@ const HostsInputbar: FC<Props> = ({
           blocks
         }
       }
-      return { message, blocks }
+      // 没有选择专家时，使用 Host（房间）本身的信息
+      // 这样消息头部会显示房间名称而不是模型名称
+      return {
+        message: {
+          ...message,
+          expertId: assistant.id,
+          expertName: assistant.name,
+          expertEmoji: assistant.emoji || '🏠'
+        },
+        blocks
+      }
     },
-    [selectedExpert]
+    [selectedExpert, assistant]
   )
 
   // 专家选择器内容 - 只显示选择按钮（标签已移到页面顶部）
@@ -372,6 +383,7 @@ const HostsInputbar: FC<Props> = ({
       externalMentionedModels={mentionedModels}
       onMentionedModelsChange={onMentionedModelsChange}
       showMentionedModelsInInputbar={false}
+      showTranslateButton={false}
     />
   )
 }

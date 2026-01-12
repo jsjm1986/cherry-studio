@@ -1,8 +1,8 @@
 {
-  "name": "CherryStudio",
+  "name": "Her",
   "version": "1.7.1",
   "private": true,
-  "description": "A powerful AI assistant for producer.",
+  "description": "A powerful AI assistant.",
   "main": "./out/main/index.js",
   "author": "support@cherry-ai.com",
   "homepage": "https://github.com/CherryHQ/cherry-studio",

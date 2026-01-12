@@ -6,8 +6,8 @@
  */
 
 // 基础组件
-export { Button, buttonVariants, type ButtonProps } from './button'
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './card'
+export { Badge, type BadgeProps,badgeVariants } from './badge'
+export { Button, type ButtonProps,buttonVariants } from './button'
+export { Card, CardContent,CardDescription, CardFooter, CardHeader, CardTitle } from './card'
 export { Input } from './input'
 export { Textarea } from './textarea'
-export { Badge, badgeVariants, type BadgeProps } from './badge'

@@ -1,26 +1,18 @@
-import AddAssistantPopup from '@renderer/components/Popups/AddAssistantPopup'
-import { useActiveSession } from '@renderer/hooks/agents/useActiveSession'
-import { useUpdateSession } from '@renderer/hooks/agents/useUpdateSession'
 import { useAssistants, useDefaultAssistant } from '@renderer/hooks/useAssistant'
-import { useRuntime } from '@renderer/hooks/useRuntime'
-import { useNavbarPosition, useSettings } from '@renderer/hooks/useSettings'
-import { useShowTopics } from '@renderer/hooks/useStore'
-import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
+import { useNavbarPosition } from '@renderer/hooks/useSettings'
 import { useAppDispatch } from '@renderer/store'
 import { setActiveAgentId, setActiveTopicOrSessionAction } from '@renderer/store/runtime'
 import type { Assistant, Topic } from '@renderer/types'
-import type { Tab } from '@renderer/types/chat'
-import { classNames, getErrorMessage, uuid } from '@renderer/utils'
-import { Alert, Skeleton } from 'antd'
+import { uuid } from '@renderer/utils'
+import { compileCartridgeToPrompt, extractExpertInfoFromCartridge, parseCartridgeMarkdown } from '@renderer/utils/cartridge'
+import { message } from 'antd'
+import { Cpu } from 'lucide-react'
 import type { FC } from 'react'
-import { useEffect, useState } from 'react'
+import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
 import Assistants from './AssistantsTab'
-import SessionSettingsTab from './SessionSettingsTab'
-import Settings from './SettingsTab'
-import Topics from './TopicsTab'
 
 interface Props {
   activeAssistant: Assistant
@@ -32,53 +24,51 @@ interface Props {
   style?: React.CSSProperties
 }
 
-let _tab: Tab | null = null
-
-const HomeTabs: FC<Props> = ({
-  activeAssistant,
-  activeTopic,
-  setActiveAssistant,
-  setActiveTopic,
-  position,
-  forceToSeeAllTab,
-  style
-}) => {
+const HomeTabs: FC<Props> = ({ activeAssistant, setActiveAssistant, style }) => {
   const { addAssistant } = useAssistants()
-  const { topicPosition } = useSettings()
   const { defaultAssistant } = useDefaultAssistant()
-  const { toggleShowTopics } = useShowTopics()
   const { isLeftNavbar } = useNavbarPosition()
-  const { t } = useTranslation()
-  const { chat } = useRuntime()
-  const { activeTopicOrSession, activeAgentId } = chat
-  const { session, isLoading: isSessionLoading, error: sessionError } = useActiveSession()
-  const { updateSession } = useUpdateSession(activeAgentId)
   const dispatch = useAppDispatch()
+  const { t } = useTranslation()
 
-  const isSessionView = activeTopicOrSession === 'session'
-  const isTopicView = activeTopicOrSession === 'topic'
-
-  const [tab, setTab] = useState<Tab>(position === 'left' ? _tab || 'assistants' : 'topic')
   const borderStyle = '0.5px solid var(--color-border)'
-  const border =
-    position === 'left'
-      ? { borderRight: isLeftNavbar ? borderStyle : 'none' }
-      : { borderLeft: isLeftNavbar ? borderStyle : 'none', borderTopLeftRadius: 0 }
+  const border = { borderRight: isLeftNavbar ? borderStyle : 'none' }
 
-  if (position === 'left' && topicPosition === 'left') {
-    _tab = tab
-  }
+  // 从MD文件导入卡带
+  const onImportCartridgeFile = useCallback(
+    (file: File) => {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        try {
+          const markdown = e.target?.result as string
+          const cartridgeData = parseCartridgeMarkdown(markdown)
+          const compiledPrompt = compileCartridgeToPrompt(cartridgeData)
+          const expertInfo = extractExpertInfoFromCartridge(cartridgeData)
 
-  const showTab = position === 'left' && topicPosition === 'left'
+          // 创建助手
+          const newAssistant: Assistant = {
+            ...defaultAssistant,
+            id: uuid(),
+            name: expertInfo.name,
+            description: cartridgeData.identity.profession || '',
+            prompt: compiledPrompt,
+            emoji: '👤'
+          }
 
-  const onCreateAssistant = async () => {
-    const assistant = await AddAssistantPopup.show()
-    if (assistant) {
-      setActiveAssistant(assistant)
-      dispatch(setActiveAgentId(null))
-      dispatch(setActiveTopicOrSessionAction('topic'))
-    }
-  }
+          addAssistant(newAssistant)
+          setActiveAssistant(newAssistant)
+          dispatch(setActiveAgentId(null))
+          dispatch(setActiveTopicOrSessionAction('topic'))
+
+          message.success(t('assistants.cartridgeStore.importSuccess'))
+        } catch {
+          message.error(t('assistants.cartridgeStore.importError'))
+        }
+      }
+      reader.readAsText(file, 'UTF-8')
+    },
+    [defaultAssistant, addAssistant, setActiveAssistant, dispatch, t]
+  )
 
   const onCreateDefaultAssistant = () => {
     const assistant = { ...defaultAssistant, id: uuid() }
@@ -88,98 +78,24 @@ const HomeTabs: FC<Props> = ({
     dispatch(setActiveTopicOrSessionAction('topic'))
   }
 
-  useEffect(() => {
-    const unsubscribes = [
-      EventEmitter.on(EVENT_NAMES.SHOW_ASSISTANTS, (): any => {
-        showTab && setTab('assistants')
-      }),
-      EventEmitter.on(EVENT_NAMES.SHOW_TOPIC_SIDEBAR, (): any => {
-        showTab && setTab('topic')
-      }),
-      EventEmitter.on(EVENT_NAMES.SHOW_CHAT_SETTINGS, (): any => {
-        showTab && setTab('settings')
-      }),
-      EventEmitter.on(EVENT_NAMES.SWITCH_TOPIC_SIDEBAR, () => {
-        showTab && setTab('topic')
-        if (position === 'left' && topicPosition === 'right') {
-          toggleShowTopics()
-        }
-      })
-    ]
-    return () => unsubscribes.forEach((unsub) => unsub())
-  }, [position, setTab, showTab, tab, toggleShowTopics, topicPosition])
-
-  useEffect(() => {
-    if (position === 'right' && topicPosition === 'right' && tab === 'assistants') {
-      setTab('topic')
-    }
-    if (position === 'left' && topicPosition === 'right' && (tab === 'topic' || tab === 'settings')) {
-      setTab('assistants')
-    }
-  }, [position, tab, topicPosition, forceToSeeAllTab])
-
   return (
-    <Container
-      style={{ ...border, ...style }}
-      className={classNames('home-tabs', { right: position === 'right' && topicPosition === 'right' })}>
-      {position === 'left' && topicPosition === 'left' && (
-        <CustomTabs>
-          <TabItem active={tab === 'assistants'} onClick={() => setTab('assistants')}>
-            {t('assistants.abbr')}
-          </TabItem>
-          <TabItem active={tab === 'topic'} onClick={() => setTab('topic')}>
-            {t('common.topics')}
-          </TabItem>
-          <TabItem active={tab === 'settings'} onClick={() => setTab('settings')}>
-            {t('settings.title')}
-          </TabItem>
-        </CustomTabs>
-      )}
+    <Container style={{ ...border, ...style }} className="home-tabs cartridge-store">
+      {/* 卡带商店标题 */}
+      <StoreHeader>
+        <StoreIcon>
+          <Cpu size={24} />
+        </StoreIcon>
+        <StoreTitle>{t('assistants.cartridgeStore.title')}</StoreTitle>
+      </StoreHeader>
 
-      {position === 'right' && topicPosition === 'right' && (
-        <CustomTabs>
-          <TabItem active={tab === 'topic'} onClick={() => setTab('topic')}>
-            {t('common.topics')}
-          </TabItem>
-          <TabItem active={tab === 'settings'} onClick={() => setTab('settings')}>
-            {t('settings.title')}
-          </TabItem>
-        </CustomTabs>
-      )}
-
+      {/* 卡带列表 */}
       <TabContent className="home-tabs-content">
-        {tab === 'assistants' && (
-          <Assistants
-            activeAssistant={activeAssistant}
-            setActiveAssistant={setActiveAssistant}
-            onCreateAssistant={onCreateAssistant}
-            onCreateDefaultAssistant={onCreateDefaultAssistant}
-          />
-        )}
-        {tab === 'topic' && (
-          <Topics
-            assistant={activeAssistant}
-            activeTopic={activeTopic}
-            setActiveTopic={setActiveTopic}
-            position={position}
-          />
-        )}
-        {tab === 'settings' && isTopicView && <Settings assistant={activeAssistant} />}
-        {tab === 'settings' && isSessionView && !sessionError && (
-          <Skeleton loading={isSessionLoading} active style={{ height: '100%', padding: '16px' }}>
-            <SessionSettingsTab session={session} update={updateSession} />
-          </Skeleton>
-        )}
-        {tab === 'settings' && isSessionView && sessionError && (
-          <div className="w-[var(--assistants-width)] p-2 px-3 pt-4">
-            <Alert
-              type="error"
-              message={t('agent.session.get.error.failed')}
-              description={getErrorMessage(sessionError)}
-              style={{ padding: '10px 15px' }}
-            />
-          </div>
-        )}
+        <Assistants
+          activeAssistant={activeAssistant}
+          setActiveAssistant={setActiveAssistant}
+          onImportCartridgeFile={onImportCartridgeFile}
+          onCreateDefaultAssistant={onCreateDefaultAssistant}
+        />
       </TabContent>
     </Container>
   )
@@ -188,13 +104,8 @@ const HomeTabs: FC<Props> = ({
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  width: var(--assistants-width);
-  transition: width 0.3s;
+  width: 100%;
   height: calc(100vh - var(--navbar-height));
-
-  &.right {
-    height: calc(100vh - var(--navbar-height));
-  }
 
   [navbar-position='left'] & {
     background-color: var(--color-background);
@@ -203,74 +114,101 @@ const Container = styled.div`
     height: calc(100vh - var(--navbar-height));
   }
   overflow: hidden;
-  .collapsed {
-    width: 0;
-    border-left: none;
-  }
 `
 
-const TabContent = styled.div`
+const StoreHeader = styled.div`
   display: flex;
-  transition: width 0.3s;
-  flex: 1;
-  flex-direction: column;
-  overflow-y: hidden;
-  overflow-x: hidden;
-`
-
-const CustomTabs = styled.div`
-  display: flex;
-  margin: 0 12px;
-  padding: 6px 0;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
   border-bottom: 1px solid var(--color-border);
-  background: transparent;
-  -webkit-app-region: no-drag;
-  [navbar-position='top'] & {
-    padding-top: 2px;
+  background: var(--color-background);
+  -webkit-app-region: drag;
+  position: relative;
+
+  /* 科技感底部线条 */
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      #3b82f6 20%,
+      #8b5cf6 50%,
+      #06b6d4 80%,
+      transparent 100%
+    );
+    opacity: 0.6;
   }
 `
 
-const TabItem = styled.button<{ active: boolean }>`
-  flex: 1;
-  height: 30px;
-  border: none;
-  background: transparent;
-  color: ${(props) => (props.active ? 'var(--color-text)' : 'var(--color-text-secondary)')};
-  font-size: 13px;
-  font-weight: ${(props) => (props.active ? '600' : '400')};
-  cursor: pointer;
-  border-radius: 8px;
-  margin: 0 2px;
-  position: relative;
+const StoreIcon = styled.div`
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--color-background-soft) 0%, var(--color-background-mute) 100%);
+  border: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #3b82f6;
+  -webkit-app-region: no-drag;
+  position: relative;
+  box-shadow:
+    0 4px 16px rgba(59, 130, 246, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 
-  &:hover {
-    color: var(--color-text);
-  }
-
-  &:active {
-    transform: scale(0.98);
+  /* 芯片针脚 */
+  &::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 24px;
+    background: repeating-linear-gradient(
+      180deg,
+      #fbbf24 0px, #fbbf24 3px,
+      transparent 3px, transparent 6px
+    );
+    border-radius: 1px;
   }
 
   &::after {
     content: '';
     position: absolute;
-    bottom: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: ${(props) => (props.active ? '30px' : '0')};
-    height: 3px;
-    background: var(--color-primary);
+    right: -4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 24px;
+    background: repeating-linear-gradient(
+      180deg,
+      #fbbf24 0px, #fbbf24 3px,
+      transparent 3px, transparent 6px
+    );
     border-radius: 1px;
-    transition: all 0.2s ease;
   }
+`
 
-  &:hover::after {
-    width: ${(props) => (props.active ? '30px' : '16px')};
-    background: ${(props) => (props.active ? 'var(--color-primary)' : 'var(--color-primary-soft)')};
-  }
+const StoreTitle = styled.div`
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text);
+  -webkit-app-region: no-drag;
+  letter-spacing: 1px;
+`
+
+const TabContent = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow-y: hidden;
+  overflow-x: hidden;
 `
 
 export default HomeTabs

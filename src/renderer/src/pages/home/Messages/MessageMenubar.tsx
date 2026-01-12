@@ -20,10 +20,11 @@ import { getMessageTitle } from '@renderer/services/MessagesService'
 import { translateText } from '@renderer/services/TranslateService'
 import type { RootState } from '@renderer/store'
 import store, { useAppDispatch } from '@renderer/store'
+import { selectHosts } from '@renderer/store/assistants'
 import { messageBlocksSelectors, removeOneBlock } from '@renderer/store/messageBlock'
 import { selectMessagesForTopic } from '@renderer/store/newMessage'
 import { TraceIcon } from '@renderer/trace/pages/Component'
-import type { Assistant, Host, Model, Topic, TranslateLanguage } from '@renderer/types'
+import type { Assistant, Expert, Host, Model, Topic, TranslateLanguage } from '@renderer/types'
 import { type Message, MessageBlockType } from '@renderer/types/newMessage'
 import { captureScrollableAsBlob, captureScrollableAsDataURL, classNames } from '@renderer/utils'
 import { copyMessageAsPlainText } from '@renderer/utils/copy'
@@ -162,6 +163,18 @@ const MessageMenubar: FC<Props> = (props) => {
   // const loading = useTopicLoading(topic)
 
   const isUserMessage = message.role === 'user'
+
+  // 获取 hosts 列表，用于查找 Expert 对应的 Host
+  const hosts = useSelector(selectHosts)
+
+  // 计算当前消息对应的 Host（用于项目文件夹保存）
+  const projectHost = useMemo(() => {
+    if (assistant.type === 'host') return assistant as Host
+    if (assistant.type === 'expert') {
+      return hosts.find((h) => h.id === (assistant as Expert).hostId) || null
+    }
+    return null
+  }, [assistant, hosts])
 
   const exportMenuOptions = useSelector((state: RootState) => state.settings.exportMenuOptions)
   const dispatch = useAppDispatch()
@@ -316,23 +329,25 @@ const MessageMenubar: FC<Props> = (props) => {
               SaveToKnowledgePopup.showForMessage(message)
             }
           },
-          // 项目文件夹保存选项（仅在 Host 模式下显示）
-          assistant.type === 'host' && {
-            label: t('hosts.project.save_to_project'),
-            key: 'save-to-project',
-            icon: <FolderOutput size={14} />,
-            onClick: () => {
-              SaveToProjectPopup.showForMessage(message, assistant as Host, topic)
+          // 项目文件夹保存选项（Host 或 Expert 模式下显示，需要有配置项目文件夹）
+          projectHost &&
+            projectHost.projectFolderPath && {
+              label: t('hosts.project.save_to_project'),
+              key: 'save-to-project',
+              icon: <FolderOutput size={14} />,
+              onClick: () => {
+                SaveToProjectPopup.showForMessage(message, projectHost, topic)
+              }
+            },
+          projectHost &&
+            projectHost.projectFolderPath && {
+              label: t('hosts.project.save_full_context'),
+              key: 'save-full-context',
+              icon: <FileText size={14} />,
+              onClick: () => {
+                SaveToProjectPopup.showForFullContext(message, projectHost, topic)
+              }
             }
-          },
-          assistant.type === 'host' && {
-            label: t('hosts.project.save_full_context'),
-            key: 'save-full-context',
-            icon: <FileText size={14} />,
-            onClick: () => {
-              SaveToProjectPopup.showForFullContext(message, assistant as Host, topic)
-            }
-          }
         ].filter(Boolean)
       },
       {

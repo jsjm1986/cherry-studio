@@ -3,6 +3,7 @@ import { AiSdkToChunkAdapter } from '@renderer/aiCore/chunk/AiSdkToChunkAdapter'
 import { AgentApiClient } from '@renderer/api/agent'
 import db from '@renderer/databases'
 import { fetchMessagesSummary } from '@renderer/services/ApiService'
+import { authService } from '@renderer/services/AuthService'
 import { DbService } from '@renderer/services/db/DbService'
 import FileManager from '@renderer/services/FileManager'
 import { BlockManager } from '@renderer/services/messageStreaming/BlockManager'
@@ -12,6 +13,7 @@ import { endSpan } from '@renderer/services/SpanManagerService'
 import { createStreamProcessor, type StreamProcessorCallbacks } from '@renderer/services/StreamProcessingService'
 import store from '@renderer/store'
 import { updateTopicUpdatedAt } from '@renderer/store/assistants'
+import { setMessageQuota } from '@renderer/store/auth'
 import { type ApiServerConfig, type Assistant, type FileMetadata, type Model, type Topic } from '@renderer/types'
 import type { AgentSessionEntity, GetAgentSessionResponse } from '@renderer/types/agent'
 import { ChunkType } from '@renderer/types/chunk'
@@ -858,6 +860,24 @@ export const sendMessage =
   ) =>
   async (dispatch: AppDispatch, getState: () => RootState) => {
     try {
+      // 【安全关键】强制登录检查 - 防止用户清除token绕过配额
+      if (!authService.isLoggedIn()) {
+        window.toast.error(t('error.login_required') || '请先登录后再使用')
+        return
+      }
+
+      // 【安全关键】服务端预扣减配额 - 必须在发送前验证
+      // 不能依赖本地缓存，必须通过服务端验证
+      const preConsumeResult = await authService.preConsumeQuota()
+      if (!preConsumeResult.success) {
+        window.toast.error(t('error.quota_exhausted') || '对话次数已用完，请联系管理员充值')
+        return
+      }
+      // 同步更新 Redux store 中的配额
+      if (preConsumeResult.quota !== undefined) {
+        dispatch(setMessageQuota(preConsumeResult.quota))
+      }
+
       if (userMessage.blocks.length === 0) {
         logger.warn('sendMessage: No blocks in the provided message.')
         return
@@ -1088,6 +1108,23 @@ export const resendMessageThunk =
   (topicId: Topic['id'], userMessageToResend: Message, assistant: Assistant) =>
   async (dispatch: AppDispatch, getState: () => RootState) => {
     try {
+      // 【安全关键】强制登录检查 - 防止用户清除token绕过配额
+      if (!authService.isLoggedIn()) {
+        window.toast.error(t('error.login_required') || '请先登录后再使用')
+        return
+      }
+
+      // 【安全关键】服务端预扣减配额 - 重发也需要验证
+      const preConsumeResult = await authService.preConsumeQuota()
+      if (!preConsumeResult.success) {
+        window.toast.error(t('error.quota_exhausted') || '对话次数已用完，请联系管理员充值')
+        return
+      }
+      // 同步更新 Redux store 中的配额
+      if (preConsumeResult.quota !== undefined) {
+        dispatch(setMessageQuota(preConsumeResult.quota))
+      }
+
       const state = getState()
       // Use selector to get all messages for the topic
       const allMessagesForTopic = selectMessagesForTopic(state, topicId)
@@ -1207,6 +1244,23 @@ export const regenerateAssistantResponseThunk =
   (topicId: Topic['id'], assistantMessageToRegenerate: Message, assistant: Assistant) =>
   async (dispatch: AppDispatch, getState: () => RootState) => {
     try {
+      // 【安全关键】强制登录检查 - 防止用户清除token绕过配额
+      if (!authService.isLoggedIn()) {
+        window.toast.error(t('error.login_required') || '请先登录后再使用')
+        return
+      }
+
+      // 【安全关键】服务端预扣减配额 - 重新生成也需要验证
+      const preConsumeResult = await authService.preConsumeQuota()
+      if (!preConsumeResult.success) {
+        window.toast.error(t('error.quota_exhausted') || '对话次数已用完，请联系管理员充值')
+        return
+      }
+      // 同步更新 Redux store 中的配额
+      if (preConsumeResult.quota !== undefined) {
+        dispatch(setMessageQuota(preConsumeResult.quota))
+      }
+
       const state = getState()
 
       // 1. Use selector to get all messages for the topic
@@ -1415,6 +1469,23 @@ export const appendAssistantResponseThunk =
   ) =>
   async (dispatch: AppDispatch, getState: () => RootState) => {
     try {
+      // 【安全关键】强制登录检查 - 防止用户清除token绕过配额
+      if (!authService.isLoggedIn()) {
+        window.toast.error(t('error.login_required') || '请先登录后再使用')
+        return
+      }
+
+      // 【安全关键】服务端预扣减配额 - 追加模型回复也需要验证
+      const preConsumeResult = await authService.preConsumeQuota()
+      if (!preConsumeResult.success) {
+        window.toast.error(t('error.quota_exhausted') || '对话次数已用完，请联系管理员充值')
+        return
+      }
+      // 同步更新 Redux store 中的配额
+      if (preConsumeResult.quota !== undefined) {
+        dispatch(setMessageQuota(preConsumeResult.quota))
+      }
+
       const state = getState()
 
       // 1. Find the existing assistant message to get the original askId

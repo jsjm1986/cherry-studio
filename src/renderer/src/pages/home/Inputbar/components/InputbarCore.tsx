@@ -72,6 +72,9 @@ export interface InputbarCoreProps {
 
   /** 控制 @ 符号的行为: 'models'(默认) 或 'experts' */
   mentionMode?: 'models' | 'experts'
+
+  /** 是否显示翻译按钮（默认 true） */
+  showTranslateButton?: boolean
 }
 
 const TextareaStyle: CSSProperties = {
@@ -121,7 +124,8 @@ export const InputbarCore: FC<InputbarCoreProps> = ({
   rightToolbar,
   topContent,
   forceEnableQuickPanelTriggers,
-  mentionMode = 'models'
+  mentionMode = 'models',
+  showTranslateButton = true
 }) => {
   const config = useMemo(() => getInputbarConfig(scope), [scope])
   const { files, isExpanded } = useInputbarToolsState()
@@ -638,7 +642,9 @@ export const InputbarCore: FC<InputbarCoreProps> = ({
 
   const rightSectionExtras = useMemo(() => {
     const extras: React.ReactNode[] = []
-    extras.push(<TranslateButton key="translate" text={text} onTranslated={onTranslated} isLoading={isTranslating} />)
+    if (showTranslateButton) {
+      extras.push(<TranslateButton key="translate" text={text} onTranslated={onTranslated} isLoading={isTranslating} />)
+    }
     extras.push(<SendMessageButton key="send" sendMessage={handleSendMessage} disabled={isSendDisabled} />)
 
     if (isLoading) {
@@ -652,7 +658,7 @@ export const InputbarCore: FC<InputbarCoreProps> = ({
     }
 
     return <>{extras}</>
-  }, [text, onTranslated, isTranslating, handleSendMessage, isSendDisabled, isLoading, t, onPause])
+  }, [text, onTranslated, isTranslating, handleSendMessage, isSendDisabled, isLoading, t, onPause, showTranslateButton])
 
   const quickPanelElement = config.enableQuickPanel ? <QuickPanelView setInputText={setText} /> : null
 

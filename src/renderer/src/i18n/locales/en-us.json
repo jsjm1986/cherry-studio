@@ -390,6 +390,18 @@
   },
   "assistants": {
     "abbr": "Assistants",
+    "cartridgeStore": {
+      "title": "Cartridge Store",
+      "addCartridge": "Add Cartridge",
+      "importCartridge": "Import Cartridge",
+      "importSuccess": "Cartridge imported successfully",
+      "importError": "Failed to import cartridge, please check file format",
+      "noDescription": "No description",
+      "topicCount": "{{count}} topics",
+      "insertToHost": "Insert to Host",
+      "noHosts": "No hosts available",
+      "importToHostSuccess": "Imported to host \"{{hostName}}\""
+    },
     "clear": {
       "content": "Clearing the topic will delete all topics and files in the assistant. Are you sure you want to continue?",
       "title": "Clear topics"
@@ -1274,6 +1286,7 @@
     "name": "Error name",
     "no_api_key": "API key is not configured",
     "no_response": "No response",
+    "quota_exhausted": "Message quota exhausted, please contact administrator to recharge",
     "originalError": "Original Error",
     "originalMessage": "Original Message",
     "parameter": "Parameter",
@@ -1401,6 +1414,15 @@
     "open": "Open",
     "preview": {
       "error": "Failed to open file"
+    },
+    "project": {
+      "title": "Project Folders",
+      "files_count": "files",
+      "hosts_count": "hosts have project folders",
+      "empty_title": "No Project Folders",
+      "empty_desc": "Please configure project folders in host settings first",
+      "go_to_hosts": "Go to Host Settings",
+      "go_to_files": "View All Project Files"
     },
     "size": "Size",
     "text": "Text",

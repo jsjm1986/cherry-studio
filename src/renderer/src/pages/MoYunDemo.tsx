@@ -1,22 +1,22 @@
-import { FC, useState } from 'react'
-import styled from 'styled-components'
 import {
+  BookOpen,
+  ChevronRight,
+  FileText,
+  Globe,
+  Layers,
+  Mic,
   Moon,
-  Sun,
-  Sparkles,
+  Plus,
+  Search,
   Send,
   Settings,
+  Sparkles,
+  Sun,
   User,
-  Search,
-  BookOpen,
-  Mic,
-  Layers,
-  ChevronRight,
-  Plus,
-  FileText,
-  Zap,
-  Globe
-} from 'lucide-react'
+  Zap} from 'lucide-react'
+import type { FC} from 'react';
+import { useState } from 'react'
+import styled from 'styled-components'
 
 /**
  * 墨韵设计系统 Demo 页面 v2.0

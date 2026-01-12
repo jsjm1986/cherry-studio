@@ -84,6 +84,8 @@ interface Props {
   onMentionedModelsChange?: (models: Model[]) => void
   /** 是否在输入框内显示模型标签（默认 true） */
   showMentionedModelsInInputbar?: boolean
+  /** 是否显示翻译按钮（默认 true） */
+  showTranslateButton?: boolean
 }
 
 type ProviderActionHandlers = {
@@ -110,7 +112,8 @@ const Inputbar: FC<Props> = ({
   forceEnableQuickPanelTriggers,
   externalMentionedModels,
   onMentionedModelsChange,
-  showMentionedModelsInInputbar = true
+  showMentionedModelsInInputbar = true,
+  showTranslateButton = true
 }) => {
   const actionsRef = useRef<ProviderActionHandlers>({
     resizeTextArea: () => {},
@@ -159,6 +162,7 @@ const Inputbar: FC<Props> = ({
         mentionMode={mentionMode}
         forceEnableQuickPanelTriggers={forceEnableQuickPanelTriggers}
         showMentionedModelsInInputbar={showMentionedModelsInInputbar}
+        showTranslateButton={showTranslateButton}
       />
     </InputbarToolsProvider>
   )
@@ -174,7 +178,8 @@ const InputbarInner: FC<InputbarInnerProps> = ({
   getEffectiveAssistant,
   mentionMode,
   forceEnableQuickPanelTriggers,
-  showMentionedModelsInInputbar = true
+  showMentionedModelsInInputbar = true,
+  showTranslateButton = true
 }) => {
   const scope = topic.type ?? TopicType.Chat
   const config = getInputbarConfig(scope)
@@ -569,6 +574,7 @@ const InputbarInner: FC<InputbarInnerProps> = ({
       topContent={topContent}
       mentionMode={mentionMode}
       forceEnableQuickPanelTriggers={forceEnableQuickPanelTriggers}
+      showTranslateButton={showTranslateButton}
     />
   )
 }
