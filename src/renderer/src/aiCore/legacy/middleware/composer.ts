@@ -248,18 +248,17 @@ export function applyCompletionsMiddlewares<
       const timeout = context._internal.customState?.sdkMetadata?.timeout
 
       // 将 callType 添加到请求头，用于服务端区分请求类型（如 summary 不计费）
-      const callTypeHeaders = params.callType ? { 'X-Call-Type': params.callType } : {}
+      const callTypeHeaders: Record<string, string> = params.callType ? { 'X-Call-Type': params.callType } : {}
 
       const methodCall = async (payload) => {
         return await originalCompletionsMethod.call(originalApiClientInstance, payload, {
-          ...options,
           signal: abortSignal,
           timeout,
           headers: {
-            ...options?.headers,
+            ...(options?.headers as Record<string, string> | undefined),
             ...callTypeHeaders
           }
-        })
+        } as RequestOptions)
       }
 
       const traceParams = {

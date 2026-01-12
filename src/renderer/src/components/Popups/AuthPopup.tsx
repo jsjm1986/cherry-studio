@@ -2,7 +2,6 @@ import { useAppDispatch, useAppSelector } from '@renderer/store'
 import { loginSuccess, logout, setError, setLoading } from '@renderer/store/auth'
 import { Button, Form, Input, Modal, Tabs } from 'antd'
 import React, { useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
 import { authService } from '../../services/AuthService'
@@ -17,7 +16,6 @@ type TabKey = 'login' | 'register'
 const PopupContainer: React.FC<Props> = ({ resolve }) => {
   const [open, setOpen] = useState(true)
   const [activeTab, setActiveTab] = useState<TabKey>('login')
-  const { t } = useTranslation()
   const dispatch = useAppDispatch()
   const { loading, error, isLoggedIn, user } = useAppSelector((state) => state.auth)
   const [loginForm] = Form.useForm()

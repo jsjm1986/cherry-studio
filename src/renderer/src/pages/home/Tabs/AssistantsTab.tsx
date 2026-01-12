@@ -423,34 +423,6 @@ const pixelFlicker = keyframes`
   }
 `
 
-// RGB 色彩偏移效果 - CRT 显示器风格
-const rgbShift = keyframes`
-  0%, 100% {
-    text-shadow:
-      1px 1px 0 rgba(0, 0, 0, 0.3),
-      0 0 0 rgba(255, 0, 0, 0),
-      0 0 0 rgba(0, 255, 255, 0);
-  }
-  25% {
-    text-shadow:
-      1px 1px 0 rgba(0, 0, 0, 0.3),
-      2px 0 0 rgba(255, 0, 0, 0.4),
-      -2px 0 0 rgba(0, 255, 255, 0.4);
-  }
-  50% {
-    text-shadow:
-      1px 1px 0 rgba(0, 0, 0, 0.3),
-      1px 0 0 rgba(255, 0, 0, 0.3),
-      -1px 0 0 rgba(0, 255, 255, 0.3);
-  }
-  75% {
-    text-shadow:
-      1px 1px 0 rgba(0, 0, 0, 0.3),
-      3px 0 0 rgba(255, 0, 0, 0.5),
-      -3px 0 0 rgba(0, 255, 255, 0.5);
-  }
-`
-
 // 边框像素脉冲 - 霓虹灯风格
 const borderPulse = keyframes`
   0%, 100% {
