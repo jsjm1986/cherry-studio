@@ -4,7 +4,6 @@ import WindowControls from '@renderer/components/WindowControls'
 import { useTheme } from '@renderer/context/ThemeProvider'
 import { db } from '@renderer/databases'
 import { useAssistant } from '@renderer/hooks/useAssistant'
-import { useNotesSettings } from '@renderer/hooks/useNotesSettings'
 import { useNavbarPosition } from '@renderer/hooks/useSettings'
 import { finishTopicRenaming, startTopicRenaming, TopicManager } from '@renderer/hooks/useTopic'
 import { fetchMessagesSummary } from '@renderer/services/ApiService'
@@ -24,7 +23,7 @@ import {
   parseCartridgeMarkdown
 } from '@renderer/utils/cartridge'
 import { copyTopicAsMarkdown } from '@renderer/utils/copy'
-import { exportTopicAsMarkdown, exportTopicToNotes } from '@renderer/utils/export'
+import { exportTopicAsMarkdown } from '@renderer/utils/export'
 import { createAssistantMessage, createMainTextBlock } from '@renderer/utils/messageUtils/create'
 import { Input, message, Modal } from 'antd'
 import type { FC } from 'react'
@@ -72,7 +71,6 @@ const saveNotebookCollapsed = (collapsed: boolean): void => {
 const HostsPageContent: FC = () => {
   const { t } = useTranslation()
   const { navbarPosition } = useNavbarPosition()
-  const { notesPath } = useNotesSettings()
   const { setMentionedExpert } = useExpertContext()
   const dispatch = useAppDispatch()
   const { theme } = useTheme()
@@ -473,7 +471,7 @@ const HostsPageContent: FC = () => {
   // 保存到项目文件
   const handleSaveToProjectFolder = useCallback(
     async (topic: Topic) => {
-      if (!currentAssistant?.projectFolderPath) {
+      if (!activeHost?.projectFolderPath) {
         window.toast.warning('请先设置项目文件夹')
         return
       }
@@ -485,7 +483,7 @@ const HostsPageContent: FC = () => {
       const safeName = removeSpecialCharactersForFileName(topic.name)
       const date = dayjs().format('YYYY-MM-DD')
       const fileName = `${safeName}-${date}.md`
-      const filePath = `${currentAssistant.projectFolderPath}/${fileName}`
+      const filePath = `${activeHost.projectFolderPath}/${fileName}`
 
       try {
         await window.api.file.write(filePath, markdown)
@@ -495,7 +493,7 @@ const HostsPageContent: FC = () => {
         window.toast.error('保存失败')
       }
     },
-    [currentAssistant?.projectFolderPath]
+    [activeHost?.projectFolderPath]
   )
 
   // 清空消息
