@@ -1,194 +1,44 @@
-import { GithubOutlined } from '@ant-design/icons'
-import IndicatorLight from '@renderer/components/IndicatorLight'
-import { HStack } from '@renderer/components/Layout'
-import UpdateDialogPopup from '@renderer/components/Popups/UpdateDialogPopup'
 import { APP_NAME, AppLogo } from '@renderer/config/env'
 import { useTheme } from '@renderer/context/ThemeProvider'
-import { useMinappPopup } from '@renderer/hooks/useMinappPopup'
 import { useRuntime } from '@renderer/hooks/useRuntime'
-import { useSettings } from '@renderer/hooks/useSettings'
-import i18n from '@renderer/i18n'
-import { useAppDispatch } from '@renderer/store'
-import { setUpdateState } from '@renderer/store/runtime'
-import { ThemeMode } from '@renderer/types'
 import { runAsyncFunction } from '@renderer/utils'
-import { UpgradeChannel } from '@shared/config/constant'
-import { Avatar, Button, Progress, Radio, Row, Switch, Tag, Tooltip } from 'antd'
-import { debounce } from 'lodash'
-import { Bug, Building2, Github, Globe, Mail, Rss } from 'lucide-react'
-import { BadgeQuestionMark } from 'lucide-react'
+import { Avatar, Progress, Row, Tag } from 'antd'
 import type { FC } from 'react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import Markdown from 'react-markdown'
-import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
-import { SettingContainer, SettingDivider, SettingGroup, SettingRow, SettingTitle } from '.'
+import { SettingContainer, SettingDivider, SettingGroup, SettingTitle } from '.'
 
 const AboutSettings: FC = () => {
   const [version, setVersion] = useState('')
-  const [isPortable, setIsPortable] = useState(false)
   const { t } = useTranslation()
-  const { autoCheckUpdate, setAutoCheckUpdate, testPlan, setTestPlan, testChannel, setTestChannel } = useSettings()
   const { theme } = useTheme()
-  const dispatch = useAppDispatch()
   const { update } = useRuntime()
-  const { openSmartMinapp } = useMinappPopup()
-
-  const onCheckUpdate = debounce(
-    async () => {
-      if (update.checking || update.downloading) {
-        return
-      }
-
-      if (update.downloaded) {
-        // Open update dialog directly in renderer
-        UpdateDialogPopup.show({ releaseInfo: update.info || null })
-        return
-      }
-
-      dispatch(setUpdateState({ checking: true }))
-
-      try {
-        await window.api.checkForUpdate()
-      } catch (error) {
-        window.toast.error(t('settings.about.updateError'))
-      }
-
-      dispatch(setUpdateState({ checking: false }))
-    },
-    2000,
-    { leading: true, trailing: false }
-  )
-
-  const onOpenWebsite = (url: string) => {
-    window.api.openWebsite(url)
-  }
-
-  const mailto = async () => {
-    const email = 'support@cherry-ai.com'
-    const subject = `${APP_NAME} Feedback`
-    const version = (await window.api.getAppInfo()).version
-    const platform = window.electron.process.platform
-    const url = `mailto:${email}?subject=${subject}&body=%0A%0AVersion: ${version} | Platform: ${platform}`
-    onOpenWebsite(url)
-  }
-
-  const debug = async () => {
-    await window.api.devTools.toggle()
-  }
-
-  const showEnterprise = async () => {
-    onOpenWebsite('https://cherry-ai.com/enterprise')
-  }
-
-  const showReleases = async () => {
-    const { appPath } = await window.api.getAppInfo()
-    openSmartMinapp({
-      id: 'cherrystudio-releases',
-      name: t('settings.about.releases.title'),
-      url: `file://${appPath}/resources/cherry-studio/releases.html?theme=${theme === ThemeMode.dark ? 'dark' : 'light'}`,
-      logo: AppLogo
-    })
-  }
-
-  const currentChannelByVersion =
-    [
-      { pattern: `-${UpgradeChannel.BETA}.`, channel: UpgradeChannel.BETA },
-      { pattern: `-${UpgradeChannel.RC}.`, channel: UpgradeChannel.RC }
-    ].find(({ pattern }) => version.includes(pattern))?.channel || UpgradeChannel.LATEST
-
-  const handleTestChannelChange = async (value: UpgradeChannel) => {
-    if (testPlan && currentChannelByVersion !== UpgradeChannel.LATEST && value !== currentChannelByVersion) {
-      window.toast.warning(t('settings.general.test_plan.version_channel_not_match'))
-    }
-    setTestChannel(value)
-    // Clear update info when switching upgrade channel
-    dispatch(
-      setUpdateState({
-        available: false,
-        info: null,
-        downloaded: false,
-        checking: false,
-        downloading: false,
-        downloadProgress: 0
-      })
-    )
-  }
-
-  // Get available test version options based on current version
-  const getAvailableTestChannels = () => {
-    return [
-      {
-        tooltip: t('settings.general.test_plan.rc_version_tooltip'),
-        label: t('settings.general.test_plan.rc_version'),
-        value: UpgradeChannel.RC
-      },
-      {
-        tooltip: t('settings.general.test_plan.beta_version_tooltip'),
-        label: t('settings.general.test_plan.beta_version'),
-        value: UpgradeChannel.BETA
-      }
-    ]
-  }
-
-  const handleSetTestPlan = (value: boolean) => {
-    setTestPlan(value)
-    dispatch(
-      setUpdateState({
-        available: false,
-        info: null,
-        downloaded: false,
-        checking: false,
-        downloading: false,
-        downloadProgress: 0
-      })
-    )
-
-    if (value === true) {
-      setTestChannel(getTestChannel())
-    }
-  }
-
-  const getTestChannel = () => {
-    if (testChannel === UpgradeChannel.LATEST) {
-      return UpgradeChannel.RC
-    }
-    return testChannel
-  }
 
   useEffect(() => {
     runAsyncFunction(async () => {
       const appInfo = await window.api.getAppInfo()
       setVersion(appInfo.version)
-      setIsPortable(appInfo.isPortable)
     })
-    setAutoCheckUpdate(autoCheckUpdate)
-  }, [autoCheckUpdate, setAutoCheckUpdate])
-
-  const onOpenDocs = () => {
-    const isChinese = i18n.language.startsWith('zh')
-    window.api.openWebsite(
-      isChinese ? 'https://docs.cherry-ai.com/' : 'https://docs.cherry-ai.com/cherry-studio-wen-dang/en-us'
-    )
-  }
+  }, [])
 
   return (
     <SettingContainer theme={theme}>
       <SettingGroup theme={theme}>
         <SettingTitle>
           {t('settings.about.title')}
-          <HStack alignItems="center">
+          {/* GitHub 链接暂时隐藏 */}
+          {/* <HStack alignItems="center">
             <Link to="https://github.com/CherryHQ/cherry-studio">
               <GithubOutlined style={{ marginRight: 4, color: 'var(--color-text)', fontSize: 20 }} />
             </Link>
-          </HStack>
+          </HStack> */}
         </SettingTitle>
         <SettingDivider />
         <AboutHeader>
           <Row align="middle">
-            <AvatarWrapper onClick={() => onOpenWebsite('https://github.com/CherryHQ/cherry-studio')}>
+            <AvatarWrapper>
               {update.downloadProgress > 0 && (
                 <ProgressCircle
                   type="circle"
@@ -205,14 +55,14 @@ const AboutSettings: FC = () => {
               <Title>{APP_NAME}</Title>
               <Description>{t('settings.about.description')}</Description>
               <Tag
-                onClick={() => onOpenWebsite('https://github.com/CherryHQ/cherry-studio/releases')}
                 color="cyan"
-                style={{ marginTop: 8, cursor: 'pointer' }}>
+                style={{ marginTop: 8 }}>
                 v{version}
               </Tag>
             </VersionWrapper>
           </Row>
-          {!isPortable && (
+          {/* 立即更新按钮暂时隐藏 */}
+          {/* {!isPortable && (
             <CheckUpdateButton
               onClick={onCheckUpdate}
               loading={update.checking}
@@ -223,9 +73,10 @@ const AboutSettings: FC = () => {
                   ? t('settings.about.checkUpdate.available')
                   : t('settings.about.checkUpdate.label')}
             </CheckUpdateButton>
-          )}
+          )} */}
         </AboutHeader>
-        {!isPortable && (
+        {/* 自动更新和测试计划暂时隐藏 */}
+        {/* {!isPortable && (
           <>
             <SettingDivider />
             <SettingRow>
@@ -259,9 +110,10 @@ const AboutSettings: FC = () => {
               </>
             )}
           </>
-        )}
+        )} */}
       </SettingGroup>
-      {update.info && update.available && (
+      {/* 发现新版本区域暂时隐藏 */}
+      {/* {update.info && update.available && (
         <SettingGroup theme={theme}>
           <SettingRow>
             <SettingRowTitle>
@@ -277,8 +129,9 @@ const AboutSettings: FC = () => {
             </Markdown>
           </UpdateNotesWrapper>
         </SettingGroup>
-      )}
-      <SettingGroup theme={theme}>
+      )} */}
+      {/* 帮助文档、更新日志等暂时隐藏 */}
+      {/* <SettingGroup theme={theme}>
         <SettingRow>
           <SettingRowTitle>
             <BadgeQuestionMark size={18} />
@@ -336,7 +189,7 @@ const AboutSettings: FC = () => {
           </SettingRowTitle>
           <Button onClick={debug}>{t('settings.about.debug.open')}</Button>
         </SettingRow>
-      </SettingGroup>
+      </SettingGroup> */}
     </SettingContainer>
   )
 }
@@ -371,8 +224,6 @@ const Description = styled.div`
   text-align: center;
 `
 
-const CheckUpdateButton = styled(Button)``
-
 const AvatarWrapper = styled.div`
   position: relative;
   cursor: pointer;
@@ -396,19 +247,6 @@ export const SettingRowTitle = styled.div`
   .anticon {
     font-size: 16px;
     color: var(--color-text-1);
-  }
-`
-
-const UpdateNotesWrapper = styled.div`
-  padding: 12px 0;
-  margin: 8px 0;
-  background-color: var(--color-bg-2);
-  border-radius: 6px;
-  color: var(--color-text-2);
-  font-size: 14px;
-
-  p {
-    margin: 0;
   }
 `
 

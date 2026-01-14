@@ -130,6 +130,8 @@ interface DirectoryListOptions {
   includeDirectories?: boolean
   maxEntries?: number
   searchPattern?: string
+  /** 禁用默认的目录排除规则（node_modules, .git, build 等） */
+  disableDefaultExcludes?: boolean
 }
 
 const DEFAULT_DIRECTORY_LIST_OPTIONS: Required<DirectoryListOptions> = {
@@ -139,7 +141,8 @@ const DEFAULT_DIRECTORY_LIST_OPTIONS: Required<DirectoryListOptions> = {
   includeFiles: true,
   includeDirectories: true,
   maxEntries: 10,
-  searchPattern: '.'
+  searchPattern: '.',
+  disableDefaultExcludes: false
 }
 
 class FileStorage {
@@ -977,18 +980,20 @@ class FileStorage {
         args.push('--iglob', `*${options.searchPattern}*`)
       }
 
-      // Exclude common hidden directories and large directories
-      args.push('-g', '!**/node_modules/**')
-      args.push('-g', '!**/.git/**')
-      args.push('-g', '!**/.idea/**')
-      args.push('-g', '!**/.vscode/**')
-      args.push('-g', '!**/.DS_Store')
-      args.push('-g', '!**/dist/**')
-      args.push('-g', '!**/build/**')
-      args.push('-g', '!**/.next/**')
-      args.push('-g', '!**/.nuxt/**')
-      args.push('-g', '!**/coverage/**')
-      args.push('-g', '!**/.cache/**')
+      // Exclude common hidden directories and large directories (unless disabled)
+      if (!options.disableDefaultExcludes) {
+        args.push('-g', '!**/node_modules/**')
+        args.push('-g', '!**/.git/**')
+        args.push('-g', '!**/.idea/**')
+        args.push('-g', '!**/.vscode/**')
+        args.push('-g', '!**/.DS_Store')
+        args.push('-g', '!**/dist/**')
+        args.push('-g', '!**/build/**')
+        args.push('-g', '!**/.next/**')
+        args.push('-g', '!**/.nuxt/**')
+        args.push('-g', '!**/coverage/**')
+        args.push('-g', '!**/.cache/**')
+      }
 
       // Handle max depth
       if (!options.recursive) {

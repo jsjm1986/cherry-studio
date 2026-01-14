@@ -71,7 +71,7 @@ const MessageItem: FC<Props> = ({
   const { assistant, setModel } = useAssistant(message.assistantId)
   const { isMultiSelectMode } = useChatContext(topic)
   const model = useModel(getMessageModelId(message), message.model?.provider) || message.model
-  const { messageFont, fontSize, messageStyle, showMessageOutline } = useSettings()
+  const { messageFont, fontSize, showMessageOutline } = useSettings()
   const { editMessageBlocks, resendUserMessageWithEdit, editMessage } = useMessageOperations(topic)
   const messageContainerRef = useRef<HTMLDivElement>(null)
   const { editingMessageId, startEditing, stopEditing } = useMessageEditing()
@@ -232,10 +232,7 @@ const MessageItem: FC<Props> = ({
               <MessageFooter className="MessageFooter">
                 <HorizontalScrollContainer
                   classNames={{
-                    content: cn(
-                      'flex-1 items-center justify-between',
-                      isLastMessage && messageStyle === 'plain' ? 'flex-row-reverse' : 'flex-row'
-                    )
+                    content: cn('flex-1 items-center justify-between flex-row')
                   }}>
                   <MessageMenubar
                     message={message}

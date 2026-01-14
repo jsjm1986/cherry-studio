@@ -5,6 +5,8 @@ import { loggerService } from '@logger'
 import type { AiSdkMiddlewareConfig } from '@renderer/aiCore/middleware/AiSdkMiddlewareBuilder'
 import { buildStreamTextParams } from '@renderer/aiCore/prepareParams'
 import { isDedicatedImageGenerationModel, isEmbeddingModel, isFunctionCallingModel } from '@renderer/config/models'
+import { yunwuGeminiModel } from '@renderer/config/models/default'
+import { BUILTIN_PROVIDER } from '@renderer/config/providers'
 import { getStoreSetting } from '@renderer/hooks/useSettings'
 import i18n from '@renderer/i18n'
 import store from '@renderer/store'
@@ -31,8 +33,7 @@ import {
   // getAssistantSettings,
   getDefaultAssistant,
   getDefaultModel,
-  getProviderByModel,
-  getQuickModel
+  getProviderByModel
 } from './AssistantService'
 // import { processKnowledgeSearch } from './KnowledgeService'
 // import {
@@ -168,7 +169,8 @@ export async function fetchChatCompletion({
 
 export async function fetchMessagesSummary({ messages, assistant }: { messages: Message[]; assistant: Assistant }) {
   let prompt = (getStoreSetting('topicNamingPrompt') as string) || i18n.t('prompts.title')
-  const model = getQuickModel() || assistant?.model || getDefaultModel()
+  // 强制使用内置的 yunwu 模型进行话题命名，确保始终可用
+  const model = yunwuGeminiModel
 
   if (prompt && containsSupportedVariables(prompt)) {
     prompt = await replacePromptVariables(prompt, model.name)
@@ -176,7 +178,8 @@ export async function fetchMessagesSummary({ messages, assistant }: { messages: 
 
   // 总结上下文总是取最后5条消息
   const contextMessages = takeRight(messages, 5)
-  const provider = getProviderByModel(model)
+  // 使用内置的 yunwu provider
+  const provider = BUILTIN_PROVIDER
 
   if (!hasApiKey(provider)) {
     return null
@@ -275,13 +278,15 @@ export async function fetchMessagesSummary({ messages, assistant }: { messages: 
 export async function fetchNoteSummary({ content, assistant }: { content: string; assistant?: Assistant }) {
   let prompt = (getStoreSetting('topicNamingPrompt') as string) || i18n.t('prompts.title')
   const resolvedAssistant = assistant || getDefaultAssistant()
-  const model = getQuickModel() || resolvedAssistant.model || getDefaultModel()
+  // 强制使用内置的 yunwu 模型进行笔记命名，确保始终可用
+  const model = yunwuGeminiModel
 
   if (prompt && containsSupportedVariables(prompt)) {
     prompt = await replacePromptVariables(prompt, model.name)
   }
 
-  const provider = getProviderByModel(model)
+  // 使用内置的 yunwu provider
+  const provider = BUILTIN_PROVIDER
 
   if (!hasApiKey(provider)) {
     return null
@@ -372,10 +377,9 @@ export async function fetchGenerate({
   content: string
   model?: Model
 }): Promise<string> {
-  if (!model) {
-    model = getDefaultModel()
-  }
-  const provider = getProviderByModel(model)
+  // 如果没有指定模型，使用内置的 yunwu 模型
+  const resolvedModel = model || yunwuGeminiModel
+  const provider = model ? getProviderByModel(resolvedModel) : BUILTIN_PROVIDER
 
   if (!hasApiKey(provider)) {
     return ''
@@ -387,10 +391,10 @@ export async function fetchGenerate({
     apiKey: getRotatedApiKey(provider)
   }
 
-  const AI = new AiProviderNew(model, providerWithRotatedKey)
+  const AI = new AiProviderNew(resolvedModel, providerWithRotatedKey)
 
   const assistant = getDefaultAssistant()
-  assistant.model = model
+  assistant.model = resolvedModel
   assistant.prompt = prompt
 
   // const params: CompletionsParams = {
@@ -413,7 +417,7 @@ export async function fetchGenerate({
 
   try {
     const result = await AI.completions(
-      model.id,
+      resolvedModel.id,
       {
         system: prompt,
         prompt: content

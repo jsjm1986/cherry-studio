@@ -1,5 +1,4 @@
 import db from '@renderer/databases'
-import i18n from '@renderer/i18n'
 import { fetchMessagesSummary } from '@renderer/services/ApiService'
 import { getDefaultTopic } from '@renderer/services/AssistantService'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
@@ -163,7 +162,8 @@ export const autoRenameTopic = async (assistant: Assistant, topicId: string) => 
       return
     }
 
-    if (topic && topic.name === i18n.t('chat.default.topic.name') && topic.messages.length >= 2) {
+    // 每次对话后都自动更新话题名（只要消息数>=2且未手动编辑）
+    if (topic && topic.messages.length >= 2) {
       try {
         startTopicRenaming(topicId)
         const summaryText = await fetchMessagesSummary({ messages: topic.messages, assistant })

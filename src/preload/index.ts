@@ -56,6 +56,8 @@ type DirectoryListOptions = {
   includeDirectories?: boolean
   maxEntries?: number
   searchPattern?: string
+  /** 禁用默认的目录排除规则（node_modules, .git, build 等） */
+  disableDefaultExcludes?: boolean
 }
 
 export function tracedInvoke(channel: string, spanContext: SpanContext | undefined, ...args: any[]) {

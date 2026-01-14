@@ -1,22 +1,6 @@
-import { GlobalOutlined } from '@ant-design/icons'
 import { Navbar, NavbarCenter } from '@renderer/components/app/Navbar'
 import Scrollbar from '@renderer/components/Scrollbar'
-import { Divider as AntDivider } from 'antd'
-import {
-  Brain,
-  Command,
-  FileCode,
-  Hammer,
-  HardDrive,
-  Info,
-  MonitorCog,
-  NotebookPen,
-  PictureInPicture2,
-  Server,
-  Settings2,
-  TextCursorInput,
-  Zap
-} from 'lucide-react'
+import { Info } from 'lucide-react'
 import type { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, Route, Routes, useLocation } from 'react-router-dom'
@@ -50,21 +34,8 @@ const SettingsPage: FC = () => {
       </Navbar>
       <ContentContainer id="content-container">
         <SettingMenus>
-          {/* Provider 和 Model 设置已禁用，使用内置模型 */}
-          {/* <MenuItemLink to="/settings/provider">
-            <MenuItem className={isRoute('/settings/provider')}>
-              <Cloud size={18} />
-              {t('settings.provider.title')}
-            </MenuItem>
-          </MenuItemLink>
-          <MenuItemLink to="/settings/model">
-            <MenuItem className={isRoute('/settings/model')}>
-              <Package size={18} />
-              {t('settings.model')}
-            </MenuItem>
-          </MenuItemLink>
-          <Divider /> */}
-          <MenuItemLink to="/settings/general">
+          {/* 以下菜单暂时隐藏，后续开发 */}
+          {/* <MenuItemLink to="/settings/general">
             <MenuItem className={isRoute('/settings/general')}>
               <Settings2 size={18} />
               {t('settings.general.label')}
@@ -144,7 +115,7 @@ const SettingsPage: FC = () => {
               {t('selection.name')}
             </MenuItem>
           </MenuItemLink>
-          <Divider />
+          <Divider /> */}
           <MenuItemLink to="/settings/about">
             <MenuItem className={isRoute('/settings/about')}>
               <Info size={18} />
@@ -236,10 +207,6 @@ const SettingContent = styled.div`
   display: flex;
   height: 100%;
   flex: 1;
-`
-
-const Divider = styled(AntDivider)`
-  margin: 3px 0;
 `
 
 export default SettingsPage

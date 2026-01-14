@@ -2,6 +2,7 @@ import KeyvStorage from '@kangfenmao/keyv-storage'
 import { loggerService } from '@logger'
 
 import { startAutoSync } from './services/BackupService'
+import { initializeBuiltinRooms } from './services/BuiltinRoomsService'
 import { startNutstoreAutoSync } from './services/NutstoreService'
 import storeSyncService from './services/StoreSyncService'
 import { webTraceService } from './services/WebTraceService'
@@ -35,7 +36,15 @@ function initWebTrace() {
   webTraceService.init()
 }
 
+function initBuiltinRooms() {
+  // 延迟初始化内置房间，确保 store 已准备好
+  setTimeout(() => {
+    initializeBuiltinRooms()
+  }, 1000)
+}
+
 initKeyv()
 initAutoSync()
 initStoreSync()
 initWebTrace()
+initBuiltinRooms()
