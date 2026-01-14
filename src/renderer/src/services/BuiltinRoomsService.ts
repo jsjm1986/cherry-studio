@@ -42,7 +42,7 @@ export async function initializeBuiltinRooms(): Promise<void> {
   }
 
   // 获取现有房间列表，避免重复创建
-  const existingHosts = store.getState().assistants.filter((a) => a.type === 'host') as Host[]
+  const existingHosts = store.getState().assistants.assistants.filter((a) => a.type === 'host') as Host[]
   const existingHostNames = new Set(existingHosts.map((h) => h.name))
 
   for (const roomConfig of BUILTIN_ROOMS) {
