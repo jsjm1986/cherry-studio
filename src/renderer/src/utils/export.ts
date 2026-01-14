@@ -1183,3 +1183,95 @@ export const exportNote = async ({ node, platform }: NoteExportOptions): Promise
     throw error
   }
 }
+
+/**
+ * 导出房间所有话题到项目文件夹
+ * @param host 房间对象
+ * @param onProgress 进度回调
+ */
+export const exportRoomToProjectFolder = async (
+  host: { name: string; topics: Topic[]; projectFolderPath?: string },
+  onProgress?: (current: number, total: number, topicName: string) => void
+): Promise<{ success: number; failed: number }> => {
+  const { projectFolderPath, topics, name: roomName } = host
+
+  if (!projectFolderPath) {
+    window.toast.error(i18n.t('hosts.export.no_folder'))
+    return { success: 0, failed: 0 }
+  }
+
+  if (!topics || topics.length === 0) {
+    window.toast.warning(i18n.t('hosts.export.no_topics'))
+    return { success: 0, failed: 0 }
+  }
+
+  if (getExportState()) {
+    window.toast.warning(i18n.t('message.warn.export.exporting'))
+    return { success: 0, failed: 0 }
+  }
+
+  setExportingState(true)
+
+  let success = 0
+  let failed = 0
+  const total = topics.length
+
+  try {
+    for (let i = 0; i < topics.length; i++) {
+      const topic = topics[i]
+      onProgress?.(i + 1, total, topic.name)
+
+      try {
+        const markdown = await topicToMarkdownWithMeta(topic, roomName)
+        const fileName = generateTopicFileName(topic.name)
+        const filePath = `${projectFolderPath}/${fileName}`
+
+        await window.api.file.save(filePath, markdown)
+        success++
+      } catch (err) {
+        logger.error(`Failed to export topic ${topic.name}:`, err as Error)
+        failed++
+      }
+    }
+
+    if (success > 0) {
+      window.toast.success(i18n.t('hosts.export.success', { count: success }))
+    }
+    if (failed > 0) {
+      window.toast.warning(i18n.t('hosts.export.partial_failed', { failed }))
+    }
+  } finally {
+    setExportingState(false)
+  }
+
+  return { success, failed }
+}
+
+/**
+ * 生成带元数据的话题 Markdown
+ */
+const topicToMarkdownWithMeta = async (topic: Topic, roomName: string): Promise<string> => {
+  const messages = await fetchTopicMessages(topic.id)
+  const timestamp = dayjs().format('YYYY-MM-DD HH:mm:ss')
+
+  let markdown = `# ${topic.name}\n\n`
+  markdown += `> 导出时间: ${timestamp}\n`
+  markdown += `> 房间: ${roomName}\n`
+  markdown += `> 消息数: ${messages.length}\n\n`
+  markdown += `---\n\n`
+
+  if (messages && messages.length > 0) {
+    markdown += messagesToMarkdown(messages)
+  }
+
+  return markdown
+}
+
+/**
+ * 生成话题文件名
+ */
+const generateTopicFileName = (topicName: string): string => {
+  const safeName = removeSpecialCharactersForFileName(topicName)
+  const date = dayjs().format('YYYY-MM-DD')
+  return `${safeName}-${date}.md`
+}

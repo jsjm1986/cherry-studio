@@ -1,21 +1,29 @@
+import { isMac } from '@renderer/config/constant'
 import { useTheme } from '@renderer/context/ThemeProvider'
 import { useAppSelector } from '@renderer/store'
 import { selectMessagesForTopic } from '@renderer/store/newMessage'
 import type { Expert, Host, InfoFolder, RoomUserInfo, Topic } from '@renderer/types'
 import { Dropdown } from 'antd'
 import {
+  ArrowDown,
+  ArrowUp,
   AtSign,
   ChevronDown,
+  Copy,
   Download,
   FileText,
   FileUp,
-  Folder,
+  FolderDown,
   Info,
   MessageSquare,
+  MessageSquarePlus,
   MoreHorizontal,
   Pencil,
+  Pin,
   Plus,
+  Save,
   Settings,
+  Sparkles,
   Trash2,
   User,
   UserPlus,
@@ -45,6 +53,17 @@ interface Props {
   onAddTopic: () => void
   onDeleteTopic: (topic: Topic) => void
   onRenameTopic: (topic: Topic, newName: string) => void
+  // 话题右键菜单
+  onGenerateTopicName?: (topic: Topic) => void
+  onEditTopicPrompt?: (topic: Topic) => void
+  onPinTopic?: (topic: Topic) => void
+  onSaveToProjectFolder?: (topic: Topic) => void
+  onClearMessages?: (topic: Topic) => void
+  onMoveTopicUp?: (topic: Topic) => void
+  onMoveTopicDown?: (topic: Topic) => void
+  onCopyTopic?: (topic: Topic) => void
+  onSaveTopic?: (topic: Topic) => void
+  onExportTopic?: (topic: Topic) => void
   // 成员相关
   members: Expert[]
   onAddMember: () => void
@@ -78,6 +97,16 @@ const HostsLeftSidebar: FC<Props> = ({
   onAddTopic,
   onDeleteTopic,
   onRenameTopic,
+  onGenerateTopicName,
+  onEditTopicPrompt,
+  onPinTopic,
+  onSaveToProjectFolder,
+  onClearMessages,
+  onMoveTopicUp,
+  onMoveTopicDown,
+  onCopyTopic,
+  onSaveTopic,
+  onExportTopic,
   members,
   onAddMember,
   onImportMember,
@@ -85,20 +114,27 @@ const HostsLeftSidebar: FC<Props> = ({
   onEditMember,
   onDeleteMember,
   onMentionMember,
-  infoFolders,
-  onAddInfoFolder,
-  onSelectInfoFolder,
-  onDeleteInfoFolder,
-  selectedInfoFolderId,
+  // 资料库相关 - 暂时隐藏
+  infoFolders: _infoFolders,
+  onAddInfoFolder: _onAddInfoFolder,
+  onSelectInfoFolder: _onSelectInfoFolder,
+  onDeleteInfoFolder: _onDeleteInfoFolder,
+  selectedInfoFolderId: _selectedInfoFolderId,
   onUpdateUserInfo
 }) => {
+  // 暂时标记为未使用
+  void _infoFolders
+  void _onAddInfoFolder
+  void _onSelectInfoFolder
+  void _onDeleteInfoFolder
+  void _selectedInfoFolderId
+
   const { theme } = useTheme()
   const isDark = theme === 'dark'
 
   const [showRoomDropdown, setShowRoomDropdown] = useState(false)
   const [projectCollapsed, setProjectCollapsed] = useState(false)
   const [memberCollapsed, setMemberCollapsed] = useState(false)
-  const [infoCollapsed, setInfoCollapsed] = useState(false)
   const [aboutCollapsed, setAboutCollapsed] = useState(false)
   const [renamingTopicId, setRenamingTopicId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
@@ -271,47 +307,140 @@ const HostsLeftSidebar: FC<Props> = ({
                 ) : topics.length === 0 ? (
                   <EmptyState>暂无对话记录</EmptyState>
                 ) : (
-                  topics.map((topic) => (
-                    <TopicItem
+                  topics.map((topic, index) => (
+                    <Dropdown
                       key={topic.id}
-                      $active={activeTopic?.id === topic.id}
-                      onClick={() => onSelectTopic(topic)}>
-                      <FileText size={14} />
-                      {renamingTopicId === topic.id ? (
-                        <RenameInput
-                          value={renameValue}
-                          onChange={(e) => setRenameValue(e.target.value)}
-                          onBlur={() => handleFinishRename(topic)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleFinishRename(topic)
-                            if (e.key === 'Escape') {
-                              setRenamingTopicId(null)
-                              setRenameValue('')
-                            }
-                          }}
-                          autoFocus
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      ) : (
-                        <TopicName>{topic.name}</TopicName>
-                      )}
-                      <TopicActions className="actions">
-                        <ActionIcon
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleStartRename(topic)
-                          }}>
-                          <Pencil size={12} />
-                        </ActionIcon>
-                        <ActionIcon
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onDeleteTopic(topic)
-                          }}>
-                          <Trash2 size={12} />
-                        </ActionIcon>
-                      </TopicActions>
-                    </TopicItem>
+                      trigger={['contextMenu']}
+                      menu={{
+                        items: [
+                          {
+                            key: 'generate',
+                            label: '生成话题名',
+                            icon: <Sparkles size={14} />,
+                            onClick: () => onGenerateTopicName?.(topic)
+                          },
+                          {
+                            key: 'rename',
+                            label: '编辑话题名',
+                            icon: <Pencil size={14} />,
+                            onClick: () => handleStartRename(topic)
+                          },
+                          {
+                            key: 'prompt',
+                            label: '话题提示词',
+                            icon: <MessageSquarePlus size={14} />,
+                            onClick: () => onEditTopicPrompt?.(topic)
+                          },
+                          { type: 'divider' },
+                          {
+                            key: 'pin',
+                            label: topic.pinned ? '取消固定' : '固定话题',
+                            icon: <Pin size={14} />,
+                            onClick: () => onPinTopic?.(topic)
+                          },
+                          {
+                            key: 'notebook',
+                            label: '保存到项目文件',
+                            icon: <FolderDown size={14} />,
+                            onClick: () => onSaveToProjectFolder?.(topic)
+                          },
+                          {
+                            key: 'clear',
+                            label: '清空消息',
+                            icon: <Trash2 size={14} />,
+                            onClick: () => onClearMessages?.(topic)
+                          },
+                          { type: 'divider' },
+                          {
+                            key: 'position',
+                            label: '话题位置',
+                            icon: <ArrowUp size={14} />,
+                            children: [
+                              {
+                                key: 'moveUp',
+                                label: '上移',
+                                icon: <ArrowUp size={14} />,
+                                disabled: index === 0,
+                                onClick: () => onMoveTopicUp?.(topic)
+                              },
+                              {
+                                key: 'moveDown',
+                                label: '下移',
+                                icon: <ArrowDown size={14} />,
+                                disabled: index === topics.length - 1,
+                                onClick: () => onMoveTopicDown?.(topic)
+                              }
+                            ]
+                          },
+                          { type: 'divider' },
+                          {
+                            key: 'copy',
+                            label: '复制',
+                            icon: <Copy size={14} />,
+                            onClick: () => onCopyTopic?.(topic)
+                          },
+                          {
+                            key: 'save',
+                            label: '保存',
+                            icon: <Save size={14} />,
+                            onClick: () => onSaveTopic?.(topic)
+                          },
+                          {
+                            key: 'export',
+                            label: '导出',
+                            icon: <Download size={14} />,
+                            onClick: () => onExportTopic?.(topic)
+                          },
+                          { type: 'divider' },
+                          {
+                            key: 'delete',
+                            label: '删除',
+                            icon: <Trash2 size={14} />,
+                            danger: true,
+                            onClick: () => onDeleteTopic(topic)
+                          }
+                        ]
+                      }}>
+                      <TopicItem
+                        $active={activeTopic?.id === topic.id}
+                        onClick={() => onSelectTopic(topic)}>
+                        <FileText size={14} />
+                        {renamingTopicId === topic.id ? (
+                          <RenameInput
+                            value={renameValue}
+                            onChange={(e) => setRenameValue(e.target.value)}
+                            onBlur={() => handleFinishRename(topic)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleFinishRename(topic)
+                              if (e.key === 'Escape') {
+                                setRenamingTopicId(null)
+                                setRenameValue('')
+                              }
+                            }}
+                            autoFocus
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        ) : (
+                          <TopicName>{topic.name}</TopicName>
+                        )}
+                        <TopicActions className="actions">
+                          <ActionIcon
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleStartRename(topic)
+                            }}>
+                            <Pencil size={12} />
+                          </ActionIcon>
+                          <ActionIcon
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onDeleteTopic(topic)
+                            }}>
+                            <Trash2 size={12} />
+                          </ActionIcon>
+                        </TopicActions>
+                      </TopicItem>
+                    </Dropdown>
                   ))
                 )}
               </SectionContent>
@@ -426,8 +555,8 @@ const HostsLeftSidebar: FC<Props> = ({
               )}
             </Section>
 
-            {/* Information 区域 */}
-            <Section>
+            {/* Information 区域 - 暂时隐藏，后续开发 */}
+            {/* <Section>
               <SectionHeader onClick={() => !disabled && setInfoCollapsed(!infoCollapsed)}>
                 <SectionHeaderLeft>
                   <CollapseIcon $collapsed={infoCollapsed} $disabled={disabled}>
@@ -477,7 +606,7 @@ const HostsLeftSidebar: FC<Props> = ({
                   )}
                 </SectionContent>
               )}
-            </Section>
+            </Section> */}
 
             {/* About 区域 */}
             <Section>
@@ -607,7 +736,7 @@ const Container = styled.div<{ $isDark: boolean }>`
   border-radius: 12px;
   box-shadow: ${({ $isDark }) =>
     $isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.06)'};
-
+  overflow: hidden; /* 确保滚动条不会超出圆角边界 */
   /* 主题变量 - 供子组件使用 */
   --sidebar-bg: ${({ $isDark }) => ($isDark ? '#0f0f1a' : '#ffffff')};
   --sidebar-bg-hover: ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.03)' : '#f9fafb')};
@@ -625,13 +754,31 @@ const ScrollArea = styled.div<{ $isDark?: boolean }>`
   overflow-y: auto;
   overflow-x: hidden;
 
+  /* 默认隐藏滚动条，hover 时显示 */
   &::-webkit-scrollbar {
-    width: 4px;
+    width: 0px;
+    transition: width 0.2s ease;
+  }
+
+  &:hover::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
   }
 
   &::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 3px;
+  }
+
+  &:hover::-webkit-scrollbar-thumb {
     background: var(--sidebar-border);
-    border-radius: 2px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--sidebar-text-muted);
   }
 `
 
@@ -639,6 +786,7 @@ const ScrollArea = styled.div<{ $isDark?: boolean }>`
 const RoomSelector = styled.div`
   position: relative;
   padding: 12px;
+  padding-top: ${isMac ? '28px' : '12px'};
   border-bottom: 1px solid var(--sidebar-border);
 `
 
@@ -1009,51 +1157,6 @@ const RoomItemActions = styled.div`
   opacity: 0;
   transition: opacity 0.2s ease;
   margin-left: auto;
-`
-
-// Folder 样式
-const FolderItem = styled.div<{ $active?: boolean }>`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  background: ${({ $active }) => ($active ? 'var(--sidebar-primary-soft)' : 'transparent')};
-  color: ${({ $active }) => ($active ? 'var(--sidebar-primary)' : 'var(--sidebar-text)')};
-  border: 1px solid ${({ $active }) => ($active ? 'rgba(59,130,246,0.3)' : 'transparent')};
-  transition: all 0.15s ease;
-
-  &:hover {
-    background: ${({ $active }) => ($active ? 'var(--sidebar-primary-soft)' : 'var(--sidebar-bg-hover)')};
-  }
-
-  &:hover .actions {
-    opacity: 1;
-  }
-`
-
-const FolderName = styled.span`
-  flex: 1;
-  font-size: 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`
-
-const FolderBadge = styled.span`
-  font-size: 10px;
-  color: var(--sidebar-text-muted);
-  background: var(--sidebar-bg-hover);
-  padding: 2px 6px;
-  border-radius: 10px;
-`
-
-const FolderActions = styled.div`
-  display: flex;
-  gap: 2px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
 `
 
 // Info 样式

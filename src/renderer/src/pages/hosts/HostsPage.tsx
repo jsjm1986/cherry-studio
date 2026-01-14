@@ -1,13 +1,19 @@
+import PromptPopup from '@renderer/components/Popups/PromptPopup'
 import { QuickPanelProvider } from '@renderer/components/QuickPanel'
 import WindowControls from '@renderer/components/WindowControls'
 import { useTheme } from '@renderer/context/ThemeProvider'
 import { db } from '@renderer/databases'
 import { useAssistant } from '@renderer/hooks/useAssistant'
+import { useNotesSettings } from '@renderer/hooks/useNotesSettings'
 import { useNavbarPosition } from '@renderer/hooks/useSettings'
+import { finishTopicRenaming, startTopicRenaming, TopicManager } from '@renderer/hooks/useTopic'
+import { fetchMessagesSummary } from '@renderer/services/ApiService'
 import { getDefaultTopic } from '@renderer/services/AssistantService'
-import { useAppDispatch } from '@renderer/store'
+import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
+import store, { useAppDispatch } from '@renderer/store'
 import { upsertManyBlocks } from '@renderer/store/messageBlock'
 import { newMessagesActions } from '@renderer/store/newMessage'
+import { setGenerating } from '@renderer/store/runtime'
 import { loadTopicMessagesThunk, saveMessageAndBlocksToDB } from '@renderer/store/thunk/messageThunk'
 import type { Assistant, Expert, Host, InfoFolder, RoomUserInfo, Topic } from '@renderer/types'
 import { TopicType } from '@renderer/types'
@@ -17,8 +23,10 @@ import {
   extractExpertInfoFromCartridge,
   parseCartridgeMarkdown
 } from '@renderer/utils/cartridge'
+import { copyTopicAsMarkdown } from '@renderer/utils/copy'
+import { exportTopicAsMarkdown, exportTopicToNotes } from '@renderer/utils/export'
 import { createAssistantMessage, createMainTextBlock } from '@renderer/utils/messageUtils/create'
-import { Input, message,Modal } from 'antd'
+import { Input, message, Modal } from 'antd'
 import type { FC } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -64,6 +72,7 @@ const saveNotebookCollapsed = (collapsed: boolean): void => {
 const HostsPageContent: FC = () => {
   const { t } = useTranslation()
   const { navbarPosition } = useNavbarPosition()
+  const { notesPath } = useNotesSettings()
   const { setMentionedExpert } = useExpertContext()
   const dispatch = useAppDispatch()
   const { theme } = useTheme()
@@ -94,7 +103,9 @@ const HostsPageContent: FC = () => {
   }, [])
 
   // 使用 useAssistant hook 获取完整的 assistant 数据
-  const { assistant: currentAssistant, addTopic, removeTopic, updateTopic } = useAssistant(activeHost?.id || '')
+  const { assistant: currentAssistant, addTopic, removeTopic, updateTopic, updateTopics } = useAssistant(
+    activeHost?.id || ''
+  )
 
   // 专家状态
   const { experts, createExpert, updateExpert, deleteExpert, importExpertsFromAssistants } = useExperts(
@@ -402,6 +413,140 @@ const HostsPageContent: FC = () => {
     []
   )
 
+  // 生成话题名
+  const handleGenerateTopicName = useCallback(
+    async (topic: Topic) => {
+      const messages = await TopicManager.getTopicMessages(topic.id)
+      if (messages.length >= 2) {
+        startTopicRenaming(topic.id)
+        try {
+          const summaryText = await fetchMessagesSummary({ messages, assistant: currentAssistant })
+          if (summaryText) {
+            const updatedTopic = { ...topic, name: summaryText, isNameManuallyEdited: false }
+            updateTopic(updatedTopic)
+          } else {
+            window.toast?.error(t('message.error.fetchTopicName'))
+          }
+        } finally {
+          finishTopicRenaming(topic.id)
+        }
+      } else {
+        window.toast?.warning('需要至少2条消息才能生成话题名')
+      }
+    },
+    [currentAssistant, updateTopic, t]
+  )
+
+  // 编辑话题提示词
+  const handleEditTopicPrompt = useCallback(
+    async (topic: Topic) => {
+      const prompt = await PromptPopup.show({
+        title: t('chat.topics.prompt.edit.title'),
+        message: '',
+        defaultValue: topic?.prompt || '',
+        inputProps: {
+          rows: 8,
+          allowClear: true
+        }
+      })
+
+      if (prompt !== null) {
+        const updatedTopic = { ...topic, prompt: prompt.trim() }
+        updateTopic(updatedTopic)
+        if (topic.id === activeTopic?.id) {
+          setActiveTopic(updatedTopic)
+        }
+      }
+    },
+    [updateTopic, activeTopic?.id, t]
+  )
+
+  // 固定/取消固定话题
+  const handlePinTopic = useCallback(
+    (topic: Topic) => {
+      const updatedTopic = { ...topic, pinned: !topic.pinned }
+      updateTopic(updatedTopic)
+    },
+    [updateTopic]
+  )
+
+  // 保存到项目文件
+  const handleSaveToProjectFolder = useCallback(
+    async (topic: Topic) => {
+      if (!currentAssistant?.projectFolderPath) {
+        window.toast.warning('请先设置项目文件夹')
+        return
+      }
+      const { topicToMarkdown } = await import('@renderer/utils/export')
+      const { removeSpecialCharactersForFileName } = await import('@renderer/utils/file')
+      const dayjs = (await import('dayjs')).default
+
+      const markdown = await topicToMarkdown(topic)
+      const safeName = removeSpecialCharactersForFileName(topic.name)
+      const date = dayjs().format('YYYY-MM-DD')
+      const fileName = `${safeName}-${date}.md`
+      const filePath = `${currentAssistant.projectFolderPath}/${fileName}`
+
+      try {
+        await window.api.file.write(filePath, markdown)
+        window.toast.success('已保存到项目文件')
+      } catch (err) {
+        console.error('Failed to save to project folder:', err)
+        window.toast.error('保存失败')
+      }
+    },
+    [currentAssistant?.projectFolderPath]
+  )
+
+  // 清空消息
+  const handleClearMessages = useCallback((topic: Topic) => {
+    store.dispatch(setGenerating(false))
+    EventEmitter.emit(EVENT_NAMES.CLEAR_MESSAGES, topic)
+  }, [])
+
+  // 上移话题
+  const handleMoveTopicUp = useCallback(
+    (topic: Topic) => {
+      if (!currentAssistant?.topics) return
+      const topics = [...currentAssistant.topics]
+      const index = topics.findIndex((t) => t.id === topic.id)
+      if (index > 0) {
+        ;[topics[index - 1], topics[index]] = [topics[index], topics[index - 1]]
+        updateTopics(topics)
+      }
+    },
+    [currentAssistant?.topics, updateTopics]
+  )
+
+  // 下移话题
+  const handleMoveTopicDown = useCallback(
+    (topic: Topic) => {
+      if (!currentAssistant?.topics) return
+      const topics = [...currentAssistant.topics]
+      const index = topics.findIndex((t) => t.id === topic.id)
+      if (index < topics.length - 1) {
+        ;[topics[index], topics[index + 1]] = [topics[index + 1], topics[index]]
+        updateTopics(topics)
+      }
+    },
+    [currentAssistant?.topics, updateTopics]
+  )
+
+  // 复制话题
+  const handleCopyTopic = useCallback((topic: Topic) => {
+    copyTopicAsMarkdown(topic)
+  }, [])
+
+  // 保存话题
+  const handleSaveTopic = useCallback((topic: Topic) => {
+    exportTopicAsMarkdown(topic)
+  }, [])
+
+  // 导出话题
+  const handleExportTopic = useCallback((topic: Topic) => {
+    exportTopicAsMarkdown(topic)
+  }, [])
+
   const handleImportExperts = useCallback(
     (assistants: Assistant[]) => {
       const imported = importExpertsFromAssistants(assistants)
@@ -499,6 +644,16 @@ const HostsPageContent: FC = () => {
           onAddTopic={handleAddTopic}
           onDeleteTopic={handleDeleteTopic}
           onRenameTopic={handleRenameTopic}
+          onGenerateTopicName={handleGenerateTopicName}
+          onEditTopicPrompt={handleEditTopicPrompt}
+          onPinTopic={handlePinTopic}
+          onSaveToProjectFolder={handleSaveToProjectFolder}
+          onClearMessages={handleClearMessages}
+          onMoveTopicUp={handleMoveTopicUp}
+          onMoveTopicDown={handleMoveTopicDown}
+          onCopyTopic={handleCopyTopic}
+          onSaveTopic={handleSaveTopic}
+          onExportTopic={handleExportTopic}
           members={experts}
           onAddMember={handleAddExpert}
           onImportMember={handleOpenImport}
@@ -541,8 +696,8 @@ const HostsPageContent: FC = () => {
             ) : (
               <EmptyStateCenter>
                 <EmptyIcon>🏠</EmptyIcon>
-                <EmptyTitle>欢迎使用主机与专家</EmptyTitle>
-                <EmptyDescription>创建主机并添加专家，开始多角色协作对话</EmptyDescription>
+                <EmptyTitle>欢迎使用房间与专家</EmptyTitle>
+                <EmptyDescription>创建房间并添加专家，开始多角色协作对话</EmptyDescription>
               </EmptyStateCenter>
             )}
           </ChatArea>

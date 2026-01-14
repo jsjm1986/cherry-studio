@@ -112,7 +112,7 @@ const ExpertEditModal: FC<Props> = ({ open, expert, onOk, onCancel }) => {
       onOk={handleOk}
       onCancel={onCancel}
       okButtonProps={{ disabled: !name.trim() }}
-      destroyOnClose
+      destroyOnHidden
       width={520}>
       <FormContainer>
         {/* 头像和名称 - 优雅的头部布局 */}

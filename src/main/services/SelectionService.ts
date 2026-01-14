@@ -1113,7 +1113,7 @@ export class SelectionService {
       transparent: true,
       autoHideMenuBar: true,
       titleBarStyle: 'hidden', // [macOS]
-      trafficLightPosition: { x: 12, y: 9 }, // [macOS]
+      trafficLightPosition: { x: 8, y: 13 }, // [macOS]
       hasShadow: false,
       thickFrame: false,
       show: false,

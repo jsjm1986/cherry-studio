@@ -22,27 +22,34 @@ export function useProjectFolder(host: Host | null) {
     setError(null)
 
     try {
-      const result = await window.api.file.listDirectory(projectFolderPath)
-      // result 是文件路径字符串数组，需要从路径中提取文件名
-      const allFiles: ProjectFile[] = result
-        .map((filePath: string) => {
-          // 跨平台提取文件名：处理 Windows (\) 和 Unix/Mac (/) 路径分隔符
-          // 先去除末尾的分隔符，再提取最后一段
-          const normalizedPath = filePath.replace(/[/\\]+$/, '')
-          const segments = normalizedPath.split(/[/\\]/)
-          const name = segments[segments.length - 1] || normalizedPath
-          return {
-            name,
-            path: filePath,
-            size: 0,
-            modifiedAt: Date.now(),
-            isDirectory: false
-          }
-        })
-        .filter((file) => file.name && !file.name.startsWith('.')) // 过滤空名称和隐藏文件
+      // 使用 getDirectoryStructure 获取目录结构
+      const result = await window.api.file.getDirectoryStructure(projectFolderPath)
 
-      setFiles(allFiles)
+      // 递归展平树结构，提取所有文件
+      // scanDir 返回的 name 已去掉 .md 后缀，type='file' 表示文件
+      const flattenFiles = (nodes: any[]): ProjectFile[] => {
+        const files: ProjectFile[] = []
+        for (const node of nodes) {
+          if (node.type === 'file') {
+            files.push({
+              name: node.name + '.md', // 补回 .md 后缀用于显示
+              path: node.externalPath,
+              size: 0,
+              modifiedAt: node.updatedAt ? new Date(node.updatedAt).getTime() : Date.now(),
+              isDirectory: false
+            })
+          }
+          if (node.children && node.children.length > 0) {
+            files.push(...flattenFiles(node.children))
+          }
+        }
+        return files
+      }
+
+      const mdFiles = flattenFiles(result)
+      setFiles(mdFiles)
     } catch (err: any) {
+      console.error('[useProjectFolder] Error:', err)
       setError(err.message || 'Failed to list files')
       setFiles([])
     } finally {

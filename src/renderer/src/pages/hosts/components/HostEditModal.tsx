@@ -82,7 +82,7 @@ const HostEditModal: FC<Props> = ({ open, host, onOk, onCancel }) => {
       onCancel={onCancel}
       okButtonProps={{ disabled: !name.trim() }}
       width={520}
-      destroyOnClose>
+      destroyOnHidden>
       <FormContainer>
         {/* 头像和名称 - 优雅的头部布局 */}
         <HeaderRow>

@@ -204,9 +204,9 @@ const ExpertSettingsPopup: FC<Props> = ({ open, expert, onSave, onCancel }) => {
               </FormHint>
             </FormGroup>
 
-            {/* 主机提示词处理方式 */}
+            {/* 房间提示词处理方式 */}
             <FormGroup>
-              <FormLabel>{t('experts.promptSettings.hostPromptMode', { defaultValue: '主机提示词' })}</FormLabel>
+              <FormLabel>{t('experts.promptSettings.hostPromptMode', { defaultValue: '房间提示词' })}</FormLabel>
               <StyledSelect
                 value={localExpert.promptSettings?.hostPromptMode ?? 'append'}
                 onChange={(value) => updatePromptSettings({ hostPromptMode: value as 'append' | 'ignore' })}
@@ -218,13 +218,13 @@ const ExpertSettingsPopup: FC<Props> = ({ open, expert, onSave, onCancel }) => {
                   },
                   {
                     value: 'ignore',
-                    label: t('experts.promptSettings.hostPromptIgnore', { defaultValue: '忽略主机提示词' })
+                    label: t('experts.promptSettings.hostPromptIgnore', { defaultValue: '忽略房间提示词' })
                   }
                 ]}
               />
               <FormHint>
                 {t('experts.promptSettings.hostPromptModeHint', {
-                  defaultValue: '选择如何处理主机的提示词'
+                  defaultValue: '选择如何处理房间的提示词'
                 })}
               </FormHint>
             </FormGroup>
@@ -280,7 +280,7 @@ const ExpertSettingsPopup: FC<Props> = ({ open, expert, onSave, onCancel }) => {
         </FooterContainer>
       }
       width={600}
-      destroyOnClose
+      destroyOnHidden
       styles={{
         body: { padding: 0 }
       }}>

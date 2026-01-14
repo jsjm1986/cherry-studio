@@ -1,18 +1,20 @@
+import ProjectFileEditPopup from '@renderer/components/Popups/ProjectFileEditPopup'
 import { useTheme } from '@renderer/context/ThemeProvider'
 import { useAppDispatch } from '@renderer/store'
 import { removeNotebookItem, updateNotebookItem } from '@renderer/store/assistants'
 import type { Host, NotebookItem } from '@renderer/types'
 import { formatFileSize } from '@renderer/utils'
+import { exportRoomToProjectFolder } from '@renderer/utils/export'
 import { Button, Empty, Modal, Tabs, Tooltip } from 'antd'
 import {
   ChevronLeft,
   ChevronRight,
+  Download,
   Edit3,
   File,
   FileText,
   Folder,
   FolderOpen,
-  Info,
   RefreshCw,
   Trash2
 } from 'lucide-react'
@@ -154,6 +156,24 @@ const NotebookPanel: FC<Props> = ({ host, collapsed, onToggleCollapse, onUpdateH
     }
   }, [host, onUpdateHost])
 
+  // 导出所有对话到项目文件夹
+  const handleExportToFolder = useCallback(async () => {
+    if (!host || !host.projectFolderPath) return
+    await exportRoomToProjectFolder(host)
+    refreshFiles()
+  }, [host, refreshFiles])
+
+  // 打开文件编辑弹窗
+  const handleOpenFile = useCallback(
+    async (filePath: string, fileName: string) => {
+      const saved = await ProjectFileEditPopup.show({ filePath, fileName })
+      if (saved) {
+        refreshFiles()
+      }
+    },
+    [refreshFiles]
+  )
+
   // 格式化日期
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp)
@@ -242,26 +262,27 @@ const NotebookPanel: FC<Props> = ({ host, collapsed, onToggleCollapse, onUpdateH
   }
 
   const tabItems = [
-    {
-      key: 'info',
-      label: (
-        <TabLabel>
-          <Info size={14} />
-          <span>Info</span>
-        </TabLabel>
-      ),
-      children: (
-        <TabContent>
-          <PlaceholderText>{t('notebook.info.placeholder', { defaultValue: '待开发' })}</PlaceholderText>
-        </TabContent>
-      )
-    },
+    // Info 标签 - 暂时隐藏，后续开发
+    // {
+    //   key: 'info',
+    //   label: (
+    //     <TabLabel>
+    //       <Info size={14} />
+    //       <span>Info</span>
+    //     </TabLabel>
+    //   ),
+    //   children: (
+    //     <TabContent>
+    //       <PlaceholderText>{t('notebook.info.placeholder', { defaultValue: '待开发' })}</PlaceholderText>
+    //     </TabContent>
+    //   )
+    // },
     {
       key: 'notebook',
       label: (
         <TabLabel>
           <FileText size={14} />
-          <span>Notebook</span>
+          <span>摘录</span>
         </TabLabel>
       ),
       children: (
@@ -302,6 +323,11 @@ const NotebookPanel: FC<Props> = ({ host, collapsed, onToggleCollapse, onUpdateH
                   <span>{projectFolderPath}</span>
                 </FolderPath>
                 <HeaderActions>
+                  <Tooltip title={t('hosts.export.sync_all')}>
+                    <SmallActionButton onClick={handleExportToFolder}>
+                      <Download size={14} />
+                    </SmallActionButton>
+                  </Tooltip>
                   <Tooltip title={t('hosts.project.refresh')}>
                     <SmallActionButton onClick={refreshFiles}>
                       <RefreshCw size={14} />
@@ -323,7 +349,7 @@ const NotebookPanel: FC<Props> = ({ host, collapsed, onToggleCollapse, onUpdateH
               ) : (
                 <FilesList>
                   {files.map((file) => (
-                    <FileItem key={file.path} onClick={() => window.api.file.openPath(file.path)}>
+                    <FileItem key={file.path} onClick={() => handleOpenFile(file.path, file.name)}>
                       <FileIcon>
                         <File size={16} />
                       </FileIcon>
@@ -478,13 +504,6 @@ const TabContent = styled.div`
   height: 100%;
   overflow-y: auto;
   padding: 12px;
-`
-
-const PlaceholderText = styled.div`
-  color: var(--panel-text-muted);
-  text-align: center;
-  padding: 40px 20px;
-  font-size: 14px;
 `
 
 const NoteList = styled.div`

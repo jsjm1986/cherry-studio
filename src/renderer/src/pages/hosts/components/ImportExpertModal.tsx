@@ -82,7 +82,7 @@ const ImportExpertModal: FC<Props> = ({ open, onImport, onCancel }) => {
       okText={t('experts.import.confirm', { count: selectedIds.size })}
       okButtonProps={{ disabled: selectedIds.size === 0 }}
       width={600}
-      destroyOnClose>
+      destroyOnHidden>
       <ModalContent>
         <SearchBar>
           <SearchInputWrapper>
