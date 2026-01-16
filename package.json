@@ -1,6 +1,6 @@
 {
   "name": "Roome",
-  "version": "1.7.1",
+  "version": "1.13.0-beta",
   "private": true,
   "description": "A powerful AI assistant.",
   "main": "./out/main/index.js",
