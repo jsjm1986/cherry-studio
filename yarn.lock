@@ -10059,9 +10059,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"Tokenic@workspace:.":
+"Roome@workspace:.":
   version: 0.0.0-use.local
-  resolution: "Tokenic@workspace:."
+  resolution: "Roome@workspace:."
   dependencies:
     "@agentic/exa": "npm:^7.3.3"
     "@agentic/searxng": "npm:^7.3.3"
