@@ -44,8 +44,8 @@ import { useExperts, useHosts } from './hooks/useHosts'
 import { useInfoLibrary } from './hooks/useInfoLibrary'
 
 // localStorage 存储最后选中的主机
-const LAST_HOST_KEY = 'cherry-studio:last-active-host'
-const NOTEBOOK_COLLAPSED_KEY = 'cherry-studio:notebook-collapsed'
+const LAST_HOST_KEY = 'roome:last-active-host'
+const NOTEBOOK_COLLAPSED_KEY = 'roome:notebook-collapsed'
 
 const loadLastHostId = (): string | null => {
   return localStorage.getItem(LAST_HOST_KEY)
@@ -101,9 +101,13 @@ const HostsPageContent: FC = () => {
   }, [])
 
   // 使用 useAssistant hook 获取完整的 assistant 数据
-  const { assistant: currentAssistant, addTopic, removeTopic, updateTopic, updateTopics } = useAssistant(
-    activeHost?.id || ''
-  )
+  const {
+    assistant: currentAssistant,
+    addTopic,
+    removeTopic,
+    updateTopic,
+    updateTopics
+  } = useAssistant(activeHost?.id || '')
 
   // 专家状态
   const { experts, createExpert, updateExpert, deleteExpert, importExpertsFromAssistants } = useExperts(
@@ -400,16 +404,13 @@ const HostsPageContent: FC = () => {
   )
 
   // 选择话题时确保设置正确的 type 字段
-  const handleSelectTopic = useCallback(
-    (topic: Topic | null) => {
-      if (topic) {
-        setActiveTopic({ ...topic, type: TopicType.Host })
-      } else {
-        setActiveTopic(null)
-      }
-    },
-    []
-  )
+  const handleSelectTopic = useCallback((topic: Topic | null) => {
+    if (topic) {
+      setActiveTopic({ ...topic, type: TopicType.Host })
+    } else {
+      setActiveTopic(null)
+    }
+  }, [])
 
   // 生成话题名
   const handleGenerateTopicName = useCallback(
@@ -797,8 +798,7 @@ const ContentArea = styled.div<{ $isDark: boolean }>`
   overflow: hidden;
   background-color: ${({ $isDark }) => ($isDark ? '#0f0f1a' : '#ffffff')};
   border-radius: 12px;
-  box-shadow: ${({ $isDark }) =>
-    $isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.06)'};
+  box-shadow: ${({ $isDark }) => ($isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.06)')};
 `
 
 const ChatArea = styled.div<{ $isDark: boolean }>`

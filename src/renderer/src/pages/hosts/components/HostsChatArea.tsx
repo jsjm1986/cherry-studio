@@ -56,11 +56,6 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
     navigator.clipboard.writeText(selectedText)
   }, [])
 
-  const handleAskHer = useCallback((selectedText: string) => {
-    console.log('Ask Her:', selectedText)
-    // TODO: 实现问 Her 功能
-  }, [])
-
   const handleSaveToLibrary = useCallback(
     async (selectedText: string) => {
       if (!activeHost) return
@@ -207,7 +202,6 @@ const HostsChatArea: FC<Props> = ({ assistant, topic, setActiveTopic, experts, a
       <TextSelectionToolbar
         containerRef={chatContentRef}
         onCopy={handleCopy}
-        onAskHer={handleAskHer}
         showSaveToLibrary={!!activeHost}
         onSaveToLibrary={handleSaveToLibrary}
         showSaveToNotebook={!!activeHost}

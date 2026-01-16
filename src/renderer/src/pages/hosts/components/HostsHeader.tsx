@@ -1,5 +1,5 @@
 import type { Host } from '@renderer/types'
-import { ChevronDown, Globe, Home, Plus, Settings } from 'lucide-react'
+import { ChevronDown, Globe, Home } from 'lucide-react'
 import type { FC } from 'react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -176,23 +176,24 @@ const HostsHeader: FC<Props> = ({ hosts, activeHost, onSelectHost, onAddHost, on
             ) : (
               <EmptyHint>{t('hosts.room.empty', { defaultValue: '暂无房间' })}</EmptyHint>
             )}
-            <DropdownDivider />
+            {/* 创建房间功能已隐藏 - 仅能使用，无法增删改 */}
+            {/* <DropdownDivider />
             <DropdownItem onClick={onAddHost} $isAction>
               <Plus size={14} />
               <span>{t('hosts.room.create', { defaultValue: '创建房间' })}</span>
-            </DropdownItem>
+            </DropdownItem> */}
           </DropdownMenu>
         )}
       </SelectorContainer>
 
-      {/* 房间设置按钮 */}
-      {activeHost && (
+      {/* 房间设置按钮已隐藏 - 仅能使用，无法增删改 */}
+      {/* {activeHost && (
         <SettingsButton
           onClick={() => onEditHost(activeHost)}
           title={t('hosts.settings', { defaultValue: '房间设置' })}>
           <Settings size={16} />
         </SettingsButton>
-      )}
+      )} */}
     </HeaderContainer>
   )
 }

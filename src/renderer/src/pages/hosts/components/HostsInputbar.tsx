@@ -1,5 +1,6 @@
 import { useQuickPanel } from '@renderer/components/QuickPanel'
 import { useAssistant } from '@renderer/hooks/useAssistant'
+import type { HighlightPattern } from '@renderer/pages/home/Inputbar/components/HighlightTextarea'
 import { useInputbarToolsDispatch } from '@renderer/pages/home/Inputbar/context/InputbarToolsProvider'
 import { getDefaultModel } from '@renderer/services/AssistantService'
 import type { Assistant, Expert, Model, RoomUserInfo, Topic } from '@renderer/types'
@@ -164,7 +165,12 @@ const ExpertMentionHandler: FC<ExpertMentionHandlerProps> = ({
 
     // 检查文本中是否还包含 @handle
     // 使用正则匹配，确保 @ 后面紧跟 handle（避免误匹配）
-    const pattern = new RegExp(`@${handle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:\\s|$)`, 'i')
+    // 转义正则特殊字符（使用 split/map/join 避免替换字符串被系统处理）
+    const escapedHandle = handle
+      .split('')
+      .map((c) => (/[.*+?^${}()|[\]\\]/.test(c) ? '\\' + c : c))
+      .join('')
+    const pattern = new RegExp(`@${escapedHandle}(?:\\s|$)`, 'i')
 
     if (!pattern.test(currentText)) {
       // @ handle 已被删除，清除选中的专家
@@ -370,6 +376,30 @@ const HostsInputbar: FC<Props> = ({
     }
   }, [selectedExpert, assistant, experts, userInfo])
 
+  // 根据选中的专家生成高亮模式
+  // 只有当专家被选中时，才高亮对应的 @handle
+  const highlightPatterns = useMemo<HighlightPattern[]>(() => {
+    console.log('[HostsInputbar] selectedExpert:', selectedExpert)
+    if (!selectedExpert) return []
+
+    const handle = selectedExpert.handle?.replace('@', '') || selectedExpert.name
+    // 转义正则特殊字符（使用 split/map/join 避免替换字符串被系统处理）
+    const escapedHandle = handle
+      .split('')
+      .map((c) => (/[.*+?^${}()|[\]\\]/.test(c) ? '\\' + c : c))
+      .join('')
+    console.log('[HostsInputbar] Creating highlight pattern for:', handle, 'escaped:', escapedHandle)
+    return [
+      {
+        // 匹配 @专家名，不要求后面必须有空格（用户可能正在输入）
+        pattern: new RegExp(`@${escapedHandle}`, 'gi'),
+        color: 'var(--color-primary)'
+      }
+    ]
+  }, [selectedExpert])
+
+  console.log('[HostsInputbar] Passing to Inputbar - highlightPatterns:', highlightPatterns)
+
   return (
     <Inputbar
       assistant={assistant}
@@ -384,6 +414,7 @@ const HostsInputbar: FC<Props> = ({
       onMentionedModelsChange={onMentionedModelsChange}
       showMentionedModelsInInputbar={false}
       showTranslateButton={false}
+      highlightPatterns={highlightPatterns}
     />
   )
 }

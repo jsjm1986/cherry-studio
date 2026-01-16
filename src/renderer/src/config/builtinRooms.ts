@@ -5,8 +5,6 @@
  */
 
 // ==================== 通用协议 ====================
-import MPP_KERNEL from '@renderer/assets/prompts/通用房间协议.md?raw'
-
 // ==================== 写作房间 ====================
 import WRITING_ROOM_PROMPT from '@renderer/assets/prompts/01 写作房间/00 房间提示词.md?raw'
 import EXPERT_MOJIANSHAN from '@renderer/assets/prompts/01 写作房间/01 总编-墨见山.md?raw'
@@ -16,7 +14,6 @@ import EXPERT_LAOMA from '@renderer/assets/prompts/01 写作房间/04 历史小�
 import EXPERT_LAOWANG from '@renderer/assets/prompts/01 写作房间/05 散文-老汪.md?raw'
 import EXPERT_LAOWAN from '@renderer/assets/prompts/01 写作房间/06 科普作家-老万.md?raw'
 import EXPERT_LAOGUI from '@renderer/assets/prompts/01 写作房间/07 风格模仿-老鬼.md?raw'
-
 // ==================== 预测房间 ====================
 import PREDICTION_ROOM_PROMPT from '@renderer/assets/prompts/02 预测房间/00 预测房间.md?raw'
 import EXPERT_LIYUNHE from '@renderer/assets/prompts/02 预测房间/01 八字命理-李云鹤.md?raw'
@@ -25,27 +22,26 @@ import EXPERT_XUANJI from '@renderer/assets/prompts/02 预测房间/03 五行命
 import EXPERT_ANNA from '@renderer/assets/prompts/02 预测房间/04 韦特塔罗-安娜.md?raw'
 import EXPERT_KUNLING from '@renderer/assets/prompts/02 预测房间/05 紫薇斗术-坤灵.md?raw'
 import EXPERT_XUANYUAN from '@renderer/assets/prompts/02 预测房间/06 格局架构 - 玄源.md?raw'
-
-// ==================== 人类群星 ====================
-import STARS_ROOM_PROMPT from '@renderer/assets/prompts/04 人类群星/房间prompt.md?raw'
-import EXPERT_NIHONG from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：赛博情报商 - 霓虹].md?raw'
-import EXPERT_WOKE from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：痕迹学侦探 - 沃克].md?raw'
+import EXPERT_SHIYANKONG from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：传统佛教阐释者 - 释衍空].md?raw'
+import EXPERT_HEERMAN from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：复杂系统理论家 - 赫尔曼].md?raw'
+import EXPERT_DEMIWUER from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：异界造物主 - 德米吾尔].md?raw'
+import EXPERT_LIAOBOERDE from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：思想史考古学家 - 利奥波德].md?raw'
+import EXPERT_V from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：思辨狂想家 - V].md?raw'
+import EXPERT_JIERBOTE from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：日常语言学派阐释者 - 吉尔伯特].md?raw'
 import EXPERT_YISUOERDE from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：深层心理侧写师 - 伊索尔德].md?raw'
 import EXPERT_YILISHABAI from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：深度心理学家 - 伊丽莎白].md?raw'
-import EXPERT_V from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：思辨狂想家 - V].md?raw'
-import EXPERT_HEERMAN from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：复杂系统理论家 - 赫尔曼].md?raw'
-import EXPERT_LIAOBOERDE from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：思想史考古学家 - 利奥波德].md?raw'
 import EXPERT_KELAOSU from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：现象学哲学家 - 克劳斯].md?raw'
-import EXPERT_JIERBOTE from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：日常语言学派阐释者 - 吉尔伯特].md?raw'
-import EXPERT_SHIYANKONG from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：传统佛教阐释者 - 释衍空].md?raw'
-import EXPERT_DEMIWUER from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：异界造物主 - 德米吾尔].md?raw'
+import EXPERT_WOKE from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：痕迹学侦探 - 沃克].md?raw'
+import EXPERT_NIHONG from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：赛博情报商 - 霓虹].md?raw'
 import EXPERT_BOERHESI from '@renderer/assets/prompts/04 人类群星/[人格卡带 v2.0：迷宫守门人 - 博尔赫斯].md?raw'
-
+// ==================== 人类群星 ====================
+import STARS_ROOM_PROMPT from '@renderer/assets/prompts/04 人类群星/房间prompt.md?raw'
 // ==================== 教研房间 ====================
 import EXPERT_LAOPAN from '@renderer/assets/prompts/05 教研房间/01 课题研究 - 老潘.md?raw'
 import EXPERT_FANG from '@renderer/assets/prompts/05 教研房间/02 教学目标 - 方老师.md?raw'
 import EXPERT_XIAOSHEN from '@renderer/assets/prompts/05 教研房间/03 学习体验 - 小沈.md?raw'
 import EXPERT_CATTY from '@renderer/assets/prompts/05 教研房间/04 PPT 大神 - Catty.md?raw'
+import MPP_KERNEL from '@renderer/assets/prompts/通用房间协议.md?raw'
 
 // ==================== 类型定义 ====================
 export interface BuiltinExpert {
