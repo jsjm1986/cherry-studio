@@ -52,7 +52,7 @@ export class TrayService {
       this.tray.setContextMenu(this.contextMenu)
     }
 
-    this.tray.setToolTip('Her')
+    this.tray.setToolTip('Roome')
 
     this.tray.on('right-click', () => {
       if (this.contextMenu) {

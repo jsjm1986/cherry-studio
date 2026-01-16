@@ -1,9 +1,9 @@
 import TextArea from 'antd/es/input/TextArea'
 import type { CSSProperties, FC } from 'react'
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import styled from 'styled-components'
 
-interface HighlightPattern {
+export interface HighlightPattern {
   /** 匹配正则 */
   pattern: RegExp
   /** 高亮颜色 */
@@ -33,18 +33,67 @@ interface HighlightTextareaProps {
   highlightPatterns?: HighlightPattern[]
 }
 
-/** 默认的 @ 高亮模式 */
-const DEFAULT_HIGHLIGHT_PATTERNS: HighlightPattern[] = [
-  {
-    // 匹配 @xxx 格式（@后跟非空白字符，直到空格或结束）
-    pattern: /@[^\s@]+/g,
-    color: 'var(--color-primary)'
+/** 默认的高亮模式：空数组，不自动高亮任何内容 */
+const DEFAULT_HIGHLIGHT_PATTERNS: HighlightPattern[] = []
+
+/**
+ * 将文本分割成高亮和非高亮的部分
+ */
+function splitTextByHighlight(
+  text: string,
+  patterns: HighlightPattern[]
+): Array<{ text: string; color: string | null }> {
+  if (!text || patterns.length === 0) {
+    return [{ text, color: null }]
   }
-]
+
+  const matches: Array<{ start: number; end: number; color: string }> = []
+
+  for (const { pattern, color } of patterns) {
+    const regex = new RegExp(pattern.source, pattern.flags)
+    let match: RegExpExecArray | null
+    while ((match = regex.exec(text)) !== null) {
+      matches.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        color
+      })
+      if (match[0].length === 0) break
+    }
+  }
+
+  if (matches.length === 0) {
+    return [{ text, color: null }]
+  }
+
+  matches.sort((a, b) => a.start - b.start)
+
+  const result: Array<{ text: string; color: string | null }> = []
+  let lastIndex = 0
+
+  for (const match of matches) {
+    if (match.start < lastIndex) continue
+
+    if (match.start > lastIndex) {
+      result.push({ text: text.slice(lastIndex, match.start), color: null })
+    }
+
+    result.push({ text: text.slice(match.start, match.end), color: match.color })
+    lastIndex = match.end
+  }
+
+  if (lastIndex < text.length) {
+    result.push({ text: text.slice(lastIndex), color: null })
+  }
+
+  return result
+}
 
 /**
  * 带文本高亮功能的 Textarea
- * 使用覆盖层方案：底层显示高亮文本，上层透明 textarea 处理输入
+ *
+ * 新方案：高亮层只显示高亮部分的彩色文字，非高亮部分完全透明
+ * textarea 正常显示所有文字，高亮部分的文字会被高亮层的彩色文字覆盖
  */
 export const HighlightTextarea: FC<HighlightTextareaProps> = ({
   value,
@@ -70,67 +119,20 @@ export const HighlightTextarea: FC<HighlightTextareaProps> = ({
   const highlightRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // 渲染带高亮的文本
-  const renderHighlightedText = useCallback(
-    (text: string): React.ReactNode[] => {
-      if (!text || highlightPatterns.length === 0) {
-        // 保留空白符和换行，添加一个零宽字符确保空行也有高度
-        return [text || '\u200B']
-      }
+  // 检查是否需要高亮（有 patterns 且文本匹配）
+  const needsHighlight = useMemo(() => {
+    if (highlightPatterns.length === 0) return false
+    return highlightPatterns.some(({ pattern }) => {
+      const regex = new RegExp(pattern.source, pattern.flags)
+      return regex.test(value)
+    })
+  }, [highlightPatterns, value])
 
-      const result: React.ReactNode[] = []
-      let lastIndex = 0
-      const matches: Array<{ start: number; end: number; text: string; color: string }> = []
-
-      // 收集所有匹配
-      for (const { pattern, color } of highlightPatterns) {
-        const regex = new RegExp(pattern.source, pattern.flags)
-        let match: RegExpExecArray | null
-        while ((match = regex.exec(text)) !== null) {
-          matches.push({
-            start: match.index,
-            end: match.index + match[0].length,
-            text: match[0],
-            color
-          })
-        }
-      }
-
-      // 按位置排序
-      matches.sort((a, b) => a.start - b.start)
-
-      // 构建结果
-      for (const match of matches) {
-        // 跳过重叠的匹配
-        if (match.start < lastIndex) continue
-
-        // 添加普通文本
-        if (match.start > lastIndex) {
-          result.push(text.slice(lastIndex, match.start))
-        }
-
-        // 添加高亮文本
-        result.push(
-          <HighlightSpan key={`${match.start}-${match.text}`} style={{ color: match.color }}>
-            {match.text}
-          </HighlightSpan>
-        )
-
-        lastIndex = match.end
-      }
-
-      // 添加剩余文本
-      if (lastIndex < text.length) {
-        result.push(text.slice(lastIndex))
-      }
-
-      // 添加零宽字符确保最后的换行符能正确显示
-      result.push('\u200B')
-
-      return result
-    },
-    [highlightPatterns]
-  )
+  // 分割文本为高亮和非高亮部分
+  const textParts = useMemo(() => {
+    if (!needsHighlight) return []
+    return splitTextByHighlight(value, highlightPatterns)
+  }, [value, highlightPatterns, needsHighlight])
 
   // 同步滚动位置
   const syncScroll = useCallback(() => {
@@ -152,12 +154,6 @@ export const HighlightTextarea: FC<HighlightTextareaProps> = ({
     return undefined
   }, [textareaRef, syncScroll])
 
-  // 检查是否需要高亮（性能优化：如果没有 @ 符号就不渲染高亮层）
-  const needsHighlight = highlightPatterns.some(({ pattern }) => {
-    const regex = new RegExp(pattern.source, pattern.flags)
-    return regex.test(value)
-  })
-
   // 外层容器样式
   const containerStyle: CSSProperties = {
     ...style,
@@ -166,34 +162,34 @@ export const HighlightTextarea: FC<HighlightTextareaProps> = ({
     minHeight: '30px'
   }
 
-  // 内部 textarea 样式 - 需要通过 styles.textarea 传递才能生效
-  const textareaInnerStyle: CSSProperties = {
-    ...styles?.textarea,
-    // 当需要高亮时，文字透明，光标保持可见
-    ...(needsHighlight && {
-      color: 'transparent',
-      caretColor: 'var(--color-text)',
-      WebkitTextFillColor: 'transparent' // 兼容 webkit 浏览器
-    })
-  }
-
   return (
     <TextareaContainer ref={containerRef}>
-      {/* 高亮层 - 只在需要时渲染 */}
+      {/* 高亮层 - 只显示高亮部分的彩色文字，非高亮部分透明 */}
       {needsHighlight && (
         <HighlightLayer
           ref={highlightRef}
           style={{
             fontSize,
             height: height,
-            minHeight: '30px',
-            ...styles?.textarea
+            minHeight: '30px'
           }}>
-          {renderHighlightedText(value)}
+          {textParts.map((part, idx) =>
+            part.color ? (
+              // 高亮部分：显示彩色文字，带背景遮挡 textarea 的文字
+              <HighlightSpan key={idx} $color={part.color}>
+                {part.text}
+              </HighlightSpan>
+            ) : (
+              // 非高亮部分：完全透明，让 textarea 的文字显示
+              <span key={idx} style={{ visibility: 'hidden' }}>
+                {part.text}
+              </span>
+            )
+          )}
         </HighlightLayer>
       )}
 
-      {/* 实际的 textarea */}
+      {/* 实际的 textarea - 正常显示所有文字 */}
       <StyledTextArea
         ref={textareaRef}
         value={value}
@@ -209,10 +205,14 @@ export const HighlightTextarea: FC<HighlightTextareaProps> = ({
         spellCheck={spellCheck}
         rows={rows}
         autoSize={autoSize}
-        styles={{ textarea: textareaInnerStyle }}
+        styles={{
+          textarea: {
+            ...styles?.textarea,
+            padding: '6px 15px 0px'
+          }
+        }}
         style={containerStyle}
         disabled={disabled}
-        $needsHighlight={needsHighlight}
       />
     </TextareaContainer>
   )
@@ -234,17 +234,22 @@ const HighlightLayer = styled.div`
   white-space: pre-wrap;
   word-wrap: break-word;
   overflow: hidden;
-  color: var(--color-text);
   line-height: 1.4;
-  font-family: inherit;
-  z-index: 0;
+  font-family: var(--font-family);
+  font-size: inherit;
+  font-weight: 400;
+  z-index: 2;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 `
 
-const HighlightSpan = styled.span`
-  /* 颜色通过 style prop 设置 */
+const HighlightSpan = styled.span<{ $color: string }>`
+  color: ${({ $color }) => $color};
+  background-color: var(--color-background-soft);
+  font-weight: 400;
 `
 
-const StyledTextArea = styled(TextArea)<{ $needsHighlight?: boolean }>`
+const StyledTextArea = styled(TextArea)`
   position: relative;
   z-index: 1;
   padding: 0;
@@ -266,20 +271,11 @@ const StyledTextArea = styled(TextArea)<{ $needsHighlight?: boolean }>`
   }
 
   /* 确保 textarea 背景透明 */
-  textarea {
+  && textarea,
+  && .ant-input,
+  && textarea.ant-input {
     background: transparent !important;
   }
-
-  /* 当需要高亮时，强制文字透明 */
-  ${({ $needsHighlight }) =>
-    $needsHighlight &&
-    `
-    textarea {
-      color: transparent !important;
-      -webkit-text-fill-color: transparent !important;
-      caret-color: var(--color-text) !important;
-    }
-  `}
 `
 
 export default HighlightTextarea

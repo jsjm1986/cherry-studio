@@ -8,6 +8,7 @@ import useNavBackgroundColor from '@renderer/hooks/useNavBackgroundColor'
 import { modelGenerating, useRuntime } from '@renderer/hooks/useRuntime'
 import { useSettings } from '@renderer/hooks/useSettings'
 import { getSidebarIconLabel, getThemeModeLabel } from '@renderer/i18n/label'
+import type { SidebarIcon } from '@renderer/types'
 import { ThemeMode } from '@renderer/types'
 import { Tooltip } from 'antd'
 import {
@@ -152,25 +153,30 @@ const MainMenus: FC = () => {
     notes: '/notes'
   }
 
-  return sidebarIcons.visible.map((icon) => {
-    const path = pathMap[icon]
-    const isActive = path === '/' ? isRoute(path) : isRoutes(path)
+  // 过滤掉隐藏的频道（store: 卡带商城, assistants: 角色 暂时隐藏）
+  const hiddenIcons: SidebarIcon[] = ['store', 'assistants']
 
-    return (
-      <Tooltip key={icon} title={getSidebarIconLabel(icon)} mouseEnterDelay={0.8} placement="right">
-        <StyledLink
-          onClick={async () => {
-            hideMinappPopup()
-            await modelGenerating()
-            navigate(path)
-          }}>
-          <Icon theme={theme} className={isActive}>
-            {iconMap[icon]}
-          </Icon>
-        </StyledLink>
-      </Tooltip>
-    )
-  })
+  return sidebarIcons.visible
+    .filter((icon) => !hiddenIcons.includes(icon))
+    .map((icon) => {
+      const path = pathMap[icon]
+      const isActive = path === '/' ? isRoute(path) : isRoutes(path)
+
+      return (
+        <Tooltip key={icon} title={getSidebarIconLabel(icon)} mouseEnterDelay={0.8} placement="right">
+          <StyledLink
+            onClick={async () => {
+              hideMinappPopup()
+              await modelGenerating()
+              navigate(path)
+            }}>
+            <Icon theme={theme} className={isActive}>
+              {iconMap[icon]}
+            </Icon>
+          </StyledLink>
+        </Tooltip>
+      )
+    })
 }
 
 const Container = styled.div<{ $isFullscreen: boolean }>`
@@ -300,7 +306,7 @@ const AvatarWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   margin-bottom: ${isMac ? '12px' : '12px'};
-  margin-top: ${isMac ? '0px' : '2px'};
+  margin-top: ${isMac ? '8px' : '2px'};
 `
 
 export default Sidebar

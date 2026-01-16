@@ -5,6 +5,7 @@ import { useMemo } from 'react'
 import { HashRouter, Route, Routes } from 'react-router-dom'
 
 import Sidebar from './components/app/Sidebar'
+import AuthGuard from './components/AuthGuard'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import TabsContainer from './components/Tab/TabContainer'
 import NavigationHandler from './handler/NavigationHandler'
@@ -53,17 +54,21 @@ const Router: FC = () => {
   if (navbarPosition === 'left') {
     return (
       <HashRouter>
-        <Sidebar />
-        {routes}
-        <NavigationHandler />
+        <AuthGuard>
+          <Sidebar />
+          {routes}
+          <NavigationHandler />
+        </AuthGuard>
       </HashRouter>
     )
   }
 
   return (
     <HashRouter>
-      <NavigationHandler />
-      <TabsContainer>{routes}</TabsContainer>
+      <AuthGuard>
+        <NavigationHandler />
+        <TabsContainer>{routes}</TabsContainer>
+      </AuthGuard>
     </HashRouter>
   )
 }

@@ -391,16 +391,16 @@
   "assistants": {
     "abbr": "角色",
     "cartridgeStore": {
-      "title": "卡带商店",
       "addCartridge": "添加卡带",
       "importCartridge": "导入卡带",
-      "importSuccess": "卡带导入成功",
       "importError": "卡带导入失败，请检查文件格式",
-      "noDescription": "暂无描述",
-      "topicCount": "{{count}} 话题",
+      "importSuccess": "卡带导入成功",
+      "importToHostSuccess": "已导入到房间「{{hostName}}」",
       "insertToHost": "插入房间",
+      "noDescription": "暂无描述",
       "noHosts": "暂无房间",
-      "importToHostSuccess": "已导入到房间「{{hostName}}」"
+      "title": "卡带商店",
+      "topicCount": "{{count}} 话题"
     },
     "clear": {
       "content": "清空话题会删除角色下所有话题和文件，确定要继续吗？",
@@ -568,11 +568,33 @@
     "title": "角色"
   },
   "auth": {
+    "confirm_password": "确认密码",
+    "confirm_password_placeholder": "请再次输入密码",
+    "confirm_password_required": "请确认密码",
+    "contact_info": "充值请联系客服微信：skortur",
+    "email": "邮箱",
+    "email_invalid": "请输入有效的邮箱",
+    "email_placeholder": "请输入邮箱",
+    "email_required": "请输入邮箱",
     "error": "自动获取密钥失败，请手动获取",
     "get_key": "获取",
     "get_key_success": "自动获取密钥成功",
     "login": "登录",
-    "oauth_button": "使用 {{provider}} 登录"
+    "login_failed": "登录失败",
+    "login_success": "登录成功",
+    "login_to_continue": "请登录后继续使用",
+    "nickname": "昵称",
+    "nickname_placeholder": "请输入昵称（可选）",
+    "oauth_button": "使用 {{provider}} 登录",
+    "password": "密码",
+    "password_min": "密码至少6位",
+    "password_mismatch": "两次输入的密码不一致",
+    "password_placeholder": "请输入密码",
+    "password_required": "请输入密码",
+    "register": "注册",
+    "register_failed": "注册失败",
+    "register_success": "注册成功",
+    "welcome": "欢迎使用 Roome"
   },
   "backup": {
     "confirm": {
@@ -1288,7 +1310,6 @@
     "name": "错误名称",
     "no_api_key": "API 密钥未配置",
     "no_response": "无响应",
-    "quota_exhausted": "对话次数已用完，请联系管理员充值",
     "originalError": "原错误",
     "originalMessage": "原消息",
     "parameter": "参数",
@@ -1297,6 +1318,7 @@
     "provider": "提供商",
     "providerId": "提供商 ID",
     "provider_disabled": "模型提供商未启用",
+    "quota_exhausted": "对话次数已用完，请联系管理员充值",
     "reason": "原因",
     "render": {
       "description": "消息内容渲染失败，请检查消息内容格式是否正确",
@@ -1419,13 +1441,13 @@
       "error": "打开文件失败"
     },
     "project": {
-      "title": "项目文件夹",
-      "files_count": "个文件",
-      "hosts_count": "个房间设置了项目文件夹",
-      "empty_title": "暂无项目文件夹",
       "empty_desc": "请先在房间设置中配置项目文件夹",
+      "empty_title": "暂无项目文件夹",
+      "files_count": "个文件",
+      "go_to_files": "查看全部项目文件",
       "go_to_hosts": "前往房间设置",
-      "go_to_files": "查看全部项目文件"
+      "hosts_count": "个房间设置了项目文件夹",
+      "title": "项目文件夹"
     },
     "size": "大小",
     "text": "文本",
@@ -1469,6 +1491,13 @@
     "edit": "编辑房间",
     "emoji": "表情符号",
     "empty": "暂无房间，点击上方按钮创建",
+    "export": {
+      "no_folder": "请先设置项目文件夹",
+      "no_topics": "暂无对话可导出",
+      "partial_failed": "{{failed}} 个对话导出失败",
+      "success": "成功导出 {{count}} 个对话",
+      "sync_all": "同步所有对话"
+    },
     "list": "房间列表",
     "name": "房间名称",
     "project": {
@@ -1492,13 +1521,6 @@
       "save_to_project": "存为资料",
       "select_folder": "选择文件夹",
       "title": "项目"
-    },
-    "export": {
-      "no_folder": "请先设置项目文件夹",
-      "no_topics": "暂无对话可导出",
-      "success": "成功导出 {{count}} 个对话",
-      "partial_failed": "{{failed}} 个对话导出失败",
-      "sync_all": "同步所有对话"
     },
     "project_folder": "项目文件夹",
     "project_folder_help": "用于保存对话资料的本地文件夹",
@@ -2245,9 +2267,6 @@
       "websearch": "联网"
     }
   },
-  "notebook": {
-    "empty": "暂无笔记"
-  },
   "navbar": {
     "expand": "伸缩对话框",
     "hide_sidebar": "隐藏侧边栏",
@@ -2261,6 +2280,9 @@
   },
   "navigate": {
     "provider_settings": "跳转到服务商设置界面"
+  },
+  "notebook": {
+    "empty": "暂无笔记"
   },
   "notes": {
     "auto_rename": {
@@ -3006,12 +3028,10 @@
         "r_regenerate": "R 重新生成"
       }
     },
-    "name": "划词助手",
-    "save_to_notebook": "保存到笔记",
     "highlight_color": "高亮颜色",
+    "name": "划词助手",
     "save_to_library": "保存到资料库",
-    "ask_her": "问问 Her",
-    "ask_her_label": "问问 Her",
+    "save_to_notebook": "保存到笔记",
     "settings": {
       "actions": {
         "add_tooltip": {
