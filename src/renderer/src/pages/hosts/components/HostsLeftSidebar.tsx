@@ -83,9 +83,9 @@ const HostsLeftSidebar: FC<Props> = ({
   hosts,
   activeHost,
   onSelectHost,
-  onAddHost,
-  onEditHost,
-  onDeleteHost,
+  onAddHost: _onAddHost,
+  onEditHost: _onEditHost,
+  onDeleteHost: _onDeleteHost,
   activeTab,
   onTabChange,
   topics,
@@ -95,7 +95,7 @@ const HostsLeftSidebar: FC<Props> = ({
   onDeleteTopic,
   onRenameTopic,
   onGenerateTopicName,
-  onEditTopicPrompt,
+  onEditTopicPrompt: _onEditTopicPrompt,
   onPinTopic,
   onSaveToProjectFolder,
   onClearMessages,
@@ -105,11 +105,11 @@ const HostsLeftSidebar: FC<Props> = ({
   onSaveTopic,
   onExportTopic,
   members,
-  onAddMember,
-  onImportMember,
-  onImportCartridge,
-  onEditMember,
-  onDeleteMember,
+  onAddMember: _onAddMember,
+  onImportMember: _onImportMember,
+  onImportCartridge: _onImportCartridge,
+  onEditMember: _onEditMember,
+  onDeleteMember: _onDeleteMember,
   onMentionMember,
   // 资料库相关 - 暂时隐藏
   infoFolders: _infoFolders,
@@ -119,7 +119,16 @@ const HostsLeftSidebar: FC<Props> = ({
   selectedInfoFolderId: _selectedInfoFolderId,
   onUpdateUserInfo
 }) => {
-  // 暂时标记为未使用
+  // 暂时标记为未使用 - 房间增删改功能已隐藏
+  void _onAddHost
+  void _onEditHost
+  void _onDeleteHost
+  void _onEditTopicPrompt
+  void _onAddMember
+  void _onImportMember
+  void _onImportCartridge
+  void _onEditMember
+  void _onDeleteMember
   void _infoFolders
   void _onAddInfoFolder
   void _onSelectInfoFolder
@@ -136,8 +145,9 @@ const HostsLeftSidebar: FC<Props> = ({
   const [renamingTopicId, setRenamingTopicId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
 
-  // 卡带导入文件输入
-  const cartridgeInputRef = useRef<HTMLInputElement>(null)
+  // 卡带导入文件输入 - 已隐藏
+  const _cartridgeInputRef = useRef<HTMLInputElement>(null)
+  void _cartridgeInputRef
 
   // 房间下拉菜单 ref（用于点击外部关闭）
   const roomDropdownRef = useRef<HTMLDivElement>(null)
@@ -813,11 +823,13 @@ const RoomDropdownItem = styled.div<{ $active?: boolean; $isAction?: boolean }>`
   }
 `
 
-const DropdownDivider = styled.div`
+// 已隐藏 - 添加下划线前缀
+const _DropdownDivider = styled.div`
   height: 1px;
   background: var(--sidebar-border);
   margin: 4px 0;
 `
+void _DropdownDivider
 
 const EmptyHint = styled.div`
   padding: 12px;
@@ -1067,14 +1079,15 @@ const MemberActions = styled.div`
   transition: opacity 0.15s ease;
 `
 
-// Room item actions
-const RoomItemActions = styled.div`
+// Room item actions - 已隐藏
+const _RoomItemActions = styled.div`
   display: flex;
   gap: 2px;
   opacity: 0;
   transition: opacity 0.2s ease;
   margin-left: auto;
 `
+void _RoomItemActions
 
 // Info 样式
 const InfoItem = styled.div`
@@ -1249,13 +1262,14 @@ const FormButton = styled.button<{ $primary?: boolean }>`
   }
 `
 
-// 底部设置
-const BottomSection = styled.div`
+// 底部设置 - 已隐藏
+const _BottomSection = styled.div`
   padding: 12px;
   border-top: 1px solid var(--sidebar-border);
 `
+void _BottomSection
 
-const SettingsButton = styled.button`
+const _SettingsButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1281,5 +1295,6 @@ const SettingsButton = styled.button`
     cursor: not-allowed;
   }
 `
+void _SettingsButton
 
 export default HostsLeftSidebar

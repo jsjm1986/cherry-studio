@@ -1,7 +1,9 @@
-import { DeleteIcon, EditIcon } from '@renderer/components/Icons'
+// DeleteIcon, EditIcon 已隐藏 - 仅能使用，无法增删改
+// import { DeleteIcon, EditIcon } from '@renderer/components/Icons'
 import CustomTag from '@renderer/components/Tags/CustomTag'
 import { useAssistantPresets } from '@renderer/hooks/useAssistantPresets'
-import AssistantSettingsPopup from '@renderer/pages/settings/AssistantSettings'
+// AssistantSettingsPopup 已隐藏 - 仅能使用，无法增删改
+// import AssistantSettingsPopup from '@renderer/pages/settings/AssistantSettings'
 import { createAssistantFromAgent } from '@renderer/services/AssistantService'
 import type { AssistantPreset } from '@renderer/types'
 import { getLeadingEmoji } from '@renderer/utils'
@@ -25,7 +27,8 @@ const AssistantPresetCard: FC<Props> = ({ preset, onClick, activegroup, getLocal
   const [isVisible, setIsVisible] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
-  const handleDelete = useCallback(
+  // 删除功能已隐藏 - 仅能使用，无法增删改
+  const _handleDelete = useCallback(
     (preset: AssistantPreset) => {
       window.modal.confirm({
         centered: true,
@@ -35,6 +38,7 @@ const AssistantPresetCard: FC<Props> = ({ preset, onClick, activegroup, getLocal
     },
     [removeAssistantPreset]
   )
+  void _handleDelete
 
   const exportPreset = useCallback(async () => {
     const result = [

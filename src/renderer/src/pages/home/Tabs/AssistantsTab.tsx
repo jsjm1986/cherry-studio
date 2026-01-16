@@ -96,8 +96,8 @@ const AssistantsTab: FC<AssistantsTabProps> = (props) => {
     [hosts, dispatch, t]
   )
 
-  // 生成房间子菜单项
-  const getHostMenuItems = useCallback(
+  // 生成房间子菜单项 - 已隐藏
+  const _getHostMenuItems = useCallback(
     (assistant: Assistant) => {
       if (hosts.length === 0) {
         return [
@@ -125,6 +125,7 @@ const AssistantsTab: FC<AssistantsTabProps> = (props) => {
     },
     [hosts, importToHost, t]
   )
+  void _getHostMenuItems
 
   // Unified items management
   const { unifiedItems } = useUnifiedItems({
@@ -142,7 +143,8 @@ const AssistantsTab: FC<AssistantsTabProps> = (props) => {
     updateAssistants
   })
 
-  const onDeleteAssistant = useCallback(
+  // 删除功能已隐藏 - 仅能使用，无法增删改
+  const _onDeleteAssistant = useCallback(
     (assistant: Assistant) => {
       const remaining = assistants.filter((a) => a.id !== assistant.id)
       if (assistant.id === activeAssistant?.id) {
@@ -153,6 +155,7 @@ const AssistantsTab: FC<AssistantsTabProps> = (props) => {
     },
     [activeAssistant, assistants, removeAssistant, setActiveAssistant, onCreateDefaultAssistant]
   )
+  void _onDeleteAssistant
 
   const handleCartridgeClick = useCallback(
     (assistant: Assistant) => {
@@ -162,9 +165,11 @@ const AssistantsTab: FC<AssistantsTabProps> = (props) => {
     [setActiveAssistant, dispatch]
   )
 
-  const handleFileInputClick = useCallback(() => {
+  // 文件导入功能已隐藏 - 仅能使用，无法增删改
+  const _handleFileInputClick = useCallback(() => {
     fileInputRef.current?.click()
   }, [])
+  void _handleFileInputClick
 
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -774,8 +779,8 @@ const FooterText = styled.span`
   letter-spacing: 1px;
 `
 
-// 添加卡带贴纸
-const AddSticker = styled.div`
+// 添加卡带贴纸 - 已隐藏
+const _AddSticker = styled.div`
   width: 100%;
   height: 100%;
   border-radius: 8px;
@@ -792,8 +797,9 @@ const AddSticker = styled.div`
     background: rgba(59, 130, 246, 0.1);
   }
 `
+void _AddSticker
 
-const AddIconWrapper = styled.div`
+const _AddIconWrapper = styled.div`
   width: 64px;
   height: 64px;
   border-radius: 50%;
@@ -811,8 +817,9 @@ const AddIconWrapper = styled.div`
     transform: scale(1.1);
   }
 `
+void _AddIconWrapper
 
-const AddText = styled.div`
+const _AddText = styled.div`
   font-size: 10px;
   font-weight: 600;
   color: #6b7280;
@@ -824,6 +831,7 @@ const AddText = styled.div`
     color: #3b82f6;
   }
 `
+void _AddText
 
 // 底部区域
 const BottomSection = styled.div`
@@ -880,8 +888,8 @@ const CartridgeShadow = styled.div`
   }
 `
 
-// 操作按钮覆盖层
-const ActionOverlay = styled.div`
+// 操作按钮覆盖层 - 已隐藏
+const _ActionOverlay = styled.div`
   position: absolute;
   top: 0;
   left: 0;
@@ -897,8 +905,9 @@ const ActionOverlay = styled.div`
   z-index: 20;
   backdrop-filter: blur(2px);
 `
+void _ActionOverlay
 
-const ActionButton = styled.button`
+const _ActionButton = styled.button`
   width: 48px;
   height: 48px;
   border: none;
@@ -916,5 +925,6 @@ const ActionButton = styled.button`
     transform: scale(1.1);
   }
 `
+void _ActionButton
 
 export default AssistantsTab

@@ -13,7 +13,17 @@ interface Props {
   onEditHost: (host: Host) => void
 }
 
-const HostsHeader: FC<Props> = ({ hosts, activeHost, onSelectHost, onAddHost, onEditHost }) => {
+const HostsHeader: FC<Props> = ({
+  hosts,
+  activeHost,
+  onSelectHost,
+  onAddHost: _onAddHost,
+  onEditHost: _onEditHost
+}) => {
+  // 标记未使用的参数 - 添加/编辑功能已隐藏
+  void _onAddHost
+  void _onEditHost
+
   const { t } = useTranslation()
   const [showWorldDropdown, setShowWorldDropdown] = useState(false)
   const [showRoomDropdown, setShowRoomDropdown] = useState(false)
@@ -332,11 +342,13 @@ const WorldTag = styled.span`
   white-space: nowrap;
 `
 
-const DropdownDivider = styled.div`
+// 已隐藏的 styled components - 添加下划线前缀
+const _DropdownDivider = styled.div`
   height: 1px;
   background: var(--color-border);
   margin: 4px 0;
 `
+void _DropdownDivider
 
 const EmptyHint = styled.div`
   padding: 16px;
@@ -345,7 +357,8 @@ const EmptyHint = styled.div`
   font-size: 13px;
 `
 
-const SettingsButton = styled.button`
+// 已隐藏的 styled components - 添加下划线前缀
+const _SettingsButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -366,5 +379,6 @@ const SettingsButton = styled.button`
     color: var(--color-text-secondary);
   }
 `
+void _SettingsButton
 
 export default HostsHeader

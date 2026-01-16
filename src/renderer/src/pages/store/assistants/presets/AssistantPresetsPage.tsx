@@ -162,19 +162,23 @@ const AssistantPresetsPage: FC = () => {
     setActiveGroup(group)
   }
 
-  const handleAddAgent = () => {
+  // 添加功能已隐藏 - 仅能使用，无法增删改
+  const _handleAddAgent = () => {
     AddAssistantPresetPopup.show().then(() => {
       handleSearchClear()
     })
   }
+  void _handleAddAgent
 
-  const handleImportAgent = async () => {
+  // 导入功能已隐藏 - 仅能使用，无法增删改
+  const _handleImportAgent = async () => {
     try {
       await ImportAssistantPresetPopup.show()
     } catch (error) {
       window.toast.error(error instanceof Error ? error.message : t('message.agents.import.error'))
     }
   }
+  void _handleImportAgent
 
   const handleSubscribeSettings = () => {
     GeneralPopup.show({

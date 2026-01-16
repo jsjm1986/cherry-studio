@@ -2,7 +2,7 @@ import ModelAvatar from '@renderer/components/Avatar/ModelAvatar'
 import EmojiIcon from '@renderer/components/EmojiIcon'
 // 编辑、删除功能已隐藏，以下导入暂时保留但未使用
 // import { CopyIcon, DeleteIcon, EditIcon } from '@renderer/components/Icons'
-import PromptPopup from '@renderer/components/Popups/PromptPopup'
+// import PromptPopup from '@renderer/components/Popups/PromptPopup'
 import { useAssistant, useAssistants } from '@renderer/hooks/useAssistant'
 import { useSettings } from '@renderer/hooks/useSettings'
 import { useTags } from '@renderer/hooks/useTags'
@@ -22,12 +22,12 @@ import {
   ArrowDownAZ,
   ArrowUpAZ,
   // BrushCleaning,
-  Check,
-  Plus,
+  // Check,
+  // Plus,
   // Save,
-  Settings2,
+  // Settings2,
   Smile,
-  Tag,
+  // Tag,
   Tags
 } from 'lucide-react'
 import type { FC, PropsWithChildren } from 'react'
@@ -35,7 +35,7 @@ import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import * as tinyPinyin from 'tiny-pinyin'
 
-import AssistantTagsPopup from './AssistantTagsPopup'
+// import AssistantTagsPopup from './AssistantTagsPopup'
 
 interface AssistantItemProps {
   assistant: Assistant
@@ -193,7 +193,7 @@ const sortAssistantsByPinyin = (assistants: Assistant[], isAscending: boolean) =
   })
 }
 
-// 提取标签相关的操作函数
+/* 提取标签相关的操作函数 - 已隐藏
 const handleTagOperation = (
   tag: string,
   assistant: Assistant,
@@ -205,8 +205,9 @@ const handleTagOperation = (
   const hasTag = assistant.tags?.includes(tag)
   hasTag ? removeTag() : addTag()
 }
+*/
 
-// 提取创建菜单项的函数
+/* 提取创建菜单项的函数 - 已隐藏，标记为未使用
 const createTagMenuItems = (
   allTags: string[],
   assistant: Assistant,
@@ -256,25 +257,36 @@ const createTagMenuItems = (
 
   return items
 }
+*/
 
 // 提取创建菜单配置的函数
 function getMenuItems({
-  assistant,
+  assistant: _assistant,
   t,
-  allTags,
-  assistants,
-  updateAssistants,
-  addPreset,
-  copyAssistant,
-  onSwitch,
-  onDelete,
-  removeAllTopics,
+  allTags: _allTags,
+  assistants: _assistants,
+  updateAssistants: _updateAssistants,
+  addPreset: _addPreset,
+  copyAssistant: _copyAssistant,
+  onSwitch: _onSwitch,
+  onDelete: _onDelete,
+  removeAllTopics: _removeAllTopics,
   setAssistantIconType,
   sortBy,
   handleSortByChange,
   sortByPinyinAsc,
   sortByPinyinDesc
 }): MenuProps['items'] {
+  // 标记未使用的参数
+  void _assistant
+  void _allTags
+  void _assistants
+  void _updateAssistants
+  void _addPreset
+  void _copyAssistant
+  void _onSwitch
+  void _onDelete
+  void _removeAllTopics
   // 编辑、删除、复制、清空、保存等功能已隐藏 - 仅能使用，无法增删改
   // 保留图标类型切换、排序等查看功能
   return [
