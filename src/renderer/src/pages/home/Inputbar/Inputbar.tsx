@@ -42,6 +42,7 @@ import type { FC } from 'react'
 import React, { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { HighlightPattern } from './components/HighlightTextarea'
 import { InputbarCore } from './components/InputbarCore'
 import InputbarTools from './InputbarTools'
 import KnowledgeBaseInput from './KnowledgeBaseInput'
@@ -86,6 +87,8 @@ interface Props {
   showMentionedModelsInInputbar?: boolean
   /** 是否显示翻译按钮（默认 true） */
   showTranslateButton?: boolean
+  /** 高亮模式列表，用于高亮 @专家名称 等 */
+  highlightPatterns?: HighlightPattern[]
 }
 
 type ProviderActionHandlers = {
@@ -113,7 +116,8 @@ const Inputbar: FC<Props> = ({
   externalMentionedModels,
   onMentionedModelsChange,
   showMentionedModelsInInputbar = true,
-  showTranslateButton = true
+  showTranslateButton = true,
+  highlightPatterns
 }) => {
   const actionsRef = useRef<ProviderActionHandlers>({
     resizeTextArea: () => {},
@@ -163,6 +167,7 @@ const Inputbar: FC<Props> = ({
         forceEnableQuickPanelTriggers={forceEnableQuickPanelTriggers}
         showMentionedModelsInInputbar={showMentionedModelsInInputbar}
         showTranslateButton={showTranslateButton}
+        highlightPatterns={highlightPatterns}
       />
     </InputbarToolsProvider>
   )
@@ -179,7 +184,8 @@ const InputbarInner: FC<InputbarInnerProps> = ({
   mentionMode,
   forceEnableQuickPanelTriggers,
   showMentionedModelsInInputbar = true,
-  showTranslateButton = true
+  showTranslateButton = true,
+  highlightPatterns
 }) => {
   const scope = topic.type ?? TopicType.Chat
   const config = getInputbarConfig(scope)
@@ -575,6 +581,7 @@ const InputbarInner: FC<InputbarInnerProps> = ({
       mentionMode={mentionMode}
       forceEnableQuickPanelTriggers={forceEnableQuickPanelTriggers}
       showTranslateButton={showTranslateButton}
+      highlightPatterns={highlightPatterns}
     />
   )
 }

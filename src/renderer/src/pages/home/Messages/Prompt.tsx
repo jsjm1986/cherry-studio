@@ -1,11 +1,11 @@
 import { useTheme } from '@renderer/context/ThemeProvider'
 import { usePromptProcessor } from '@renderer/hooks/usePromptProcessor'
-import AssistantSettingsPopup from '@renderer/pages/settings/AssistantSettings'
+// import AssistantSettingsPopup from '@renderer/pages/settings/AssistantSettings'
 import type { Assistant, Topic } from '@renderer/types'
 import { isHost } from '@renderer/types'
 import { containsSupportedVariables } from '@renderer/utils/prompt'
 import type { FC } from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
@@ -15,7 +15,7 @@ interface Props {
   onHostClick?: () => void
 }
 
-const Prompt: FC<Props> = ({ assistant, topic, onHostClick }) => {
+const Prompt: FC<Props> = ({ assistant, topic }) => {
   const { t } = useTranslation()
   const { theme } = useTheme()
 
@@ -29,15 +29,16 @@ const Prompt: FC<Props> = ({ assistant, topic, onHostClick }) => {
   const [displayText, setDisplayText] = useState(prompt)
   const [isVisible, setIsVisible] = useState(true)
 
-  const handleClick = useCallback(() => {
-    // 主机类型使用简化的设置弹窗
-    if (isHost(assistant)) {
-      onHostClick?.()
-      return
-    }
-    // 其他类型使用完整的助手设置弹窗
-    AssistantSettingsPopup.show({ assistant })
-  }, [assistant, onHostClick])
+  // 编辑功能已隐藏 - 仅能使用，无法增删改
+  // const handleClick = useCallback(() => {
+  //   // 主机类型使用简化的设置弹窗
+  //   if (isHost(assistant)) {
+  //     onHostClick?.()
+  //     return
+  //   }
+  //   // 其他类型使用完整的助手设置弹窗
+  //   AssistantSettingsPopup.show({ assistant })
+  // }, [assistant, onHostClick])
 
   useEffect(() => {
     // 如果没有变量需要替换，直接显示处理后的内容
@@ -80,7 +81,7 @@ const Prompt: FC<Props> = ({ assistant, topic, onHostClick }) => {
   }
 
   return (
-    <Container className="system-prompt" onClick={handleClick} $isDark={isDark}>
+    <Container className="system-prompt" $isDark={isDark}>
       <Text $isVisible={isVisible}>{displayText}</Text>
     </Container>
   )
@@ -89,7 +90,7 @@ const Prompt: FC<Props> = ({ assistant, topic, onHostClick }) => {
 const Container = styled.div<{ $isDark: boolean }>`
   padding: 11px 16px;
   border-radius: 10px;
-  cursor: pointer;
+  /* cursor: pointer; 编辑功能已隐藏 */
   border: 0.5px solid var(--color-border);
   margin: 15px 20px;
   margin-bottom: 0;

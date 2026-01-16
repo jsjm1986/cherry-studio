@@ -1,4 +1,4 @@
-# Cherry Studio Auth Server
+# Roome Auth Server
 
 用户认证服务器，提供注册、登录、用户管理功能。
 

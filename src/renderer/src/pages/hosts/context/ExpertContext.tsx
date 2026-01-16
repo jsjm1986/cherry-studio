@@ -3,7 +3,7 @@ import type { FC, ReactNode } from 'react'
 import { createContext, use, useCallback, useMemo, useState } from 'react'
 
 /** localStorage key for recent experts */
-const RECENT_EXPERTS_KEY = 'cherry-studio:recent-mentioned-experts'
+const RECENT_EXPERTS_KEY = 'roome:recent-mentioned-experts'
 const MAX_RECENT_EXPERTS = 10
 
 /** Load recent expert IDs from localStorage */

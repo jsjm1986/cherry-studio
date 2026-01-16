@@ -1,5 +1,4 @@
 import EditableNumber from '@renderer/components/EditableNumber'
-import { HStack } from '@renderer/components/Layout'
 import Scrollbar from '@renderer/components/Scrollbar'
 import Selector from '@renderer/components/Selector'
 import { HelpTooltip } from '@renderer/components/TooltipIcons'
@@ -18,7 +17,6 @@ import { useProvider } from '@renderer/hooks/useProvider'
 import { useSettings } from '@renderer/hooks/useSettings'
 import useTranslate from '@renderer/hooks/useTranslate'
 import { SettingDivider, SettingRow, SettingRowTitle } from '@renderer/pages/settings'
-import AssistantSettingsPopup from '@renderer/pages/settings/AssistantSettings'
 import { CollapsibleSettingGroup } from '@renderer/pages/settings/SettingGroup'
 import { getDefaultModel } from '@renderer/services/AssistantService'
 import { useAppDispatch } from '@renderer/store'
@@ -61,8 +59,7 @@ import {
   isSupportServiceTierProvider,
   isSupportVerbosityProvider
 } from '@renderer/utils/provider'
-import { Button, Col, InputNumber, Row, Slider, Switch } from 'antd'
-import { Settings2 } from 'lucide-react'
+import { Col, InputNumber, Row, Slider, Switch } from 'antd'
 import type { FC } from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -199,7 +196,8 @@ const SettingsTab: FC<Props> = (props) => {
         <CollapsibleSettingGroup
           title={t('assistants.settings.title')}
           defaultExpanded={true}
-          extra={
+          /* 助手设置按钮已隐藏 - 仅能使用，无法增删改 */
+          /* extra={
             <HStack alignItems="center" gap={2}>
               <Button
                 type="text"
@@ -208,7 +206,8 @@ const SettingsTab: FC<Props> = (props) => {
                 onClick={() => AssistantSettingsPopup.show({ assistant, tab: 'model' })}
               />
             </HStack>
-          }>
+          } */
+        >
           <SettingGroup style={{ marginTop: 5 }}>
             <Row align="middle">
               <SettingRowTitleSmall>

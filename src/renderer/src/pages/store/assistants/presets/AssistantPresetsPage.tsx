@@ -11,7 +11,7 @@ import type { AssistantPreset } from '@renderer/types'
 import { uuid } from '@renderer/utils'
 import { Button, Empty, Flex, Input } from 'antd'
 import { omit } from 'lodash'
-import { Import, Plus, Rss, Search } from 'lucide-react'
+import { Rss, Search } from 'lucide-react'
 import type { FC } from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -284,15 +284,16 @@ const AssistantPresetsPage: FC = () => {
                   </Button>
                 )
               )}
-              <Button type="text" onClick={handleImportAgent} icon={<Import size={18} color="var(--color-icon)" />}>
+              {/* 导入和添加功能已隐藏 - 仅能使用，无法增删改 */}
+              {/* <Button type="text" onClick={handleImportAgent} icon={<Import size={18} color="var(--color-icon)" />}>
                 {t('assistants.presets.import.title')}
-              </Button>
+              </Button> */}
               <Button type="text" onClick={handleSubscribeSettings} icon={<Rss size={18} color="var(--color-icon)" />}>
                 {t('assistants.presets.settings.title')}
               </Button>
-              <Button type="text" onClick={handleAddAgent} icon={<Plus size={18} color="var(--color-icon)" />}>
+              {/* <Button type="text" onClick={handleAddAgent} icon={<Plus size={18} color="var(--color-icon)" />}>
                 {t('assistants.presets.add.title')}
-              </Button>
+              </Button> */}
             </Flex>
           </AgentsListHeader>
 

@@ -896,7 +896,7 @@ describe('options utils', () => {
           provider: 'cherryin'
         } as Model
 
-        // User provides custom parameters with Cherry Studio provider ID
+        // User provides custom parameters with Roome provider ID
         vi.mocked(getCustomParameters).mockReturnValue({
           cherryin: {
             customOption1: 'value1',
@@ -938,7 +938,7 @@ describe('options utils', () => {
           provider: 'cherryin'
         } as Model
 
-        // User provides custom parameters with Cherry Studio provider ID
+        // User provides custom parameters with Roome provider ID
         vi.mocked(getCustomParameters).mockReturnValue({
           cherryin: {
             customOpenAIOption: 'openai_value'
@@ -1077,7 +1077,7 @@ describe('options utils', () => {
       })
 
       // Note: For proxy providers like aihubmix/newapi, users should write AI SDK provider ID (google/anthropic)
-      // instead of the Cherry Studio provider ID for custom parameters to work correctly
+      // instead of the Roome provider ID for custom parameters to work correctly
 
       it('should handle cherryin fallback to openai-compatible with custom parameters', async () => {
         const { getCustomParameters } = await import('../reasoning')

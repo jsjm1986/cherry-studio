@@ -23,14 +23,14 @@ The `x-files/app-upgrade-config/app-upgrade-config.json` file is synchronized by
 
 ### Trigger Conditions
 
-- **Release events (`release: released/prereleased`)**  
-  - Draft releases are ignored.  
-  - When GitHub marks the release as _prerelease_, the tag must include `-beta`/`-rc` (with optional numeric suffix). Otherwise the workflow exits early.  
-  - When GitHub marks the release as stable, the tag must match the latest release returned by the GitHub API. This prevents out-of-order updates when publishing historical tags.  
+- **Release events (`release: released/prereleased`)**
+  - Draft releases are ignored.
+  - When GitHub marks the release as _prerelease_, the tag must include `-beta`/`-rc` (with optional numeric suffix). Otherwise the workflow exits early.
+  - When GitHub marks the release as stable, the tag must match the latest release returned by the GitHub API. This prevents out-of-order updates when publishing historical tags.
   - If the guard clauses pass, the version is tagged as `latest` or `beta/rc` based on its semantic suffix and propagated to the script through the `IS_PRERELEASE` flag.
-- **Manual dispatch (`workflow_dispatch`)**  
-  - Required input: `tag` (e.g., `v2.0.1`). Optional input: `is_prerelease` (defaults to `false`).  
-  - When `is_prerelease=true`, the tag must carry a beta/rc suffix, mirroring the automatic validation.  
+- **Manual dispatch (`workflow_dispatch`)**
+  - Required input: `tag` (e.g., `v2.0.1`). Optional input: `is_prerelease` (defaults to `false`).
+  - When `is_prerelease=true`, the tag must carry a beta/rc suffix, mirroring the automatic validation.
   - Manual runs still download the latest release metadata so that the workflow knows whether the tag represents the newest stable version (for documentation inside the PR body).
 
 ### Workflow Steps
@@ -38,17 +38,17 @@ The `x-files/app-upgrade-config/app-upgrade-config.json` file is synchronized by
 1. **Guard + metadata preparation** – the `Check if should proceed` and `Prepare metadata` steps compute the target tag, prerelease flag, whether the tag is the newest release, and a `safe_tag` slug used for branch names. When any rule fails, the workflow stops without touching the config.
 2. **Checkout source branches** – the default branch is checked out into `main/`, while the long-lived `x-files/app-upgrade-config` branch lives in `cs/`. All modifications happen in the latter directory.
 3. **Install toolchain** – Node.js 22, Corepack, and frozen Yarn dependencies are installed inside `main/`.
-4. **Run the update script** – `yarn tsx scripts/update-app-upgrade-config.ts --tag <tag> --config ../cs/app-upgrade-config.json --is-prerelease <flag>` updates the JSON in-place.  
-   - The script normalizes the tag (e.g., strips `v` prefix), detects the release channel (`latest`, `rc`, `beta`), and loads segment rules from `config/app-upgrade-segments.json`.  
-   - It validates that prerelease flags and semantic suffixes agree, enforces locked segments, builds mirror feed URLs, and performs release-availability checks (GitHub HEAD request for every channel; GitCode GET for latest channels, falling back to `https://releases.cherry-ai.com` when gitcode is delayed).  
+4. **Run the update script** – `yarn tsx scripts/update-app-upgrade-config.ts --tag <tag> --config ../cs/app-upgrade-config.json --is-prerelease <flag>` updates the JSON in-place.
+   - The script normalizes the tag (e.g., strips `v` prefix), detects the release channel (`latest`, `rc`, `beta`), and loads segment rules from `config/app-upgrade-segments.json`.
+   - It validates that prerelease flags and semantic suffixes agree, enforces locked segments, builds mirror feed URLs, and performs release-availability checks (GitHub HEAD request for every channel; GitCode GET for latest channels, falling back to `https://releases.cherry-ai.com` when gitcode is delayed).
    - After updating the relevant channel entry, the script rewrites the config with semver-sort order and a new `lastUpdated` timestamp.
 5. **Detect changes + create PR** – if `cs/app-upgrade-config.json` changed, the workflow opens a PR `chore/update-app-upgrade-config/<safe_tag>` against `x-files/app-upgrade-config` with a commit message `🤖 chore: sync app-upgrade-config for <tag>`. Otherwise it logs that no update is required.
 
 ### Manual Trigger Guide
 
-1. Open the Cherry Studio repository on GitHub → **Actions** tab → select **Update App Upgrade Config**.
-2. Click **Run workflow**, choose the default branch (usually `main`), and fill in the `tag` input (e.g., `v2.1.0`).  
-3. Toggle `is_prerelease` only when the tag carries a prerelease suffix (`-beta`, `-rc`). Leave it unchecked for stable releases.  
+1. Open the Roome repository on GitHub → **Actions** tab → select **Update App Upgrade Config**.
+2. Click **Run workflow**, choose the default branch (usually `main`), and fill in the `tag` input (e.g., `v2.1.0`).
+3. Toggle `is_prerelease` only when the tag carries a prerelease suffix (`-beta`, `-rc`). Leave it unchecked for stable releases.
 4. Start the run and wait for it to finish. Check the generated PR in the `x-files/app-upgrade-config` branch, verify the diff in `app-upgrade-config.json`, and merge once validated.
 
 ## JSON Configuration File Format

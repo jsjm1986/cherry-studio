@@ -12,7 +12,6 @@ const HIGHLIGHT_COLORS = ['#f5c518', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4',
 interface Props {
   containerRef: React.RefObject<HTMLElement | null>
   onCopy?: (selectedText: string) => void
-  onAskHer?: (selectedText: string) => void
   onSaveToLibrary?: (selectedText: string) => void
   showSaveToLibrary?: boolean
   onSaveToNotebook?: (selectedText: string, color: string) => void
@@ -28,7 +27,6 @@ interface ToolbarPosition {
 const TextSelectionToolbar: FC<Props> = ({
   containerRef,
   onCopy,
-  onAskHer,
   onSaveToLibrary,
   showSaveToLibrary = false,
   onSaveToNotebook,
@@ -56,7 +54,7 @@ const TextSelectionToolbar: FC<Props> = ({
 
   // 计算工具栏宽度
   const toolbarWidth = useMemo(() => {
-    let width = 140 // 复制按钮 + 问Her按钮 + 基础 padding
+    let width = 60 // 复制按钮 + 基础 padding
     if (showSaveToNotebook) width += 70 // Aa按钮 + 颜色选择器
     if (showSaveToLibrary) width += 45 // 保存资料库按钮
     return width
@@ -218,17 +216,6 @@ const TextSelectionToolbar: FC<Props> = ({
     setColorPickerOpen(false)
   }, [])
 
-  const handleAskHerClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-      onAskHer?.(selectedText)
-      // 点击后隐藏工具栏
-      setPosition((prev) => ({ ...prev, visible: false }))
-    },
-    [onAskHer, selectedText]
-  )
-
   const handleSaveToLibraryClick = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault()
@@ -306,15 +293,6 @@ const TextSelectionToolbar: FC<Props> = ({
           </IconButton>
         </>
       )}
-
-      {/* 问 Her 按钮 */}
-      <Divider />
-      <AskHerButton onClick={handleAskHerClick} title={t('selection.ask_her', { defaultValue: '问 Her' })}>
-        <AskHerBracket>[</AskHerBracket>
-        <AskHerNumber>?</AskHerNumber>
-        <AskHerBracket>]</AskHerBracket>
-        <AskHerText>{t('selection.ask_her_label', { defaultValue: '问 Her' })}</AskHerText>
-      </AskHerButton>
     </ToolbarContainer>
   )
 }
@@ -407,45 +385,6 @@ const ColorOption = styled.div<{ $color: string; $isActive: boolean }>`
   &:hover {
     border-color: ${(props) => (props.$isActive ? 'var(--color-primary)' : 'rgba(0, 0, 0, 0.2)')};
   }
-`
-
-const AskHerButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  padding: 4px 8px;
-  border: none;
-  background: transparent;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.12s ease;
-
-  &:hover {
-    background: var(--color-background-mute);
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
-`
-
-const AskHerBracket = styled.span`
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--color-primary);
-`
-
-const AskHerNumber = styled.span`
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-primary);
-`
-
-const AskHerText = styled.span`
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--color-text);
-  margin-left: 4px;
 `
 
 export default TextSelectionToolbar

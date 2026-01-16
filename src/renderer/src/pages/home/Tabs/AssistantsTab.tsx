@@ -6,14 +6,13 @@ import { useAssistants } from '@renderer/hooks/useAssistant'
 import { useAssistantPresets } from '@renderer/hooks/useAssistantPresets'
 import { useTags } from '@renderer/hooks/useTags'
 import { useHosts } from '@renderer/pages/hosts/hooks/useHosts'
-import AssistantSettingsPopup from '@renderer/pages/settings/AssistantSettings'
 import { useAppDispatch } from '@renderer/store'
 import { addAssistant } from '@renderer/store/assistants'
 import { setActiveTopicOrSessionAction } from '@renderer/store/runtime'
 import type { Assistant, Expert } from '@renderer/types'
 import { getLeadingEmoji } from '@renderer/utils'
-import { Dropdown, Input, message, Modal } from 'antd'
-import { FileUp, Home, MoreHorizontal, Search, X } from 'lucide-react'
+import { Input, message } from 'antd'
+import { Search, X } from 'lucide-react'
 import type { FC } from 'react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -243,13 +242,10 @@ const AssistantsTab: FC<AssistantsTabProps> = (props) => {
       </FilterToolbar>
 
       <CartridgeGrid>
-        {/* Add new cartridge card */}
-        <CartridgeContainer onClick={handleFileInputClick}>
+        {/* 导入卡带功能已隐藏 - 仅能使用，无法增删改 */}
+        {/* <CartridgeContainer onClick={handleFileInputClick}>
           <CartridgeShell $isPlaceholder>
-            {/* 顶部防滑纹理 */}
             <GripTexture />
-
-            {/* 贴纸凹槽区域 */}
             <StickerArea>
               <AddSticker>
                 <AddIconWrapper>
@@ -258,15 +254,13 @@ const AssistantsTab: FC<AssistantsTabProps> = (props) => {
                 <AddText>{t('assistants.cartridgeStore.importCartridge')}</AddText>
               </AddSticker>
             </StickerArea>
-
-            {/* 底部插入指示 */}
             <BottomSection>
               <InsertArrow />
               <InsertText>INSERT CARTRIDGE</InsertText>
               <ConnectorGap />
             </BottomSection>
           </CartridgeShell>
-        </CartridgeContainer>
+        </CartridgeContainer> */}
 
         {/* Cartridge cards */}
         {cartridges.map((item) => {
@@ -321,8 +315,8 @@ const AssistantsTab: FC<AssistantsTabProps> = (props) => {
                   <ConnectorGap />
                 </BottomSection>
 
-                {/* 操作按钮覆盖层 */}
-                <ActionOverlay className="action-overlay" onClick={(e) => e.stopPropagation()}>
+                {/* 操作按钮覆盖层 - 编辑/删除功能已隐藏，仅能使用，无法增删改 */}
+                {/* <ActionOverlay className="action-overlay" onClick={(e) => e.stopPropagation()}>
                   <Dropdown
                     menu={{
                       items: [
@@ -366,7 +360,7 @@ const AssistantsTab: FC<AssistantsTabProps> = (props) => {
                       <MoreHorizontal size={20} />
                     </ActionButton>
                   </Dropdown>
-                </ActionOverlay>
+                </ActionOverlay> */}
               </CartridgeShell>
               {/* 卡带倒影 */}
               <CartridgeShadow />

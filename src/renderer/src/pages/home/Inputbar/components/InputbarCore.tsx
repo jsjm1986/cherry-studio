@@ -37,7 +37,7 @@ import { usePasteHandler } from '../hooks/usePasteHandler'
 import { getInputbarConfig } from '../registry'
 import SendMessageButton from '../SendMessageButton'
 import type { InputbarScope } from '../types'
-import { HighlightTextarea } from './HighlightTextarea'
+import { type HighlightPattern, HighlightTextarea } from './HighlightTextarea'
 
 const logger = loggerService.withContext('InputbarCore')
 
@@ -75,6 +75,9 @@ export interface InputbarCoreProps {
 
   /** 是否显示翻译按钮（默认 true） */
   showTranslateButton?: boolean
+
+  /** 高亮模式列表，用于高亮 @专家名称 等 */
+  highlightPatterns?: HighlightPattern[]
 }
 
 const TextareaStyle: CSSProperties = {
@@ -125,8 +128,17 @@ export const InputbarCore: FC<InputbarCoreProps> = ({
   topContent,
   forceEnableQuickPanelTriggers,
   mentionMode = 'models',
-  showTranslateButton = true
+  showTranslateButton = true,
+  highlightPatterns
 }) => {
+  console.log(
+    '[InputbarCore] scope:',
+    scope,
+    'mentionMode:',
+    mentionMode,
+    'highlightPatterns:',
+    highlightPatterns?.length ?? 'undefined'
+  )
   const config = useMemo(() => getInputbarConfig(scope), [scope])
   const { files, isExpanded } = useInputbarToolsState()
   const { setFiles, setIsExpanded, toolsRegistry, triggers } = useInputbarToolsDispatch()
@@ -699,6 +711,7 @@ export const InputbarCore: FC<InputbarCoreProps> = ({
             fontSize={fontSize}
             height={height}
             disabled={isTranslating || searching}
+            highlightPatterns={highlightPatterns}
             onClick={() => {
               searching && dispatch(setSearching(false))
               quickPanel.close()

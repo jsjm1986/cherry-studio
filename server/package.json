@@ -1,7 +1,7 @@
 {
-  "name": "cherry-studio-auth-server",
+  "name": "roome-auth-server",
   "version": "1.0.0",
-  "description": "Authentication server for Cherry Studio",
+  "description": "Authentication server for Roome",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",

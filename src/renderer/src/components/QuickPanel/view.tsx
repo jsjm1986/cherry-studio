@@ -614,11 +614,12 @@ export const QuickPanelView: React.FC<Props> = ({ setInputText }) => {
             break
           }
 
-          if (list?.[index]) {
-            e.preventDefault()
-            e.stopPropagation()
-            setIsMouseOver(false)
+          // 面板可见时，始终拦截 Enter 键，防止消息被发送
+          e.preventDefault()
+          e.stopPropagation()
+          setIsMouseOver(false)
 
+          if (list?.[index]) {
             handleItemAction(list[index], 'enter')
           } else {
             handleClose('enter_empty')

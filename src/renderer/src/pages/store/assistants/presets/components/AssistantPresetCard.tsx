@@ -56,16 +56,9 @@ const AssistantPresetCard: FC<Props> = ({ preset, onClick, activegroup, getLocal
     })
   }, [preset])
 
+  // 编辑、删除功能已隐藏 - 仅能使用，无法增删改
+  // 保留创建、排序、导出等功能
   const menuItems = [
-    {
-      key: 'edit',
-      label: t('assistants.presets.edit.title'),
-      icon: <EditIcon size={14} />,
-      onClick: (e: any) => {
-        e.domEvent.stopPropagation()
-        AssistantSettingsPopup.show({ assistant: preset })
-      }
-    },
     {
       key: 'create',
       label: t('assistants.presets.add.button'),
@@ -91,16 +84,6 @@ const AssistantPresetCard: FC<Props> = ({ preset, onClick, activegroup, getLocal
       onClick: (e: any) => {
         e.domEvent.stopPropagation()
         exportPreset()
-      }
-    },
-    {
-      key: 'delete',
-      label: t('common.delete'),
-      icon: <DeleteIcon size={14} className="lucide-custom" />,
-      danger: true,
-      onClick: (e: any) => {
-        e.domEvent.stopPropagation()
-        handleDelete(preset)
       }
     }
   ]

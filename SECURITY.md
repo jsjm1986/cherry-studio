@@ -2,7 +2,7 @@
 
 ## 📢 Reporting a Vulnerability
 
-At Cherry Studio, we take security seriously and appreciate your efforts to responsibly disclose vulnerabilities. If you discover a security issue, please report it as soon as possible.
+At Roome, we take security seriously and appreciate your efforts to responsibly disclose vulnerabilities. If you discover a security issue, please report it as soon as possible.
 
 **Please do not create public issues for security-related reports.**
 
@@ -30,7 +30,7 @@ If you are using an unsupported version, we strongly recommend updating to the l
 
 ## 💡 Security Measures
 
-Cherry Studio integrates several security best practices, including:
+Roome integrates several security best practices, including:
 
 - Strict dependency updates and regular vulnerability scanning.
 - TypeScript strict mode and linting to reduce potential injection or runtime issues.
@@ -50,15 +50,15 @@ Cherry Studio integrates several security best practices, including:
 
 ## 🤝 Acknowledgements
 
-We greatly appreciate contributions from the security community and strive to recognize all researchers who help keep Cherry Studio safe.
+We greatly appreciate contributions from the security community and strive to recognize all researchers who help keep Roome safe.
 
 ---
 
 ## 🌟 Questions?
 
-For any security-related questions not involving vulnerabilities, please reach out to:  
-**security@cherry-ai.com**
+For any security-related questions not involving vulnerabilities, please reach out to:
+**security@roome.ai**
 
 ---
 
-Thank you for helping keep Cherry Studio and its users secure!
+Thank you for helping keep Roome and its users secure!

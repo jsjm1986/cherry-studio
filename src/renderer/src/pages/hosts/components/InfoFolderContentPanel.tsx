@@ -11,7 +11,7 @@ import { useInfoLibrary } from '../hooks/useInfoLibrary'
 const { Paragraph } = Typography
 const { TextArea } = Input
 
-const INFO_PANEL_EXPANDED_KEY = 'cherry-studio:info-panel-expanded'
+const INFO_PANEL_EXPANDED_KEY = 'roome:info-panel-expanded'
 const NARROW_WIDTH = 360
 const WIDE_WIDTH = 520
 
@@ -186,8 +186,7 @@ const PanelContainer = styled.div<{ $isDark: boolean }>`
   height: 100%;
   background: ${({ $isDark }) => ($isDark ? '#0f0f1a' : '#ffffff')};
   border-left: 1px solid ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.06)' : '#e5e7eb')};
-  box-shadow: ${({ $isDark }) =>
-    $isDark ? '-4px 0 24px rgba(0,0,0,0.3)' : '-4px 0 24px rgba(0,0,0,0.08)'};
+  box-shadow: ${({ $isDark }) => ($isDark ? '-4px 0 24px rgba(0,0,0,0.3)' : '-4px 0 24px rgba(0,0,0,0.08)')};
   position: relative;
   transition: width 0.2s ease;
 `
@@ -209,8 +208,7 @@ const ExpandToggle = styled.button<{ $isDark: boolean }>`
   justify-content: center;
   z-index: 10;
   transition: all 0.15s ease;
-  box-shadow: ${({ $isDark }) =>
-    $isDark ? '2px 0 8px rgba(0,0,0,0.3)' : '2px 0 8px rgba(0,0,0,0.06)'};
+  box-shadow: ${({ $isDark }) => ($isDark ? '2px 0 8px rgba(0,0,0,0.3)' : '2px 0 8px rgba(0,0,0,0.06)')};
 
   &:hover {
     background: ${({ $isDark }) => ($isDark ? 'rgba(59, 130, 246, 0.15)' : 'rgba(59, 130, 246, 0.08)')};
@@ -238,8 +236,7 @@ const FolderIcon = styled.div<{ $isDark: boolean }>`
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: ${({ $isDark }) =>
-    $isDark ? 'rgba(59, 130, 246, 0.15)' : 'rgba(59, 130, 246, 0.08)'};
+  background: ${({ $isDark }) => ($isDark ? 'rgba(59, 130, 246, 0.15)' : 'rgba(59, 130, 246, 0.08)')};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -319,8 +316,7 @@ const EmptyIcon = styled.div<{ $isDark: boolean }>`
   width: 72px;
   height: 72px;
   border-radius: 18px;
-  background: ${({ $isDark }) =>
-    $isDark ? 'rgba(255,255,255,0.03)' : '#f3f4f6'};
+  background: ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.03)' : '#f3f4f6')};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -360,8 +356,7 @@ const ItemCard = styled.div<{ $isDark: boolean }>`
   &:hover {
     background: ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.04)' : '#f3f4f6')};
     border-color: ${({ $isDark }) => ($isDark ? 'rgba(59, 130, 246, 0.3)' : 'rgba(59, 130, 246, 0.2)')};
-    box-shadow: ${({ $isDark }) =>
-      $isDark ? '0 4px 12px rgba(0,0,0,0.2)' : '0 4px 12px rgba(0,0,0,0.05)'};
+    box-shadow: ${({ $isDark }) => ($isDark ? '0 4px 12px rgba(0,0,0,0.2)' : '0 4px 12px rgba(0,0,0,0.05)')};
 
     .item-actions {
       opacity: 1;
@@ -374,8 +369,7 @@ const ItemIndex = styled.div<{ $isDark: boolean }>`
   height: 24px;
   min-width: 24px;
   border-radius: 6px;
-  background: ${({ $isDark }) =>
-    $isDark ? 'rgba(59, 130, 246, 0.15)' : 'rgba(59, 130, 246, 0.08)'};
+  background: ${({ $isDark }) => ($isDark ? 'rgba(59, 130, 246, 0.15)' : 'rgba(59, 130, 246, 0.08)')};
   color: #3b82f6;
   font-size: 12px;
   font-weight: 600;
@@ -433,11 +427,7 @@ const ActionButton = styled.button<{ $isDark: boolean; $danger?: boolean }>`
 
   &:hover {
     background: ${({ $isDark, $danger }) =>
-      $danger
-        ? 'rgba(239, 68, 68, 0.1)'
-        : $isDark
-          ? 'rgba(59, 130, 246, 0.15)'
-          : 'rgba(59, 130, 246, 0.08)'};
+      $danger ? 'rgba(239, 68, 68, 0.1)' : $isDark ? 'rgba(59, 130, 246, 0.15)' : 'rgba(59, 130, 246, 0.08)'};
     color: ${({ $danger }) => ($danger ? '#ef4444' : '#3b82f6')};
   }
 `

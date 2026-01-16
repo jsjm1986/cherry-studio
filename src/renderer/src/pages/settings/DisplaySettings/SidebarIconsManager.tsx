@@ -40,6 +40,13 @@ const SidebarIconsManager: FC<SidebarIconsManagerProps> = ({
 
   const dispatch = useAppDispatch()
 
+  // 隐藏的频道（store: 卡带商城暂时隐藏）
+  const hiddenIcons: SidebarIcon[] = ['store']
+
+  // 过滤掉隐藏的图标
+  const filteredVisibleIcons = visibleIcons.filter((icon) => !hiddenIcons.includes(icon))
+  const filteredDisabledIcons = disabledIcons.filter((icon) => !hiddenIcons.includes(icon))
+
   const onDragEnd = useCallback(
     (result: DropResult) => {
       if (!result.destination) return
@@ -140,7 +147,7 @@ const SidebarIconsManager: FC<SidebarIconsManagerProps> = ({
           <Droppable droppableId="visible">
             {(provided: DroppableProvided) => (
               <IconList ref={provided.innerRef} {...provided.droppableProps}>
-                {visibleIcons.map((icon, index) => (
+                {filteredVisibleIcons.map((icon, index) => (
                   <Draggable key={icon} draggableId={icon} index={index}>
                     {(provided: DraggableProvided) => (
                       <IconItem ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
@@ -167,10 +174,10 @@ const SidebarIconsManager: FC<SidebarIconsManagerProps> = ({
           <Droppable droppableId="disabled">
             {(provided: DroppableProvided) => (
               <IconList ref={provided.innerRef} {...provided.droppableProps}>
-                {disabledIcons.length === 0 ? (
+                {filteredDisabledIcons.length === 0 ? (
                   <EmptyPlaceholder>{t('settings.display.sidebar.empty')}</EmptyPlaceholder>
                 ) : (
-                  disabledIcons.map((icon, index) => (
+                  filteredDisabledIcons.map((icon, index) => (
                     <Draggable key={icon} draggableId={icon} index={index}>
                       {(provided: DraggableProvided) => (
                         <IconItem ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>

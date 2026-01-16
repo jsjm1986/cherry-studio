@@ -1,29 +1,30 @@
 import ModelAvatar from '@renderer/components/Avatar/ModelAvatar'
 import EmojiIcon from '@renderer/components/EmojiIcon'
-import { CopyIcon, DeleteIcon, EditIcon } from '@renderer/components/Icons'
+// 编辑、删除功能已隐藏，以下导入暂时保留但未使用
+// import { CopyIcon, DeleteIcon, EditIcon } from '@renderer/components/Icons'
 import PromptPopup from '@renderer/components/Popups/PromptPopup'
 import { useAssistant, useAssistants } from '@renderer/hooks/useAssistant'
 import { useSettings } from '@renderer/hooks/useSettings'
 import { useTags } from '@renderer/hooks/useTags'
-import AssistantSettingsPopup from '@renderer/pages/settings/AssistantSettings'
+// import AssistantSettingsPopup from '@renderer/pages/settings/AssistantSettings'
 import { getDefaultModel } from '@renderer/services/AssistantService'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import { useAppDispatch } from '@renderer/store'
 import { setActiveTopicOrSessionAction } from '@renderer/store/runtime'
 import type { Assistant, AssistantsSortType } from '@renderer/types'
-import { cn, getLeadingEmoji, uuid } from '@renderer/utils'
+import { cn, getLeadingEmoji } from '@renderer/utils'
 import { hasTopicPendingRequests } from '@renderer/utils/queue'
 import type { MenuProps } from 'antd'
 import { Dropdown } from 'antd'
-import { omit } from 'lodash'
+// import { omit } from 'lodash'
 import {
   AlignJustify,
   ArrowDownAZ,
   ArrowUpAZ,
-  BrushCleaning,
+  // BrushCleaning,
   Check,
   Plus,
-  Save,
+  // Save,
   Settings2,
   Smile,
   Tag,
@@ -274,50 +275,9 @@ function getMenuItems({
   sortByPinyinAsc,
   sortByPinyinDesc
 }): MenuProps['items'] {
+  // 编辑、删除、复制、清空、保存等功能已隐藏 - 仅能使用，无法增删改
+  // 保留图标类型切换、排序等查看功能
   return [
-    {
-      label: t('assistants.edit.title'),
-      key: 'edit',
-      icon: <EditIcon size={14} />,
-      onClick: () => AssistantSettingsPopup.show({ assistant })
-    },
-    {
-      label: t('assistants.copy.title'),
-      key: 'duplicate',
-      icon: <CopyIcon size={14} />,
-      onClick: async () => {
-        const _assistant = copyAssistant(assistant)
-        if (_assistant) {
-          onSwitch(_assistant)
-        }
-      }
-    },
-    {
-      label: t('assistants.clear.title'),
-      key: 'clear',
-      icon: <BrushCleaning size={14} />,
-      onClick: () => {
-        window.modal.confirm({
-          title: t('assistants.clear.title'),
-          content: t('assistants.clear.content'),
-          centered: true,
-          okButtonProps: { danger: true },
-          onOk: removeAllTopics
-        })
-      }
-    },
-    {
-      label: t('assistants.save.title'),
-      key: 'save-to-agent',
-      icon: <Save size={14} />,
-      onClick: async () => {
-        const preset = omit(assistant, ['model', 'emoji'])
-        preset.id = uuid()
-        preset.type = 'agent'
-        addPreset(preset)
-        window.toast.success(t('assistants.save.success'))
-      }
-    },
     {
       label: t('assistants.icon.type'),
       key: 'icon-type',
@@ -344,12 +304,6 @@ function getMenuItems({
       type: 'divider'
     },
     {
-      label: t('assistants.tags.manage'),
-      key: 'all-tags',
-      icon: <Plus size={14} />,
-      children: createTagMenuItems(allTags, assistant, assistants, updateAssistants, t)
-    },
-    {
       label: sortBy === 'list' ? t('assistants.list.showByTags') : t('assistants.list.showByList'),
       key: 'switch-view',
       icon: sortBy === 'list' ? <Tags size={14} /> : <AlignJustify size={14} />,
@@ -368,25 +322,8 @@ function getMenuItems({
       key: 'sort-desc',
       icon: <ArrowUpAZ size={14} />,
       onClick: sortByPinyinDesc
-    },
-    {
-      type: 'divider'
-    },
-    {
-      label: t('common.delete'),
-      key: 'delete',
-      icon: <DeleteIcon size={14} className="lucide-custom" />,
-      danger: true,
-      onClick: () => {
-        window.modal.confirm({
-          title: t('assistants.delete.title'),
-          content: t('assistants.delete.content'),
-          centered: true,
-          okButtonProps: { danger: true },
-          onOk: () => onDelete(assistant)
-        })
-      }
     }
+    // 删除功能已隐藏 - 仅能使用，无法增删改
   ]
 }
 

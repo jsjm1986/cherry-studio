@@ -9,6 +9,7 @@ import { Button, Empty, Modal, Tabs, Tooltip } from 'antd'
 import {
   ChevronLeft,
   ChevronRight,
+  Copy,
   Download,
   Edit3,
   File,
@@ -25,7 +26,7 @@ import styled from 'styled-components'
 
 import { useProjectFolder } from '../hooks/useProjectFolder'
 
-const NOTEBOOK_WIDTH_KEY = 'cherry-studio:notebook-width'
+const NOTEBOOK_WIDTH_KEY = 'roome:notebook-width'
 const DEFAULT_WIDTH = 280
 const MIN_WIDTH = 200
 const MAX_WIDTH = 500
@@ -66,8 +67,7 @@ const NotebookPanel: FC<Props> = ({ host, collapsed, onToggleCollapse, onUpdateH
   const notebook = host?.notebook || []
 
   // 项目文件夹 Hook
-  const { files, hasProjectFolder, projectFolderPath, refreshFiles, openFolder } =
-    useProjectFolder(host)
+  const { files, hasProjectFolder, projectFolderPath, refreshFiles, openFolder } = useProjectFolder(host)
 
   // 拖拽调整宽度
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -235,6 +235,15 @@ const NotebookPanel: FC<Props> = ({ host, collapsed, onToggleCollapse, onUpdateH
           </NoteSource>
         )}
         <NoteActions>
+          <Tooltip title={t('common.copy')}>
+            <ActionButton
+              onClick={() => {
+                navigator.clipboard.writeText(item.content)
+                window.toast?.success(t('common.copied'))
+              }}>
+              <Copy size={14} />
+            </ActionButton>
+          </Tooltip>
           <Tooltip title={t('common.edit')}>
             <ActionButton onClick={() => handleStartEdit(item)}>
               <Edit3 size={14} />
@@ -388,8 +397,7 @@ const PanelContainer = styled.div<{ $isResizing: boolean; $isDark: boolean }>`
   height: 100%;
   background: ${({ $isDark }) => ($isDark ? '#0f0f1a' : '#ffffff')};
   border-radius: 12px;
-  box-shadow: ${({ $isDark }) =>
-    $isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.06)'};
+  box-shadow: ${({ $isDark }) => ($isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.06)')};
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -481,8 +489,7 @@ const CollapsedPanel = styled.div<{ $isDark: boolean }>`
   height: 100%;
   background: ${({ $isDark }) => ($isDark ? '#0f0f1a' : '#ffffff')};
   border-radius: 12px;
-  box-shadow: ${({ $isDark }) =>
-    $isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.06)'};
+  box-shadow: ${({ $isDark }) => ($isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.06)')};
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -518,11 +525,11 @@ const NoteCard = styled.div<{ $editing?: boolean; $color?: string }>`
   padding: 14px;
   position: relative;
   overflow: hidden;
-  border: 1px solid ${(props) => (props.$editing ? (props.$color || 'var(--color-primary)') : 'var(--panel-border)')};
+  border: 1px solid ${(props) => (props.$editing ? props.$color || 'var(--color-primary)' : 'var(--panel-border)')};
   transition: all 0.15s ease;
 
   &:hover {
-    border-color: ${(props) => (props.$editing ? (props.$color || 'var(--color-primary)') : 'rgba(59, 130, 246, 0.2)')};
+    border-color: ${(props) => (props.$editing ? props.$color || 'var(--color-primary)' : 'rgba(59, 130, 246, 0.2)')};
     .note-actions {
       opacity: 1;
     }

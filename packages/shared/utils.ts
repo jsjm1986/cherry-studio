@@ -1,7 +1,7 @@
 export const defaultAppHeaders = () => {
   return {
-    'HTTP-Referer': 'https://cherry-ai.com',
-    'X-Title': 'Cherry Studio'
+    'HTTP-Referer': 'https://roome.ai',
+    'X-Title': 'Roome'
   }
 }
 

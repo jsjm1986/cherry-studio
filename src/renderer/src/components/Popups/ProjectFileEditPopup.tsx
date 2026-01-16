@@ -1,6 +1,6 @@
 import RichEditor from '@renderer/components/RichEditor'
 import type { RichEditorRef } from '@renderer/components/RichEditor/types'
-import { Modal, message } from 'antd'
+import { message,Modal } from 'antd'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
