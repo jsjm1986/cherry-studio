@@ -1,5 +1,5 @@
-appId: com.tokenic.app
-productName: Tokenic
+appId: com.roome.app
+productName: Roome
 electronLanguages:
   - zh-CN
   - zh-TW
@@ -14,9 +14,9 @@ directories:
   buildResources: build
 
 protocols:
-  - name: Her
+  - name: Roome
     schemes:
-      - her
+      - roome
 files:
   - "**/*"
   - "!**/{.vscode,.yarn,.yarn-lock,.github,.cursorrules,.prettierrc}"
@@ -73,7 +73,7 @@ extraResources:
     to: "claude-code-plugins"
 
 win:
-  executableName: Her
+  executableName: Roome
   artifactName: ${productName}-${version}-${arch}-setup.${ext}
   target:
     - target: nsis
@@ -115,9 +115,9 @@ linux:
   category: Utility
   desktop:
     entry:
-      StartupWMClass: Her
+      StartupWMClass: Roome
   mimeTypes:
-    - x-scheme-handler/her
+    - x-scheme-handler/roome
 rpm:
   # Workaround for electron build issue on rpm package:
   # https://github.com/electron/forge/issues/3594
@@ -134,9 +134,9 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    A New Era of Intelligence with Cherry Studio 1.7.1
+    A New Era of Intelligence with Roome 1.7.1
 
-    Today we're releasing Cherry Studio 1.7.1 — our most ambitious update yet, introducing Agent: autonomous AI that thinks, plans, and acts.
+    Today we're releasing Roome 1.7.1 — our most ambitious update yet, introducing Agent: autonomous AI that thinks, plans, and acts.
 
     For years, AI assistants have been reactive — waiting for your commands, responding to your questions. With Agent, we're changing that. Now, AI can truly work alongside you: understanding complex goals, breaking them into steps, and executing them independently.
 
@@ -182,14 +182,14 @@ releaseInfo:
     - Dozens of UI refinements
 
     ❤️ Fully Open Source
-    Commercial restrictions removed. Cherry Studio now follows standard AGPL v3 — free for teams of any size.
+    Commercial restrictions removed. Roome now follows standard AGPL v3 — free for teams of any size.
 
     The Agent Era is here. We can't wait to see what you'll create.
 
     <!--LANG:zh-CN-->
-    Cherry Studio 1.7.1：开启智能新纪元
+    Roome 1.7.1：开启智能新纪元
 
-    今天，我们正式发布 Cherry Studio 1.7.1 —— 迄今最具雄心的版本，带来全新的 Agent：能够自主思考、规划和行动的 AI。
+    今天，我们正式发布 Roome 1.7.1 —— 迄今最具雄心的版本，带来全新的 Agent：能够自主思考、规划和行动的 AI。
 
     多年来，AI 助手一直是被动的——等待你的指令，回应你的问题。Agent 改变了这一切。现在，AI 能够真正与你并肩工作：理解复杂目标，将其拆解为步骤，并独立执行。
 
@@ -235,7 +235,7 @@ releaseInfo:
     - 数十处 UI 细节打磨
 
     ❤️ 完全开源
-    商用限制已移除。Cherry Studio 现遵循标准 AGPL v3 协议——任意规模团队均可自由使用。
+    商用限制已移除。Roome 现遵循标准 AGPL v3 协议——任意规模团队均可自由使用。
 
     Agent 纪元已至。期待你的创造。
     <!--LANG:END-->

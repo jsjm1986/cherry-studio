@@ -1,4 +1,4 @@
-import HerLogo from '@renderer/assets/images/logo.png'
+import HerLogo from '@renderer/assets/images/roome-logo.svg'
 import { isMac } from '@renderer/config/constant'
 import { useTheme } from '@renderer/context/ThemeProvider'
 import { useFullscreen } from '@renderer/hooks/useFullscreen'
