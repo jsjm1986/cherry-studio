@@ -1,7 +1,5 @@
-import EmojiPicker from '@renderer/components/EmojiPicker'
-import { FormGroup, FormHint, FormInput, FormLabel, FormTextArea, StyledModal } from '@renderer/components/StyledModal'
+import { FormGroup, FormHint, FormInput, FormLabel, StyledModal } from '@renderer/components/StyledModal'
 import type { Host } from '@renderer/types'
-import { Popover } from 'antd'
 import { Folder, X } from 'lucide-react'
 import type { FC } from 'react'
 import { useEffect, useState } from 'react'
@@ -84,26 +82,14 @@ const HostEditModal: FC<Props> = ({ open, host, onOk, onCancel }) => {
       width={520}
       destroyOnHidden>
       <FormContainer>
-        {/* 头像和名称 - 优雅的头部布局 */}
+        {/* 头像和名称 - 只读显示 */}
         <HeaderRow>
-          <Popover content={<EmojiPicker onEmojiClick={setEmoji} />} trigger="click" placement="bottomLeft">
-            <EmojiButton>{emoji}</EmojiButton>
-          </Popover>
+          <EmojiDisplay>{emoji}</EmojiDisplay>
           <HeaderInfo>
-            <FormInput
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t('hosts.name')}
-              autoFocus
-              style={{ fontSize: 16, fontWeight: 500, height: 42 }}
-            />
-            <FormInput
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={t('hosts.description_placeholder')}
-              maxLength={50}
-              showCount
-            />
+            <ReadOnlyText style={{ fontSize: 16, fontWeight: 500 }}>{name}</ReadOnlyText>
+            <ReadOnlyText style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>
+              {description || t('hosts.no_description')}
+            </ReadOnlyText>
           </HeaderInfo>
         </HeaderRow>
 
@@ -133,26 +119,7 @@ const HostEditModal: FC<Props> = ({ open, host, onOk, onCancel }) => {
           <FormHint>{t('hosts.project_folder_help')}</FormHint>
         </FormGroup>
 
-        <FormGroup>
-          <FormLabel>{t('hosts.system_prompt')}</FormLabel>
-          <FormTextArea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder={t('hosts.system_prompt_placeholder')}
-            rows={4}
-          />
-          <FormHint>{t('hosts.system_prompt_help')}</FormHint>
-        </FormGroup>
-
-        <FormGroup>
-          <FormLabel>{t('hosts.welcome_message')}</FormLabel>
-          <FormTextArea
-            value={welcomeMessage}
-            onChange={(e) => setWelcomeMessage(e.target.value)}
-            placeholder={t('hosts.welcome_message_placeholder')}
-            rows={3}
-          />
-        </FormGroup>
+        {/* 系统提示词和欢迎消息设置已隐藏 */}
       </FormContainer>
     </StyledModal>
   )
@@ -176,27 +143,25 @@ const HeaderInfo = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
+  justify-content: center;
 `
 
-const EmojiButton = styled.button`
+const EmojiDisplay = styled.div`
   width: 72px;
   height: 72px;
   border: 1px solid var(--color-border);
   border-radius: 16px;
   background: var(--color-background-soft);
   font-size: 36px;
-  cursor: pointer;
-  transition: all 0.15s ease;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+`
 
-  &:hover {
-    border-color: #3b82f6;
-    background: rgba(59, 130, 246, 0.08);
-    transform: scale(1.02);
-  }
+const ReadOnlyText = styled.div`
+  padding: 8px 0;
+  color: var(--color-text);
 `
 
 const Divider = styled.div`

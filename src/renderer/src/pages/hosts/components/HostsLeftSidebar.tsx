@@ -12,12 +12,10 @@ import {
   Copy,
   Download,
   FileText,
-  FileUp,
   FolderDown,
   Info,
   MessageSquare,
-  MessageSquarePlus,
-  MoreHorizontal,
+  // MessageSquarePlus, // 话题提示词编辑功能已隐藏
   Pencil,
   Pin,
   Plus,
@@ -26,11 +24,10 @@ import {
   Sparkles,
   Trash2,
   User,
-  UserPlus,
   Users
 } from 'lucide-react'
 import type { FC } from 'react'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 export type TabType = 'chat' | 'configuration'
@@ -142,9 +139,33 @@ const HostsLeftSidebar: FC<Props> = ({
   // 卡带导入文件输入
   const cartridgeInputRef = useRef<HTMLInputElement>(null)
 
+  // 房间下拉菜单 ref（用于点击外部关闭）
+  const roomDropdownRef = useRef<HTMLDivElement>(null)
+
   // 用户信息编辑状态
   const [isEditingUserInfo, setIsEditingUserInfo] = useState(false)
   const [editingUserInfo, setEditingUserInfo] = useState<RoomUserInfo>({})
+
+  // 点击外部关闭房间下拉菜单
+  useEffect(() => {
+    if (!showRoomDropdown) return
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (roomDropdownRef.current && !roomDropdownRef.current.contains(event.target as Node)) {
+        setShowRoomDropdown(false)
+      }
+    }
+
+    // 延迟添加事件监听，避免立即触发
+    const timer = setTimeout(() => {
+      document.addEventListener('click', handleClickOutside)
+    }, 0)
+
+    return () => {
+      clearTimeout(timer)
+      document.removeEventListener('click', handleClickOutside)
+    }
+  }, [showRoomDropdown])
 
   const handleSelectRoom = useCallback(
     (host: Host) => {
@@ -192,7 +213,7 @@ const HostsLeftSidebar: FC<Props> = ({
     <Container $isDark={isDark}>
       <ScrollArea $isDark={isDark}>
         {/* 房间选择器 */}
-        <RoomSelector>
+        <RoomSelector ref={roomDropdownRef}>
           <RoomButton onClick={() => setShowRoomDropdown(!showRoomDropdown)} $active={showRoomDropdown}>
             {activeHost ? (
               <>
@@ -222,47 +243,11 @@ const HostsLeftSidebar: FC<Props> = ({
                   $active={activeHost?.id === host.id}>
                   <span className="emoji">{host.emoji || '🏠'}</span>
                   <span className="name">{host.name}</span>
-                  <RoomItemActions className="actions">
-                    <Dropdown
-                      trigger={['click']}
-                      menu={{
-                        items: [
-                          {
-                            key: 'edit',
-                            label: '编辑',
-                            icon: <Pencil size={14} />,
-                            onClick: (e) => {
-                              e.domEvent.stopPropagation()
-                              onEditHost(host)
-                              setShowRoomDropdown(false)
-                            }
-                          },
-                          {
-                            key: 'delete',
-                            label: '删除',
-                            icon: <Trash2 size={14} />,
-                            danger: true,
-                            onClick: (e) => {
-                              e.domEvent.stopPropagation()
-                              onDeleteHost(host)
-                              setShowRoomDropdown(false)
-                            }
-                          }
-                        ]
-                      }}>
-                      <ActionIcon onClick={(e) => e.stopPropagation()}>
-                        <MoreHorizontal size={14} />
-                      </ActionIcon>
-                    </Dropdown>
-                  </RoomItemActions>
+                  {/* 房间编辑/删除功能已隐藏 - 仅能使用，无法增删改 */}
                 </RoomDropdownItem>
               ))}
               {hosts.length === 0 && <EmptyHint>暂无房间</EmptyHint>}
-              <DropdownDivider />
-              <RoomDropdownItem onClick={onAddHost} $isAction>
-                <Plus size={14} />
-                <span>创建房间</span>
-              </RoomDropdownItem>
+              {/* 创建房间功能已隐藏 - 仅能使用，无法增删改 */}
             </RoomDropdown>
           )}
         </RoomSelector>
@@ -325,12 +310,7 @@ const HostsLeftSidebar: FC<Props> = ({
                             icon: <Pencil size={14} />,
                             onClick: () => handleStartRename(topic)
                           },
-                          {
-                            key: 'prompt',
-                            label: '话题提示词',
-                            icon: <MessageSquarePlus size={14} />,
-                            onClick: () => onEditTopicPrompt?.(topic)
-                          },
+                          // 话题提示词编辑功能已隐藏 - 仅能使用，无法增删改
                           { type: 'divider' },
                           {
                             key: 'pin',
@@ -401,9 +381,7 @@ const HostsLeftSidebar: FC<Props> = ({
                           }
                         ]
                       }}>
-                      <TopicItem
-                        $active={activeTopic?.id === topic.id}
-                        onClick={() => onSelectTopic(topic)}>
+                      <TopicItem $active={activeTopic?.id === topic.id} onClick={() => onSelectTopic(topic)}>
                         <FileText size={14} />
                         {renamingTopicId === topic.id ? (
                           <RenameInput
@@ -461,45 +439,7 @@ const HostsLeftSidebar: FC<Props> = ({
                   <SectionTitle $disabled={disabled}>Member 角色</SectionTitle>
                   {members.length > 0 && <Badge>{members.length}</Badge>}
                 </SectionHeaderLeft>
-                {!disabled && (
-                  <Dropdown
-                    trigger={['click']}
-                    menu={{
-                      items: [
-                        {
-                          key: 'add',
-                          label: '添加专家',
-                          icon: <UserPlus size={14} />,
-                          onClick: (e) => {
-                            e.domEvent.stopPropagation()
-                            onAddMember()
-                          }
-                        },
-                        {
-                          key: 'import',
-                          label: '从卡带库导入',
-                          icon: <Download size={14} />,
-                          onClick: (e) => {
-                            e.domEvent.stopPropagation()
-                            onImportMember?.()
-                          }
-                        },
-                        {
-                          key: 'cartridge',
-                          label: '从MD导入卡带',
-                          icon: <FileUp size={14} />,
-                          onClick: (e) => {
-                            e.domEvent.stopPropagation()
-                            cartridgeInputRef.current?.click()
-                          }
-                        }
-                      ]
-                    }}>
-                    <AddButton onClick={(e) => e.stopPropagation()}>
-                      <Plus size={12} />
-                    </AddButton>
-                  </Dropdown>
-                )}
+                {/* Member 添加/导入功能已隐藏 - 仅能使用，无法增删改 */}
               </SectionHeader>
               {!memberCollapsed && (
                 <SectionContent>
@@ -524,29 +464,7 @@ const HostsLeftSidebar: FC<Props> = ({
                           <ActionIcon onClick={() => onMentionMember(member)} title="@提及">
                             <AtSign size={12} />
                           </ActionIcon>
-                          <Dropdown
-                            trigger={['click']}
-                            menu={{
-                              items: [
-                                {
-                                  key: 'edit',
-                                  label: '编辑',
-                                  icon: <Pencil size={14} />,
-                                  onClick: () => onEditMember(member)
-                                },
-                                {
-                                  key: 'delete',
-                                  label: '删除',
-                                  icon: <Trash2 size={14} />,
-                                  danger: true,
-                                  onClick: () => onDeleteMember(member)
-                                }
-                              ]
-                            }}>
-                            <ActionIcon>
-                              <MoreHorizontal size={12} />
-                            </ActionIcon>
-                          </Dropdown>
+                          {/* 成员编辑/删除功能已隐藏 - 仅能使用，无法增删改 */}
                         </MemberActions>
                       </MemberItem>
                     ))
@@ -699,16 +617,16 @@ const HostsLeftSidebar: FC<Props> = ({
         )}
       </ScrollArea>
 
-      {/* 底部设置 */}
-      <BottomSection>
+      {/* 底部设置功能已隐藏 - 仅能使用，无法增删改 */}
+      {/* <BottomSection>
         <SettingsButton onClick={() => activeHost && onEditHost(activeHost)} disabled={disabled}>
           <Settings size={16} />
           <span>Settings</span>
         </SettingsButton>
-      </BottomSection>
+      </BottomSection> */}
 
-      {/* 隐藏的卡带文件输入 */}
-      <input
+      {/* 隐藏的卡带文件输入 - 已禁用 */}
+      {/* <input
         ref={cartridgeInputRef}
         type="file"
         accept=".md,.markdown"
@@ -718,9 +636,9 @@ const HostsLeftSidebar: FC<Props> = ({
           if (file && onImportCartridge) {
             onImportCartridge(file)
           }
-          e.target.value = '' // 重置以允许重复选择同一文件
+          e.target.value = ''
         }}
-      />
+      /> */}
     </Container>
   )
 }
@@ -734,8 +652,7 @@ const Container = styled.div<{ $isDark: boolean }>`
   height: 100%;
   background: ${({ $isDark }) => ($isDark ? '#0f0f1a' : '#ffffff')};
   border-radius: 12px;
-  box-shadow: ${({ $isDark }) =>
-    $isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.06)'};
+  box-shadow: ${({ $isDark }) => ($isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.06)')};
   overflow: hidden; /* 确保滚动条不会超出圆角边界 */
   /* 主题变量 - 供子组件使用 */
   --sidebar-bg: ${({ $isDark }) => ($isDark ? '#0f0f1a' : '#ffffff')};

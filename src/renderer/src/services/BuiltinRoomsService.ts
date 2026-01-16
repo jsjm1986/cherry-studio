@@ -10,10 +10,10 @@ import { v4 as uuid } from 'uuid'
 import { BUILTIN_ROOMS } from '../config/builtinRooms'
 import { DEFAULT_ASSISTANT_SETTINGS, getDefaultTopic } from './AssistantService'
 
-const BUILTIN_ROOMS_INITIALIZED_KEY = 'cherry-studio:builtin-rooms-initialized'
+const BUILTIN_ROOMS_INITIALIZED_KEY = 'roome:builtin-rooms-initialized'
 // 版本号：当内置房间配置更新时，增加此版本号以触发重新初始化
-const BUILTIN_ROOMS_VERSION = '2'
-const BUILTIN_ROOMS_VERSION_KEY = 'cherry-studio:builtin-rooms-version'
+const BUILTIN_ROOMS_VERSION = '3'
+const BUILTIN_ROOMS_VERSION_KEY = 'roome:builtin-rooms-version'
 
 /**
  * 检查内置房间是否已初始化（且版本匹配）
