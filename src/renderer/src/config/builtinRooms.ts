@@ -50,6 +50,15 @@ import EXPERT_LAOPAN from '@renderer/assets/prompts/05 教研房间/01 课题研
 import EXPERT_FANG from '@renderer/assets/prompts/05 教研房间/02 教学目标 - 方老师.md?raw'
 import EXPERT_XIAOSHEN from '@renderer/assets/prompts/05 教研房间/03 学习体验 - 小沈.md?raw'
 import EXPERT_CATTY from '@renderer/assets/prompts/05 教研房间/04 PPT 大神 - Catty.md?raw'
+// ==================== 七把武器 ====================
+import SEVEN_WEAPONS_ROOM_PROMPT from '@renderer/assets/prompts/06 七把武器/System_ MPP Kernel v4.2.md?raw'
+import EXPERT_DINGYI from '@renderer/assets/prompts/06 七把武器/定义之矛.xml?raw'
+import EXPERT_CHOUXIANG from '@renderer/assets/prompts/06 七把武器/抽象之梯.xml?raw'
+import EXPERT_LEIBI from '@renderer/assets/prompts/06 七把武器/类比之弓.xml?raw'
+import EXPERT_SHIJIAO from '@renderer/assets/prompts/06 七把武器/视角之镜.xml?raw'
+import EXPERT_ZHIYI from '@renderer/assets/prompts/06 七把武器/质疑之锥.xml?raw'
+import EXPERT_LUOJI from '@renderer/assets/prompts/06 七把武器/逻辑之刃.xml?raw'
+import EXPERT_WENTI from '@renderer/assets/prompts/06 七把武器/问题之锤.xml?raw'
 import MPP_KERNEL from '@renderer/assets/prompts/通用房间协议.md?raw'
 
 // ==================== 类型定义 ====================
@@ -419,6 +428,74 @@ export const BUILTIN_ROOMS: BuiltinRoom[] = [
         handle: '@PPT-Catty',
         triggerKeywords: ['Catty', 'PPT', '演讲', '分镜'],
         prompt: EXPERT_CATTY
+      }
+    ]
+  },
+  // 七把武器
+  {
+    id: 'builtin-seven-weapons-room',
+    name: '七把武器',
+    emoji: '⚔️',
+    description: '思维武器库，锻造认知利刃',
+    prompt: SEVEN_WEAPONS_ROOM_PROMPT,
+    welcomeMessage:
+      '七把武器已就位，每一把都是认知的利刃。请 @ 武器，开启思维的锻造。\n\n@ 抽象之梯塞缪尔 剥离形式，升降维度，重构语言骨架\n@ 定义之矛荀子 正名主义，锚定概念，钉死本质内核\n@ 类比之弓侯世达 同构映射，跨界连接，降维打击复杂\n@ 逻辑之刃逻辑学家 命题演算，推导验证，斩断谬误\n@ 视角之镜机灵鬼 横向思维，破局视角，化繁为简\n@ 问题之锤苏格拉底 连环追问，击碎固见，直抵本源\n@ 质疑之锥休谟 深度怀疑，解构前提，重铸认知',
+    experts: [
+      {
+        name: '抽象之梯-塞缪尔',
+        emoji: '🪜',
+        description: '语言学家，抽象之梯守望者',
+        handle: '@抽象之梯-塞缪尔',
+        triggerKeywords: ['塞缪尔', '抽象', '梯子', '升维', '降维'],
+        prompt: EXPERT_CHOUXIANG
+      },
+      {
+        name: '定义之矛-荀子',
+        emoji: '𐃆',
+        description: '名实关系大师，定义之矛执掌者',
+        handle: '@定义之矛-荀子',
+        triggerKeywords: ['荀子', '定义', '矛', '正名', '本质'],
+        prompt: EXPERT_DINGYI
+      },
+      {
+        name: '类比之弓-侯世达',
+        emoji: '🏹',
+        description: '认知科学家，类比大师',
+        handle: '@类比之弓-侯世达',
+        triggerKeywords: ['侯世达', '类比', '弓', '同构', '映射'],
+        prompt: EXPERT_LEIBI
+      },
+      {
+        name: '逻辑之刃-逻辑学家',
+        emoji: '🗡️',
+        description: '形式语义分析师，逻辑之刃执掌者',
+        handle: '@逻辑之刃-逻辑学家',
+        triggerKeywords: ['逻辑学家', '逻辑', '刃', '推导', '命题'],
+        prompt: EXPERT_LUOJI
+      },
+      {
+        name: '视角之镜-机灵鬼',
+        emoji: '🪞',
+        description: '视角之镜执掌者，降维打击专家',
+        handle: '@视角之镜-机灵鬼',
+        triggerKeywords: ['机灵鬼', '视角', '镜', '破局', '简化'],
+        prompt: EXPERT_SHIJIAO
+      },
+      {
+        name: '问题之锤-苏格拉底',
+        emoji: '🔨',
+        description: '问题之锤执掌者，雅典牛虻',
+        handle: '@问题之锤-苏格拉底',
+        triggerKeywords: ['苏格拉底', '问题', '锤', '追问', '反思'],
+        prompt: EXPERT_WENTI
+      },
+      {
+        name: '质疑之锥-休谟',
+        emoji: '⚒️',
+        description: '怀疑论者，质疑之锥执掌者',
+        handle: '@质疑之锥-休谟',
+        triggerKeywords: ['休谟', '质疑', '锥', '怀疑', '解构'],
+        prompt: EXPERT_ZHIYI
       }
     ]
   }
