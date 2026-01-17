@@ -79,10 +79,10 @@ export const BUILTIN_ROOMS: BuiltinRoom[] = [
     id: 'builtin-writing-room',
     name: '写作房间',
     emoji: '📚',
-    description: '万卷书局 - 高阶文学创作思维殿堂',
+    description: '全能写作天团，搞定公文小说社交文案',
     prompt: MPP_KERNEL + '\n\n' + WRITING_ROOM_PROMPT,
     welcomeMessage:
-      '欢迎来到写作房间，你可以在对话框中输入"@"符号来召唤不同的写作专家。如果不知道怎么用，可以先@总编-墨见山',
+      '全能编辑部随时待命。手头有什么任务？请 @ 对应角色，让他替你完美搞定。\n\n@ 总编墨见山 拆解复杂写作需求，分派最合适角色\n@ 公文笔杆子张处 专精通知、汇报等体制内公文写作\n@ 旅行作家三姐 擅长撰写感性游记与细腻情感故事\n@ 历史小说家老马 擅长基于史实的硬核历史悬疑写作\n@ 散文名家老汪 擅长记录美食、风物与人间烟火气\n@ 科普作家老万 通俗解读前沿科技与复杂科学原理\n@ 风格模仿老鬼 擅长特定文风复刻与经典名著戏仿',
     experts: [
       {
         name: '总编-墨见山',
@@ -147,9 +147,10 @@ export const BUILTIN_ROOMS: BuiltinRoom[] = [
     id: 'builtin-prediction-room',
     name: '预测房间',
     emoji: '🔮',
-    description: '命理预测殿堂 - 八字、奇门、塔罗、紫微',
+    description: '东西方玄学天团，详解命运流年与决策',
     prompt: MPP_KERNEL + '\n\n' + PREDICTION_ROOM_PROMPT,
-    welcomeMessage: '欢迎来到预测房间，这里汇聚了各类命理预测专家。输入"@"召唤专家。',
+    welcomeMessage:
+      '东西方玄学智囊团在此。你对未来有何困惑？请 @ 大师，为你指点迷津。\n\n@ 八字命理李云鹤 分析八字命局，规划人生大运流年\n@ 奇门遁甲太七 奇门遁甲排盘，决策具体事件吉凶\n@ 五行学者玄机 调和五行能量，提供健康与运势补救\n@ 塔罗占卜师安娜 塔罗投射潜意识，洞察情感与心理\n@ 紫微斗数坤灵 紫微斗数推演，详批一生剧本与运势\n@ 格局架构玄源 把握命理全局，定性核心格局与用神',
     experts: [
       {
         name: '八字-李云鹤',
@@ -206,9 +207,10 @@ export const BUILTIN_ROOMS: BuiltinRoom[] = [
     id: 'builtin-prompt-room',
     name: '提示词房间',
     emoji: '✨',
-    description: '提示词工程殿堂 - 场域构建、势能法、语言架构',
+    description: '提示词工厂，搞定编写评估与优化',
     prompt: MPP_KERNEL + '\n\n' + PROMPT_ROOM_PROMPT,
-    welcomeMessage: '欢迎来到提示词房间，这里汇聚了提示词工程的各路专家。输入"@"召唤专家。',
+    welcomeMessage:
+      '提示词工厂已启动。想让AI帮你做什么？请 @ 专家，为你定制精准指令。\n\n@ 全能编写小七姐 定制八维结构化提示词，精准可控\n@ 提示词评估专家 给提示词打分，找出漏洞并提供建议\n@ 提示词精简专家 去除冗余废话，保留核心指令逻辑\n@ 语言架构师 为复杂任务构建防呆逻辑与代码结构\n@ 势能编写元提示 注入价值公式，写出高势能提示词\n@ 场域构建元提示 打造沉浸式语境，让AI进入特定状态\n@ 诗意编写元提示 用诗歌语言激发AI创造力与意境',
     experts: [
       {
         name: '场域构建师',
@@ -273,9 +275,10 @@ export const BUILTIN_ROOMS: BuiltinRoom[] = [
     id: 'builtin-stars-room',
     name: '人类群星',
     emoji: '🌟',
-    description: '汇聚各领域顶尖思想家的智慧殿堂',
+    description: '链接人类群星，开启跨时空深度对话',
     prompt: MPP_KERNEL + '\n\n' + STARS_ROOM_PROMPT,
-    welcomeMessage: '欢迎来到人类群星，这里汇聚了各领域的深度思想家。输入"@"召唤专家。',
+    welcomeMessage:
+      '汇聚人类群星的智慧，只为解答你的难题。请 @ 专家，听听他的见解。\n\n@ 图书馆长博尔赫斯 分析你的需求，推荐最匹配的咨询专家\n@ 佛学辩手释衍空 用佛法智慧拆解困境，看清因果纠缠\n@ 系统论赫尔曼 推演事物演化规律，透视底层模式\n@ 世界观审计德米吾尔 审计设定逻辑漏洞，预判推演后果\n@ 思想史利奥波德 追溯思想脉络，理清观点来龙去脉\n@ 狂想家V 跨学科思维爆破，打破你的认知常规\n@ 语言治疗吉尔伯特 清理语言歧义，确保沟通逻辑纯净\n@ 侧写师伊索尔德 解析性格代码，定位认知偏好与盲区\n@ 心理学家伊丽莎白 解读梦境与潜意识，看见真实动机\n@ 本质透视克劳斯 剥离表象干扰，直击问题核心本质\n@ 侦探沃克 捕捉行为痕迹，还原真实意图与状态\n@ 情报商霓虹 挖掘被掩盖信息，提供去噪后的真相',
     experts: [
       {
         name: '情报商-霓虹',
@@ -380,9 +383,10 @@ export const BUILTIN_ROOMS: BuiltinRoom[] = [
     id: 'builtin-teaching-room',
     name: '教研房间',
     emoji: '🎓',
-    description: '专业课程设计与教学研究工作室',
+    description: '私人教研团队，搞定课程讲座科普',
     prompt: MPP_KERNEL,
-    welcomeMessage: '欢迎来到教研房间，这里有专业的课程设计专家。输入"@"召唤专家。',
+    welcomeMessage:
+      '你的私人教研团队已就位。准备什么分享？请 @ 顾问，帮你打造高分内容。\n\n@ 选题顾问老潘 站在听众视角，评估选题价值与痛点\n@ 大纲架构方老师 梳理混乱思路，生成清晰的逻辑大纲\n@ 体验设计小沈 策划互动亮点，把控演讲节奏与心流\n@ PPT架构Catty 将文稿视觉化，打造电影级PPT架构',
     experts: [
       {
         name: '课题-老潘',

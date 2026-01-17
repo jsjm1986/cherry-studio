@@ -3,7 +3,7 @@
  */
 import { db } from '@renderer/databases'
 import store from '@renderer/store'
-import { addAssistant, addHost } from '@renderer/store/assistants'
+import { addAssistant, addHost, updateAssistant } from '@renderer/store/assistants'
 import type { Expert, Host } from '@renderer/types'
 import { v4 as uuid } from 'uuid'
 
@@ -12,7 +12,7 @@ import { DEFAULT_ASSISTANT_SETTINGS, getDefaultTopic } from './AssistantService'
 
 const BUILTIN_ROOMS_INITIALIZED_KEY = 'roome:builtin-rooms-initialized'
 // 版本号：当内置房间配置更新时，增加此版本号以触发重新初始化
-const BUILTIN_ROOMS_VERSION = '5'
+const BUILTIN_ROOMS_VERSION = '7'
 const BUILTIN_ROOMS_VERSION_KEY = 'roome:builtin-rooms-version'
 
 /**
@@ -37,21 +37,36 @@ export function markBuiltinRoomsInitialized(): void {
  * 初始化内置房间和专家
  */
 export async function initializeBuiltinRooms(): Promise<void> {
-  if (isBuiltinRoomsInitialized()) {
+  const currentVersion = localStorage.getItem(BUILTIN_ROOMS_VERSION_KEY)
+  const needsUpdate = currentVersion !== BUILTIN_ROOMS_VERSION
+
+  if (isBuiltinRoomsInitialized() && !needsUpdate) {
     return
   }
 
-  // 获取现有房间列表，避免重复创建
+  // 获取现有房间列表
   const existingHosts = store.getState().assistants.assistants.filter((a) => a.type === 'host') as Host[]
-  const existingHostNames = new Set(existingHosts.map((h) => h.name))
+  const existingHostsMap = new Map(existingHosts.map((h) => [h.name, h]))
 
   for (const roomConfig of BUILTIN_ROOMS) {
-    // 跳过已存在的房间
-    if (existingHostNames.has(roomConfig.name)) {
+    const existingHost = existingHostsMap.get(roomConfig.name)
+
+    if (existingHost) {
+      // 如果房间已存在且需要更新，则更新其配置
+      if (needsUpdate) {
+        const updatedHost: Partial<Host> & { id: string } = {
+          id: existingHost.id,
+          emoji: roomConfig.emoji,
+          description: roomConfig.description,
+          prompt: roomConfig.prompt,
+          welcomeMessage: roomConfig.welcomeMessage
+        }
+        store.dispatch(updateAssistant(updatedHost))
+      }
       continue
     }
 
-    // 创建房间
+    // 创建新房间
     const hostId = uuid()
     const defaultTopic = getDefaultTopic(hostId)
 
