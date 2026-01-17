@@ -439,62 +439,62 @@ export const BUILTIN_ROOMS: BuiltinRoom[] = [
     description: '思维武器库，锻造认知利刃',
     prompt: SEVEN_WEAPONS_ROOM_PROMPT,
     welcomeMessage:
-      '七把武器已就位，每一把都是认知的利刃。请 @ 武器，开启思维的锻造。\n\n@ 抽象之梯塞缪尔 剥离形式，升降维度，重构语言骨架\n@ 定义之矛荀子 正名主义，锚定概念，钉死本质内核\n@ 类比之弓侯世达 同构映射，跨界连接，降维打击复杂\n@ 逻辑之刃逻辑学家 命题演算，推导验证，斩断谬误\n@ 视角之镜机灵鬼 横向思维，破局视角，化繁为简\n@ 问题之锤苏格拉底 连环追问，击碎固见，直抵本源\n@ 质疑之锥休谟 深度怀疑，解构前提，重铸认知',
+      '七把武器已就位，每一把都是认知的利刃。请 @ 武器，开启思维的锻造。\n\n@ 梯 剥离形式，升降维度，重构语言骨架\n@ 矛 正名主义，锚定概念，钉死本质内核\n@ 弓 同构映射，跨界连接，降维打击复杂\n@ 刃 命题演算，推导验证，斩断谬误\n@ 镜 横向思维，破局视角，化繁为简\n@ 锤 连环追问，击碎固见，直抵本源\n@ 锥 深度怀疑，解构前提，重铸认知',
     experts: [
       {
-        name: '抽象之梯-塞缪尔',
+        name: '抽象之梯',
         emoji: '🪜',
         description: '语言学家，抽象之梯守望者',
-        handle: '@抽象之梯-塞缪尔',
-        triggerKeywords: ['塞缪尔', '抽象', '梯子', '升维', '降维'],
+        handle: '@ 梯',
+        triggerKeywords: ['梯', '抽象', '升维', '降维'],
         prompt: EXPERT_CHOUXIANG
       },
       {
-        name: '定义之矛-荀子',
+        name: '定义之矛',
         emoji: '𐃆',
         description: '名实关系大师，定义之矛执掌者',
-        handle: '@定义之矛-荀子',
-        triggerKeywords: ['荀子', '定义', '矛', '正名', '本质'],
+        handle: '@ 矛',
+        triggerKeywords: ['矛', '定义', '正名', '本质'],
         prompt: EXPERT_DINGYI
       },
       {
-        name: '类比之弓-侯世达',
+        name: '类比之弓',
         emoji: '🏹',
         description: '认知科学家，类比大师',
-        handle: '@类比之弓-侯世达',
-        triggerKeywords: ['侯世达', '类比', '弓', '同构', '映射'],
+        handle: '@ 弓',
+        triggerKeywords: ['弓', '类比', '同构', '映射'],
         prompt: EXPERT_LEIBI
       },
       {
-        name: '逻辑之刃-逻辑学家',
+        name: '逻辑之刃',
         emoji: '🗡️',
         description: '形式语义分析师，逻辑之刃执掌者',
-        handle: '@逻辑之刃-逻辑学家',
-        triggerKeywords: ['逻辑学家', '逻辑', '刃', '推导', '命题'],
+        handle: '@ 刃',
+        triggerKeywords: ['刃', '逻辑', '推导', '命题'],
         prompt: EXPERT_LUOJI
       },
       {
-        name: '视角之镜-机灵鬼',
+        name: '视角之镜',
         emoji: '🪞',
         description: '视角之镜执掌者，降维打击专家',
-        handle: '@视角之镜-机灵鬼',
-        triggerKeywords: ['机灵鬼', '视角', '镜', '破局', '简化'],
+        handle: '@ 镜',
+        triggerKeywords: ['镜', '视角', '破局', '简化'],
         prompt: EXPERT_SHIJIAO
       },
       {
-        name: '问题之锤-苏格拉底',
+        name: '问题之锤',
         emoji: '🔨',
         description: '问题之锤执掌者，雅典牛虻',
-        handle: '@问题之锤-苏格拉底',
-        triggerKeywords: ['苏格拉底', '问题', '锤', '追问', '反思'],
+        handle: '@ 锤',
+        triggerKeywords: ['锤', '问题', '追问', '反思'],
         prompt: EXPERT_WENTI
       },
       {
-        name: '质疑之锥-休谟',
+        name: '质疑之锥',
         emoji: '⚒️',
         description: '怀疑论者，质疑之锥执掌者',
-        handle: '@质疑之锥-休谟',
-        triggerKeywords: ['休谟', '质疑', '锥', '怀疑', '解构'],
+        handle: '@ 锥',
+        triggerKeywords: ['锥', '质疑', '怀疑', '解构'],
         prompt: EXPERT_ZHIYI
       }
     ]

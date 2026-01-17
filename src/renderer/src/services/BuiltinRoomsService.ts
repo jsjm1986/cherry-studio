@@ -12,7 +12,7 @@ import { DEFAULT_ASSISTANT_SETTINGS, getDefaultTopic } from './AssistantService'
 
 const BUILTIN_ROOMS_INITIALIZED_KEY = 'roome:builtin-rooms-initialized'
 // 版本号：当内置房间配置更新时，增加此版本号以触发重新初始化
-const BUILTIN_ROOMS_VERSION = '9'
+const BUILTIN_ROOMS_VERSION = '10'
 const BUILTIN_ROOMS_VERSION_KEY = 'roome:builtin-rooms-version'
 
 /**
@@ -70,6 +70,41 @@ export async function initializeBuiltinRooms(): Promise<void> {
           welcomeMessage: roomConfig.welcomeMessage
         }
         store.dispatch(updateAssistant(updatedHost))
+
+        // 更新该房间的所有专家
+        const existingExperts = store
+          .getState()
+          .assistants.assistants.filter(
+            (a) => a.type === 'expert' && (a as Expert).hostId === existingHost.id
+          ) as Expert[]
+
+        console.log(`[BuiltinRooms] 找到 ${existingExperts.length} 个现有专家`)
+
+        // 删除所有旧专家
+        for (const expert of existingExperts) {
+          store.dispatch({ type: 'assistants/removeAssistant', payload: expert.id })
+        }
+
+        // 创建新专家
+        for (const expertConfig of roomConfig.experts) {
+          const expertId = uuid()
+          const expert: Expert = {
+            id: expertId,
+            hostId: existingHost.id,
+            name: expertConfig.name,
+            emoji: expertConfig.emoji,
+            description: expertConfig.description,
+            handle: expertConfig.handle,
+            triggerKeywords: expertConfig.triggerKeywords,
+            prompt: expertConfig.prompt,
+            type: 'expert',
+            topics: [],
+            settings: DEFAULT_ASSISTANT_SETTINGS
+          } as Expert
+          store.dispatch(addAssistant(expert))
+        }
+
+        console.log(`[BuiltinRooms] 已重新创建 ${roomConfig.experts.length} 个专家`)
 
         // 清空该房间的所有 Topic，让欢迎消息在下次打开时重新创建
         // 这样可以确保新的欢迎消息被显示
