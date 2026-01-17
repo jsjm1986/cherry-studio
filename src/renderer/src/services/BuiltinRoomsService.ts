@@ -62,6 +62,15 @@ export async function initializeBuiltinRooms(): Promise<void> {
           welcomeMessage: roomConfig.welcomeMessage
         }
         store.dispatch(updateAssistant(updatedHost))
+
+        // 清空该房间的所有 Topic，让欢迎消息在下次打开时重新创建
+        // 这样可以确保新的欢迎消息被显示
+        if (existingHost.topics && existingHost.topics.length > 0) {
+          for (const topic of existingHost.topics) {
+            // 删除 Topic 中的所有消息
+            await db.topics.update(topic.id, { messages: [] })
+          }
+        }
       }
       continue
     }
