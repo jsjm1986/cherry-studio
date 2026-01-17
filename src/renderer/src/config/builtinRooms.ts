@@ -22,6 +22,16 @@ import EXPERT_XUANJI from '@renderer/assets/prompts/02 预测房间/03 五行命
 import EXPERT_ANNA from '@renderer/assets/prompts/02 预测房间/04 韦特塔罗-安娜.md?raw'
 import EXPERT_KUNLING from '@renderer/assets/prompts/02 预测房间/05 紫薇斗术-坤灵.md?raw'
 import EXPERT_XUANYUAN from '@renderer/assets/prompts/02 预测房间/06 格局架构 - 玄源.md?raw'
+// ==================== 提示词房间 ====================
+import PROMPT_ROOM_PROMPT from '@renderer/assets/prompts/03 提示词房间/00 提示词房间.md?raw'
+import EXPERT_CHANGYUGOU from '@renderer/assets/prompts/03 提示词房间/01 场域构建师.md?raw'
+import EXPERT_SHINENGFA from '@renderer/assets/prompts/03 提示词房间/02 势能法专家.md?raw'
+import EXPERT_XIAOQIJIE from '@renderer/assets/prompts/03 提示词房间/03 小七姐.md?raw'
+import EXPERT_YUYANJIAGOU from '@renderer/assets/prompts/03 提示词房间/04 语言架构师.md?raw'
+import EXPERT_SHIGE from '@renderer/assets/prompts/03 提示词房间/05 诗歌提示词.md?raw'
+import EXPERT_PINGGU from '@renderer/assets/prompts/03 提示词房间/06 评估专家.md?raw'
+import EXPERT_JINGJIAN from '@renderer/assets/prompts/03 提示词房间/07 精简专家.md?raw'
+// ==================== 人类群星 ====================
 import EXPERT_SHIYANKONG from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：传统佛教阐释者 - 释衍空].md?raw'
 import EXPERT_HEERMAN from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：复杂系统理论家 - 赫尔曼].md?raw'
 import EXPERT_DEMIWUER from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：异界造物主 - 德米吾尔].md?raw'
@@ -34,7 +44,6 @@ import EXPERT_KELAOSU from '@renderer/assets/prompts/04 人类群星/[人格卡�
 import EXPERT_WOKE from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：痕迹学侦探 - 沃克].md?raw'
 import EXPERT_NIHONG from '@renderer/assets/prompts/04 人类群星/[人格卡带 v1.0：赛博情报商 - 霓虹].md?raw'
 import EXPERT_BOERHESI from '@renderer/assets/prompts/04 人类群星/[人格卡带 v2.0：迷宫守门人 - 博尔赫斯].md?raw'
-// ==================== 人类群星 ====================
 import STARS_ROOM_PROMPT from '@renderer/assets/prompts/04 人类群星/房间prompt.md?raw'
 // ==================== 教研房间 ====================
 import EXPERT_LAOPAN from '@renderer/assets/prompts/05 教研房间/01 课题研究 - 老潘.md?raw'
@@ -72,7 +81,8 @@ export const BUILTIN_ROOMS: BuiltinRoom[] = [
     emoji: '📚',
     description: '万卷书局 - 高阶文学创作思维殿堂',
     prompt: MPP_KERNEL + '\n\n' + WRITING_ROOM_PROMPT,
-    welcomeMessage: '欢迎来到写作房间，你可以在对话框中输入"@"符号来召唤不同的写作专家。如果不知道怎么用，可以先@总编-墨见山',
+    welcomeMessage:
+      '欢迎来到写作房间，你可以在对话框中输入"@"符号来召唤不同的写作专家。如果不知道怎么用，可以先@总编-墨见山',
     experts: [
       {
         name: '总编-墨见山',
@@ -188,6 +198,73 @@ export const BUILTIN_ROOMS: BuiltinRoom[] = [
         handle: '@格局-玄源',
         triggerKeywords: ['玄源', '格局', '用神'],
         prompt: EXPERT_XUANYUAN
+      }
+    ]
+  },
+  // 提示词房间
+  {
+    id: 'builtin-prompt-room',
+    name: '提示词房间',
+    emoji: '✨',
+    description: '提示词工程殿堂 - 场域构建、势能法、语言架构',
+    prompt: MPP_KERNEL + '\n\n' + PROMPT_ROOM_PROMPT,
+    welcomeMessage: '欢迎来到提示词房间，这里汇聚了提示词工程的各路专家。输入"@"召唤专家。',
+    experts: [
+      {
+        name: '场域构建师',
+        emoji: '🏗️',
+        description: '四重架构专家（哲学/结构/诗学/操作）',
+        handle: '@场域构建师',
+        triggerKeywords: ['场域', '构建', '架构', '四重'],
+        prompt: EXPERT_CHANGYUGOU
+      },
+      {
+        name: '势能法专家',
+        emoji: '⚡',
+        description: '价值优先级设计（X>Y）',
+        handle: '@势能法专家',
+        triggerKeywords: ['势能', '优先级', '价值'],
+        prompt: EXPERT_SHINENGFA
+      },
+      {
+        name: '小七姐',
+        emoji: '🎨',
+        description: '8种建构方法专家',
+        handle: '@小七姐',
+        triggerKeywords: ['小七姐', '建构', '方法'],
+        prompt: EXPERT_XIAOQIJIE
+      },
+      {
+        name: '语言架构师',
+        emoji: '🔧',
+        description: '防漂移设计、结构化封装',
+        handle: '@语言架构师',
+        triggerKeywords: ['语言', '架构', '防漂移', '封装'],
+        prompt: EXPERT_YUYANJIAGOU
+      },
+      {
+        name: '诗歌提示词',
+        emoji: '📜',
+        description: '留白艺术、高信息熵',
+        handle: '@诗歌提示词',
+        triggerKeywords: ['诗歌', '留白', '信息熵'],
+        prompt: EXPERT_SHIGE
+      },
+      {
+        name: '评估专家',
+        emoji: '📊',
+        description: '四维度评估体系',
+        handle: '@评估专家',
+        triggerKeywords: ['评估', '四维度', '测试'],
+        prompt: EXPERT_PINGGU
+      },
+      {
+        name: '精简专家',
+        emoji: '✂️',
+        description: '奥卡姆剃刀原则',
+        handle: '@精简专家',
+        triggerKeywords: ['精简', '剃刀', '优化'],
+        prompt: EXPERT_JINGJIAN
       }
     ]
   },
