@@ -195,8 +195,8 @@ const HostsPageContent: FC = () => {
               existingTopic.id,
               activeHost.id,
               activeHost.welcomeMessage,
-              activeHost.emoji,
-              activeHost.name
+              activeHost.emoji || '🏠',
+              activeHost.name || '房间'
             )
           }
         }
@@ -211,8 +211,8 @@ const HostsPageContent: FC = () => {
             newTopic.id,
             activeHost.id,
             activeHost.welcomeMessage,
-            activeHost.emoji,
-            activeHost.name
+            activeHost.emoji || '🏠',
+            activeHost.name || '房间'
           )
         }
       }
@@ -397,7 +397,13 @@ const HostsPageContent: FC = () => {
     setActiveTopic(newTopic)
 
     if (activeHost.welcomeMessage) {
-      await addWelcomeMessage(newTopic.id, activeHost.id, activeHost.welcomeMessage, activeHost.emoji, activeHost.name)
+      await addWelcomeMessage(
+        newTopic.id,
+        activeHost.id,
+        activeHost.welcomeMessage,
+        activeHost.emoji || '🏠',
+        activeHost.name || '房间'
+      )
     }
   }, [activeHost, currentAssistant, addTopic, addWelcomeMessage])
 
