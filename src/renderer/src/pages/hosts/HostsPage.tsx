@@ -122,14 +122,14 @@ const HostsPageContent: FC = () => {
 
   // 添加欢迎消息到话题
   const addWelcomeMessage = useCallback(
-    async (topicId: string, hostId: string, welcomeMessage: string) => {
+    async (topicId: string, hostId: string, welcomeMessage: string, hostEmoji: string, hostName: string) => {
       const message = createAssistantMessage(hostId, topicId)
       message.status = AssistantMessageStatus.SUCCESS
 
       // 设置房间信息，使欢迎消息显示房间 emoji 而不是模型 logo
       message.expertId = hostId
-      message.expertEmoji = activeHost?.emoji || '🏠'
-      message.expertName = activeHost?.name || '房间'
+      message.expertEmoji = hostEmoji
+      message.expertName = hostName
 
       const textBlock = createMainTextBlock(message.id, welcomeMessage, {
         status: MessageBlockStatus.SUCCESS
@@ -140,7 +140,7 @@ const HostsPageContent: FC = () => {
       dispatch(newMessagesActions.addMessage({ topicId, message }))
       await saveMessageAndBlocksToDB(message, [textBlock])
     },
-    [dispatch, activeHost]
+    [dispatch]
   )
 
   // 恢复上次选中的主机
@@ -191,7 +191,13 @@ const HostsPageContent: FC = () => {
         if (activeHost.welcomeMessage) {
           const topicFromDB = await db.topics.get(existingTopic.id)
           if (topicFromDB && topicFromDB.messages.length === 0) {
-            await addWelcomeMessage(existingTopic.id, activeHost.id, activeHost.welcomeMessage)
+            await addWelcomeMessage(
+              existingTopic.id,
+              activeHost.id,
+              activeHost.welcomeMessage,
+              activeHost.emoji,
+              activeHost.name
+            )
           }
         }
       } else {
@@ -201,13 +207,19 @@ const HostsPageContent: FC = () => {
         setActiveTopic(newTopic)
 
         if (activeHost.welcomeMessage) {
-          await addWelcomeMessage(newTopic.id, activeHost.id, activeHost.welcomeMessage)
+          await addWelcomeMessage(
+            newTopic.id,
+            activeHost.id,
+            activeHost.welcomeMessage,
+            activeHost.emoji,
+            activeHost.name
+          )
         }
       }
     }
 
     initTopic()
-  }, [activeHost?.id, currentAssistant?.id])
+  }, [activeHost?.id, currentAssistant?.id, addTopic, addWelcomeMessage])
 
   // 当 activeTopic 改变时，加载消息
   useEffect(() => {
@@ -384,7 +396,7 @@ const HostsPageContent: FC = () => {
     setActiveTopic(newTopic)
 
     if (activeHost.welcomeMessage) {
-      await addWelcomeMessage(newTopic.id, activeHost.id, activeHost.welcomeMessage)
+      await addWelcomeMessage(newTopic.id, activeHost.id, activeHost.welcomeMessage, activeHost.emoji, activeHost.name)
     }
   }, [activeHost, currentAssistant, addTopic, addWelcomeMessage])
 
