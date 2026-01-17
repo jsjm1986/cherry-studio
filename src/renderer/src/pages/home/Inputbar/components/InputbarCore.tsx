@@ -402,7 +402,17 @@ export const InputbarCore: FC<InputbarCoreProps> = ({
       const lastSymbol = newText[cursorPosition - 1]
       const previousChar = newText[cursorPosition - 2]
       const isCursorAtTextStart = cursorPosition <= 1
-      const hasValidTriggerBoundary = previousChar === ' ' || isCursorAtTextStart
+
+      // 智能边界检查：允许中文场景，但避免 Email 和代码误触发
+      const isChineseChar = previousChar && /[\u4e00-\u9fa5]/.test(previousChar)
+      const isChinesePunctuation = previousChar && /[，。！？；：、（）【】《》""''…—]/.test(previousChar)
+      const isWhitespace = previousChar && /[\s\n]/.test(previousChar)
+      const isAlphanumeric = previousChar && /[a-zA-Z0-9]/.test(previousChar)
+
+      // 允许：行首、空格后、中文字符后、中文标点后
+      // 禁止：字母数字后（可能是 email 或代码）
+      const hasValidTriggerBoundary =
+        isCursorAtTextStart || isWhitespace || isChineseChar || isChinesePunctuation || !isAlphanumeric
 
       const openRootPanelAt = (position: number) => {
         triggers.emit(QuickPanelReservedSymbol.Root, {
@@ -436,7 +446,20 @@ export const InputbarCore: FC<InputbarCoreProps> = ({
         if (!quickPanel.isVisible && lastTriggerIndex !== -1 && cursorPosition > lastTriggerIndex) {
           const triggerChar = newText[lastTriggerIndex]
           const boundaryChar = newText[lastTriggerIndex - 1] ?? ''
-          const hasBoundary = lastTriggerIndex === 0 || /\s/.test(boundaryChar)
+
+          // 智能边界检查：允许中文场景，但避免 Email 和代码误触发
+          const isChineseChar = /[\u4e00-\u9fa5]/.test(boundaryChar)
+          const isChinesePunctuation = /[，。！？；：、（）【】《》""''…—]/.test(boundaryChar)
+          const isWhitespace = /[\s\n]/.test(boundaryChar)
+          const isAlphanumeric = /[a-zA-Z0-9]/.test(boundaryChar)
+
+          const hasBoundary =
+            lastTriggerIndex === 0 ||
+            isWhitespace ||
+            isChineseChar ||
+            isChinesePunctuation ||
+            (!isAlphanumeric && boundaryChar !== '')
+
           const searchSegment = newText.slice(lastTriggerIndex + 1, cursorPosition)
           const hasSearchContent = searchSegment.trim().length > 0
 
