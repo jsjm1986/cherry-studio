@@ -436,30 +436,6 @@ const HostsPageContent: FC = () => {
     [currentAssistant, updateTopic, t]
   )
 
-  // 编辑话题提示词
-  const handleEditTopicPrompt = useCallback(
-    async (topic: Topic) => {
-      const prompt = await PromptPopup.show({
-        title: t('chat.topics.prompt.edit.title'),
-        message: '',
-        defaultValue: topic?.prompt || '',
-        inputProps: {
-          rows: 8,
-          allowClear: true
-        }
-      })
-
-      if (prompt !== null) {
-        const updatedTopic = { ...topic, prompt: prompt.trim() }
-        updateTopic(updatedTopic)
-        if (topic.id === activeTopic?.id) {
-          setActiveTopic(updatedTopic)
-        }
-      }
-    },
-    [updateTopic, activeTopic?.id, t]
-  )
-
   // 固定/取消固定话题
   const handlePinTopic = useCallback(
     (topic: Topic) => {
@@ -468,40 +444,6 @@ const HostsPageContent: FC = () => {
     },
     [updateTopic]
   )
-
-  // 保存到项目文件
-  const handleSaveToProjectFolder = useCallback(
-    async (topic: Topic) => {
-      if (!activeHost?.projectFolderPath) {
-        window.toast.warning('请先设置项目文件夹')
-        return
-      }
-      const { topicToMarkdown } = await import('@renderer/utils/export')
-      const { removeSpecialCharactersForFileName } = await import('@renderer/utils/file')
-      const dayjs = (await import('dayjs')).default
-
-      const markdown = await topicToMarkdown(topic)
-      const safeName = removeSpecialCharactersForFileName(topic.name)
-      const date = dayjs().format('YYYY-MM-DD')
-      const fileName = `${safeName}-${date}.md`
-      const filePath = `${activeHost.projectFolderPath}/${fileName}`
-
-      try {
-        await window.api.file.write(filePath, markdown)
-        window.toast.success('已保存到项目文件')
-      } catch (err) {
-        console.error('Failed to save to project folder:', err)
-        window.toast.error('保存失败')
-      }
-    },
-    [activeHost?.projectFolderPath]
-  )
-
-  // 清空消息
-  const handleClearMessages = useCallback((topic: Topic) => {
-    store.dispatch(setGenerating(false))
-    EventEmitter.emit(EVENT_NAMES.CLEAR_MESSAGES, topic)
-  }, [])
 
   // 上移话题
   const handleMoveTopicUp = useCallback(
@@ -534,11 +476,6 @@ const HostsPageContent: FC = () => {
   // 复制话题
   const handleCopyTopic = useCallback((topic: Topic) => {
     copyTopicAsMarkdown(topic)
-  }, [])
-
-  // 保存话题
-  const handleSaveTopic = useCallback((topic: Topic) => {
-    exportTopicAsMarkdown(topic)
   }, [])
 
   // 导出话题
@@ -644,14 +581,10 @@ const HostsPageContent: FC = () => {
           onDeleteTopic={handleDeleteTopic}
           onRenameTopic={handleRenameTopic}
           onGenerateTopicName={handleGenerateTopicName}
-          onEditTopicPrompt={handleEditTopicPrompt}
           onPinTopic={handlePinTopic}
-          onSaveToProjectFolder={handleSaveToProjectFolder}
-          onClearMessages={handleClearMessages}
           onMoveTopicUp={handleMoveTopicUp}
           onMoveTopicDown={handleMoveTopicDown}
           onCopyTopic={handleCopyTopic}
-          onSaveTopic={handleSaveTopic}
           onExportTopic={handleExportTopic}
           members={experts}
           onAddMember={handleAddExpert}

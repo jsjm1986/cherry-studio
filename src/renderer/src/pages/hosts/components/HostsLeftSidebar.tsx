@@ -12,14 +12,12 @@ import {
   Copy,
   Download,
   FileText,
-  FolderDown,
   Info,
   MessageSquare,
   // MessageSquarePlus, // 话题提示词编辑功能已隐藏
   Pencil,
   Pin,
   Plus,
-  Save,
   Settings,
   Sparkles,
   Trash2,
@@ -52,14 +50,10 @@ interface Props {
   onRenameTopic: (topic: Topic, newName: string) => void
   // 话题右键菜单
   onGenerateTopicName?: (topic: Topic) => void
-  onEditTopicPrompt?: (topic: Topic) => void
   onPinTopic?: (topic: Topic) => void
-  onSaveToProjectFolder?: (topic: Topic) => void
-  onClearMessages?: (topic: Topic) => void
   onMoveTopicUp?: (topic: Topic) => void
   onMoveTopicDown?: (topic: Topic) => void
   onCopyTopic?: (topic: Topic) => void
-  onSaveTopic?: (topic: Topic) => void
   onExportTopic?: (topic: Topic) => void
   // 成员相关
   members: Expert[]
@@ -95,14 +89,10 @@ const HostsLeftSidebar: FC<Props> = ({
   onDeleteTopic,
   onRenameTopic,
   onGenerateTopicName,
-  onEditTopicPrompt: _onEditTopicPrompt,
   onPinTopic,
-  onSaveToProjectFolder,
-  onClearMessages,
   onMoveTopicUp,
   onMoveTopicDown,
   onCopyTopic,
-  onSaveTopic,
   onExportTopic,
   members,
   onAddMember: _onAddMember,
@@ -123,7 +113,6 @@ const HostsLeftSidebar: FC<Props> = ({
   void _onAddHost
   void _onEditHost
   void _onDeleteHost
-  void _onEditTopicPrompt
   void _onAddMember
   void _onImportMember
   void _onImportCartridge
@@ -328,18 +317,6 @@ const HostsLeftSidebar: FC<Props> = ({
                             icon: <Pin size={14} />,
                             onClick: () => onPinTopic?.(topic)
                           },
-                          {
-                            key: 'notebook',
-                            label: '保存到项目文件',
-                            icon: <FolderDown size={14} />,
-                            onClick: () => onSaveToProjectFolder?.(topic)
-                          },
-                          {
-                            key: 'clear',
-                            label: '清空消息',
-                            icon: <Trash2 size={14} />,
-                            onClick: () => onClearMessages?.(topic)
-                          },
                           { type: 'divider' },
                           {
                             key: 'position',
@@ -365,19 +342,13 @@ const HostsLeftSidebar: FC<Props> = ({
                           { type: 'divider' },
                           {
                             key: 'copy',
-                            label: '复制',
+                            label: '复制聊天记录',
                             icon: <Copy size={14} />,
                             onClick: () => onCopyTopic?.(topic)
                           },
                           {
-                            key: 'save',
-                            label: '保存',
-                            icon: <Save size={14} />,
-                            onClick: () => onSaveTopic?.(topic)
-                          },
-                          {
                             key: 'export',
-                            label: '导出',
+                            label: '导出聊天记录',
                             icon: <Download size={14} />,
                             onClick: () => onExportTopic?.(topic)
                           },
