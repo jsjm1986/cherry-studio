@@ -1,6 +1,5 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { loggerService } from '@logger'
-import { Navbar, NavbarCenter } from '@renderer/components/app/Navbar'
 import { DeleteIcon, EditIcon } from '@renderer/components/Icons'
 import ListItem from '@renderer/components/ListItem'
 import db from '@renderer/databases'
@@ -150,9 +149,6 @@ const FilesPage: FC = () => {
   if (fileType === 'project') {
     return (
       <Container>
-        <Navbar>
-          <NavbarCenter style={{ borderRight: 'none' }}>{t('files.title')}</NavbarCenter>
-        </Navbar>
         <ContentContainer id="content-container">
           <SideNav>
             {menuItems.map((item) => (
@@ -175,9 +171,6 @@ const FilesPage: FC = () => {
 
   return (
     <Container>
-      <Navbar>
-        <NavbarCenter style={{ borderRight: 'none' }}>{t('files.title')}</NavbarCenter>
-      </Navbar>
       <ContentContainer id="content-container">
         <SideNav>
           {menuItems.map((item) => (

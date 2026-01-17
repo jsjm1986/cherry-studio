@@ -1,5 +1,4 @@
 import { loggerService } from '@logger'
-import { Navbar, NavbarCenter } from '@renderer/components/app/Navbar'
 import type { CodeEditorHandles } from '@renderer/components/CodeEditor'
 import type { RichEditorRef } from '@renderer/components/RichEditor/types'
 import { useActiveNode, useFileContent, useFileContentSync } from '@renderer/hooks/useNotesQuery'
@@ -872,9 +871,6 @@ const NotesPage: FC = () => {
 
   return (
     <Container id="notes-page">
-      <Navbar>
-        <NavbarCenter style={{ borderRight: 'none' }}>{t('notes.title')}</NavbarCenter>
-      </Navbar>
       <ContentContainer id="content-container">
         <AnimatePresence initial={false}>
           {showWorkspace && (
