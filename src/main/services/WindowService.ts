@@ -77,7 +77,8 @@ export class WindowService {
           }),
       backgroundColor: isMac ? undefined : nativeTheme.shouldUseDarkColors ? '#181818' : '#FFFFFF',
       darkTheme: nativeTheme.shouldUseDarkColors,
-      ...(isLinux ? { icon } : {}),
+      // Set icon for Windows and Linux
+      ...(!isMac ? { icon } : {}),
       webPreferences: {
         preload: join(__dirname, '../preload/index.js'),
         sandbox: false,
@@ -501,6 +502,8 @@ export class WindowService {
       minimizable: false,
       maximizable: false,
       fullscreenable: false,
+      // Set icon for Windows and Linux
+      ...(!isMac ? { icon } : {}),
       webPreferences: {
         preload: join(__dirname, '../preload/index.js'),
         sandbox: false,
