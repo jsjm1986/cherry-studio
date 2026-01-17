@@ -32,7 +32,7 @@ import type { Model } from '@renderer/types'
 import { type Assistant, type MCPTool, type Provider, SystemProviderIds } from '@renderer/types'
 import type { StreamTextParams } from '@renderer/types/aiCoreTypes'
 import { mapRegexToPatterns } from '@renderer/utils/blacklistMatchPattern'
-import { replacePromptVariables } from '@renderer/utils/prompt'
+import { IDENTITY_OVERRIDE_PROTOCOL, replacePromptVariables } from '@renderer/utils/prompt'
 import { isAIGatewayProvider, isAwsBedrockProvider } from '@renderer/utils/provider'
 import type { ModelMessage, Tool } from 'ai'
 import { stepCountIs } from 'ai'
@@ -237,7 +237,9 @@ export async function buildStreamTextParams(
   }
 
   if (assistant.prompt) {
-    params.system = await replacePromptVariables(assistant.prompt, model.name)
+    const userPrompt = await replacePromptVariables(assistant.prompt, model.name)
+    // 在所有系统提示词前强制添加身份覆盖协议
+    params.system = IDENTITY_OVERRIDE_PROTOCOL + userPrompt
   }
 
   logger.debug('params', params)

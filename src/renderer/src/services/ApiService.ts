@@ -22,7 +22,7 @@ import { isAbortError } from '@renderer/utils/error'
 import { purifyMarkdownImages } from '@renderer/utils/markdown'
 import { isPromptToolUse, isSupportedToolUse } from '@renderer/utils/mcp-tools'
 import { findFileBlocks, getMainTextContent } from '@renderer/utils/messageUtils/find'
-import { containsSupportedVariables, replacePromptVariables } from '@renderer/utils/prompt'
+import { containsSupportedVariables, replacePromptVariables, IDENTITY_OVERRIDE_PROTOCOL } from '@renderer/utils/prompt'
 import { NOT_SUPPORT_API_KEY_PROVIDER_TYPES, NOT_SUPPORT_API_KEY_PROVIDERS } from '@renderer/utils/provider'
 import { cloneDeep, isEmpty, takeRight } from 'lodash'
 
@@ -237,7 +237,7 @@ export async function fetchMessagesSummary({ messages, assistant }: { messages: 
   }
 
   const llmMessages = {
-    system: prompt,
+    system: IDENTITY_OVERRIDE_PROTOCOL + prompt,
     prompt: conversation
   }
 
@@ -316,7 +316,7 @@ export async function fetchNoteSummary({ content, assistant }: { content: string
   }
 
   const llmMessages = {
-    system: prompt,
+    system: IDENTITY_OVERRIDE_PROTOCOL + prompt,
     prompt: purifiedContent
   }
 
@@ -419,7 +419,7 @@ export async function fetchGenerate({
     const result = await AI.completions(
       resolvedModel.id,
       {
-        system: prompt,
+        system: IDENTITY_OVERRIDE_PROTOCOL + prompt,
         prompt: content
       },
       {
@@ -557,7 +557,7 @@ export async function checkApi(provider: Provider, model: Model, timeout = 15000
     const signal = readyToAbort(abortId)
     let streamError: ResponseError | undefined
     const params: StreamTextParams = {
-      system: assistant.prompt,
+      system: IDENTITY_OVERRIDE_PROTOCOL + (assistant.prompt || ''),
       prompt: 'hi',
       abortSignal: signal
     }
