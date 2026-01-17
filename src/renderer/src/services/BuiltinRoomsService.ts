@@ -12,7 +12,7 @@ import { DEFAULT_ASSISTANT_SETTINGS, getDefaultTopic } from './AssistantService'
 
 const BUILTIN_ROOMS_INITIALIZED_KEY = 'roome:builtin-rooms-initialized'
 // 版本号：当内置房间配置更新时，增加此版本号以触发重新初始化
-const BUILTIN_ROOMS_VERSION = '7'
+const BUILTIN_ROOMS_VERSION = '8'
 const BUILTIN_ROOMS_VERSION_KEY = 'roome:builtin-rooms-version'
 
 /**
@@ -40,7 +40,12 @@ export async function initializeBuiltinRooms(): Promise<void> {
   const currentVersion = localStorage.getItem(BUILTIN_ROOMS_VERSION_KEY)
   const needsUpdate = currentVersion !== BUILTIN_ROOMS_VERSION
 
+  console.log(
+    `[BuiltinRooms] 当前版本: ${currentVersion}, 目标版本: ${BUILTIN_ROOMS_VERSION}, 需要更新: ${needsUpdate}`
+  )
+
   if (isBuiltinRoomsInitialized() && !needsUpdate) {
+    console.log('[BuiltinRooms] 已初始化且版本匹配，跳过')
     return
   }
 
@@ -54,6 +59,9 @@ export async function initializeBuiltinRooms(): Promise<void> {
     if (existingHost) {
       // 如果房间已存在且需要更新，则更新其配置
       if (needsUpdate) {
+        console.log(`[BuiltinRooms] 更新房间: ${roomConfig.name}`)
+        console.log(`[BuiltinRooms] 新欢迎语长度: ${roomConfig.welcomeMessage.length}`)
+
         const updatedHost: Partial<Host> & { id: string } = {
           id: existingHost.id,
           emoji: roomConfig.emoji,
@@ -66,6 +74,7 @@ export async function initializeBuiltinRooms(): Promise<void> {
         // 清空该房间的所有 Topic，让欢迎消息在下次打开时重新创建
         // 这样可以确保新的欢迎消息被显示
         if (existingHost.topics && existingHost.topics.length > 0) {
+          console.log(`[BuiltinRooms] 清空 ${existingHost.topics.length} 个 Topic 的消息`)
           for (const topic of existingHost.topics) {
             // 删除 Topic 中的所有消息
             await db.topics.update(topic.id, { messages: [] })

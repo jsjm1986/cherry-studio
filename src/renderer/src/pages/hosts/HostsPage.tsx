@@ -186,6 +186,14 @@ const HostsPageContent: FC = () => {
         // 确保话题有正确的 type 字段（用于控制工具栏显示）
         const existingTopic = currentAssistant.topics[0]
         setActiveTopic({ ...existingTopic, type: TopicType.Host })
+
+        // 检查 Topic 是否为空，如果为空且有欢迎消息，则添加欢迎消息
+        if (activeHost.welcomeMessage) {
+          const topicFromDB = await db.topics.get(existingTopic.id)
+          if (topicFromDB && topicFromDB.messages.length === 0) {
+            await addWelcomeMessage(existingTopic.id, activeHost.id, activeHost.welcomeMessage)
+          }
+        }
       } else {
         const newTopic = getDefaultTopic(activeHost.id, TopicType.Host)
         await db.topics.add({ id: newTopic.id, messages: [] })
