@@ -219,7 +219,8 @@ const HostsPageContent: FC = () => {
     }
 
     initTopic()
-  }, [activeHost?.id, currentAssistant?.id, addTopic, addWelcomeMessage])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeHost?.id, currentAssistant?.id])
 
   // 当 activeTopic 改变时，加载消息
   useEffect(() => {
