@@ -129,6 +129,11 @@ const HostsPageContent: FC = () => {
       const message = createAssistantMessage(hostId, topicId)
       message.status = AssistantMessageStatus.SUCCESS
 
+      // 设置房间信息，使欢迎消息显示房间 emoji 而不是模型 logo
+      message.expertId = hostId
+      message.expertEmoji = activeHost?.emoji || '🏠'
+      message.expertName = activeHost?.name || '房间'
+
       const textBlock = createMainTextBlock(message.id, welcomeMessage, {
         status: MessageBlockStatus.SUCCESS
       })
@@ -138,7 +143,7 @@ const HostsPageContent: FC = () => {
       dispatch(newMessagesActions.addMessage({ topicId, message }))
       await saveMessageAndBlocksToDB(message, [textBlock])
     },
-    [dispatch]
+    [dispatch, activeHost]
   )
 
   // 恢复上次选中的主机
