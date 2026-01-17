@@ -80,31 +80,54 @@ export async function initializeBuiltinRooms(): Promise<void> {
 
         console.log(`[BuiltinRooms] 找到 ${existingExperts.length} 个现有专家`)
 
-        // 删除所有旧专家
+        // 创建专家名称到配置的映射（通过 handle 匹配）
+        const expertConfigMap = new Map(roomConfig.experts.map((e) => [e.handle, e]))
+
+        // 更新现有专家
         for (const expert of existingExperts) {
-          store.dispatch({ type: 'assistants/removeAssistant', payload: expert.id })
+          // 尝试通过 handle 找到对应的新配置
+          const newConfig = expert.handle ? expertConfigMap.get(expert.handle) : null
+          if (newConfig) {
+            // 更新专家信息
+            store.dispatch(
+              updateAssistant({
+                id: expert.id,
+                name: newConfig.name,
+                emoji: newConfig.emoji,
+                description: newConfig.description,
+                handle: newConfig.handle,
+                triggerKeywords: newConfig.triggerKeywords,
+                prompt: newConfig.prompt
+              })
+            )
+            console.log(`[BuiltinRooms] 更新专家: ${expert.name} -> ${newConfig.name}`)
+          }
         }
 
-        // 创建新专家
+        // 如果新配置中有更多专家，创建它们
+        const existingHandles = new Set(existingExperts.map((e) => e.handle))
         for (const expertConfig of roomConfig.experts) {
-          const expertId = uuid()
-          const expert: Expert = {
-            id: expertId,
-            hostId: existingHost.id,
-            name: expertConfig.name,
-            emoji: expertConfig.emoji,
-            description: expertConfig.description,
-            handle: expertConfig.handle,
-            triggerKeywords: expertConfig.triggerKeywords,
-            prompt: expertConfig.prompt,
-            type: 'expert',
-            topics: [],
-            settings: DEFAULT_ASSISTANT_SETTINGS
-          } as Expert
-          store.dispatch(addAssistant(expert))
+          if (!existingHandles.has(expertConfig.handle)) {
+            const expertId = uuid()
+            const expert: Expert = {
+              id: expertId,
+              hostId: existingHost.id,
+              name: expertConfig.name,
+              emoji: expertConfig.emoji,
+              description: expertConfig.description,
+              handle: expertConfig.handle,
+              triggerKeywords: expertConfig.triggerKeywords,
+              prompt: expertConfig.prompt,
+              type: 'expert',
+              topics: [],
+              settings: DEFAULT_ASSISTANT_SETTINGS
+            } as Expert
+            store.dispatch(addAssistant(expert))
+            console.log(`[BuiltinRooms] 创建新专家: ${expertConfig.name}`)
+          }
         }
 
-        console.log(`[BuiltinRooms] 已重新创建 ${roomConfig.experts.length} 个专家`)
+        console.log(`[BuiltinRooms] 专家更新完成`)
 
         // 清空该房间的所有 Topic，让欢迎消息在下次打开时重新创建
         // 这样可以确保新的欢迎消息被显示
