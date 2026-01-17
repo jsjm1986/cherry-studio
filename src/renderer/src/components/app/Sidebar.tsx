@@ -306,7 +306,7 @@ const AvatarWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   margin-bottom: ${isMac ? '12px' : '12px'};
-  margin-top: ${isMac ? '8px' : '2px'};
+  margin-top: ${isMac ? '30px' : '2px'};
 `
 
 export default Sidebar
