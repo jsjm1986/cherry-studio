@@ -190,11 +190,12 @@ const TextSelectionToolbar: FC<Props> = ({
       e.stopPropagation()
       if (selectedText) {
         navigator.clipboard.writeText(selectedText)
+        window.toast.success(t('message.copy.success'))
         onCopy?.(selectedText)
       }
       setPosition((prev) => ({ ...prev, visible: false }))
     },
-    [onCopy, selectedText]
+    [onCopy, selectedText, t]
   )
 
   // 点击 Aa 按钮保存到 Notebook
