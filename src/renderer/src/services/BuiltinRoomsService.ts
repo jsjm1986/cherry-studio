@@ -12,7 +12,7 @@ import { DEFAULT_ASSISTANT_SETTINGS, getDefaultTopic } from './AssistantService'
 
 const BUILTIN_ROOMS_INITIALIZED_KEY = 'roome:builtin-rooms-initialized'
 // 版本号：当内置房间配置更新时，增加此版本号以触发重新初始化
-const BUILTIN_ROOMS_VERSION = '13'
+const BUILTIN_ROOMS_VERSION = '14'
 const BUILTIN_ROOMS_VERSION_KEY = 'roome:builtin-rooms-version'
 
 /**

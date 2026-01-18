@@ -444,7 +444,7 @@ export const BUILTIN_ROOMS: BuiltinRoom[] = [
       {
         name: '抽象之梯',
         emoji: '🪜',
-        description: '语言学家，抽象之梯守望者',
+        description: '七把武器 / 抽象之梯',
         handle: '@ 梯',
         triggerKeywords: ['梯', '抽象', '升维', '降维'],
         prompt: EXPERT_CHOUXIANG
@@ -452,7 +452,7 @@ export const BUILTIN_ROOMS: BuiltinRoom[] = [
       {
         name: '定义之矛',
         emoji: '𐃆',
-        description: '名实关系大师，定义之矛执掌者',
+        description: '七把武器 / 定义之矛',
         handle: '@ 矛',
         triggerKeywords: ['矛', '定义', '正名', '本质'],
         prompt: EXPERT_DINGYI
@@ -460,7 +460,7 @@ export const BUILTIN_ROOMS: BuiltinRoom[] = [
       {
         name: '类比之弓',
         emoji: '🏹',
-        description: '认知科学家，类比大师',
+        description: '七把武器 / 类比之弓',
         handle: '@ 弓',
         triggerKeywords: ['弓', '类比', '同构', '映射'],
         prompt: EXPERT_LEIBI
@@ -468,7 +468,7 @@ export const BUILTIN_ROOMS: BuiltinRoom[] = [
       {
         name: '逻辑之刃',
         emoji: '🗡️',
-        description: '形式语义分析师，逻辑之刃执掌者',
+        description: '七把武器 / 逻辑之刃',
         handle: '@ 刃',
         triggerKeywords: ['刃', '逻辑', '推导', '命题'],
         prompt: EXPERT_LUOJI
@@ -476,7 +476,7 @@ export const BUILTIN_ROOMS: BuiltinRoom[] = [
       {
         name: '视角之镜',
         emoji: '🪞',
-        description: '视角之镜执掌者，降维打击专家',
+        description: '七把武器 / 视角之镜',
         handle: '@ 镜',
         triggerKeywords: ['镜', '视角', '破局', '简化'],
         prompt: EXPERT_SHIJIAO
@@ -484,7 +484,7 @@ export const BUILTIN_ROOMS: BuiltinRoom[] = [
       {
         name: '问题之锤',
         emoji: '🔨',
-        description: '问题之锤执掌者，雅典牛虻',
+        description: '七把武器 / 问题之锤',
         handle: '@ 锤',
         triggerKeywords: ['锤', '问题', '追问', '反思'],
         prompt: EXPERT_WENTI
@@ -492,7 +492,7 @@ export const BUILTIN_ROOMS: BuiltinRoom[] = [
       {
         name: '质疑之锥',
         emoji: '⚒️',
-        description: '怀疑论者，质疑之锥执掌者',
+        description: '七把武器 / 质疑之锥',
         handle: '@ 锥',
         triggerKeywords: ['锥', '质疑', '怀疑', '解构'],
         prompt: EXPERT_ZHIYI
