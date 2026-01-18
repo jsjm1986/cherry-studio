@@ -74,6 +74,7 @@ extraResources:
 
 win:
   executableName: Roome
+  icon: build/icon.ico
   artifactName: ${productName}-${version}-${arch}-setup.${ext}
   target:
     - target: nsis
