@@ -4,8 +4,8 @@
   "private": true,
   "description": "A powerful AI assistant.",
   "main": "./out/main/index.js",
-  "author": "support@cherry-ai.com",
-  "homepage": "https://github.com/CherryHQ/cherry-studio",
+  "author": "Roome Team",
+  "homepage": "https://github.com/jsjm1986/roome",
   "engines": {
     "node": ">=22.0.0"
   },
